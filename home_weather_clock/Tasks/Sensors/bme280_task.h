@@ -19,5 +19,4 @@ typedef struct {
 
 // Public task function
 void bme280SensorTask(void *argument);
-
 #endif /* BME280_TASK_H */

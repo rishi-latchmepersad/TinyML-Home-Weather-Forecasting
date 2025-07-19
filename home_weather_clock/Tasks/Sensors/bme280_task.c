@@ -5,36 +5,30 @@
  *      Author: rishi_latchmepersad
  */
 
+#include "bme280_if.h"
 #include "bme280_defs.h"
-#include "bme280_support.h"
 #include "bme280.h"
 #include <stdio.h>
 #include "main.h"
 #include "cmsis_os.h"
 
+static uint8_t dev_addr = (BME280_I2C_ADDR_PRIM << 1);
 
-void bme280SensorTask(void *argument)
-{
-    struct bme280_dev dev;
-    struct bme280_data data;
+static int8_t bme280_setup(struct bme280_dev *dev) {
     struct bme280_settings settings;
     int8_t result;
 
-    uint8_t dev_addr = (BME280_I2C_ADDR_PRIM << 1);
-    // Set up function pointers
-    dev.read = bme280_i2c_read;
-    dev.write = bme280_i2c_write;
-    dev.delay_us = bme280_delay_us;
-    dev.intf = BME280_I2C_INTF;
-    dev.intf_ptr = &dev_addr;
-
-    // Set up the BME280
     printf("Initializing BME280...\r\n");
+    dev->read = bme280_i2c_read;
+    dev->write = bme280_i2c_write;
+    dev->delay_us = bme280_delay_us;
+    dev->intf = BME280_I2C_INTF;
+    dev->intf_ptr = &dev_addr;
 
-    result = bme280_init(&dev);
+    result = bme280_init(dev);
     if (result != BME280_OK) {
         printf("BME280 initialization failed! Error code: %d\r\n", result);
-        while (1); // Stop execution
+        return result;
     }
 
     // Set up oversampling and filter settings
@@ -44,10 +38,25 @@ void bme280SensorTask(void *argument)
     settings.filter = BME280_FILTER_COEFF_OFF;
     settings.standby_time = BME280_STANDBY_TIME_1000_MS;
 
-    result = bme280_set_sensor_settings(BME280_SEL_ALL_SETTINGS,&settings, &dev);
+    result = bme280_set_sensor_settings(BME280_SEL_ALL_SETTINGS, &settings, dev);
     if (result != BME280_OK) {
         printf("Failed to set BME280 settings! Error code: %d\r\n", result);
-        while (1);
+    }
+
+    return result;
+}
+
+void bme280SensorTask(void *argument)
+{
+	struct bme280_dev dev;
+    struct bme280_data data;
+    int8_t result;
+
+    // Set up the BME280
+    result = bme280_setup(&dev);
+    if (result != BME280_OK) {
+    	printf("Failed to setup BME280.\n");
+        while (1); // Stop execution if setup fails
     }
 
     // Main task loop
