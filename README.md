@@ -8,4 +8,6 @@ Once I have the basics down, I will implement TinyML to try to predict the weath
 
 ## Diagrams
 
-![Block Diagram](./home_weather_clock-Block Diagram.jpg)
+### Block Diagram
+
+<img alt="Block Diagram" width="600px" src="./home_weather_clock-Block Diagram.jpg" />
