@@ -12,9 +12,9 @@
 
 // Public struct for sensor data (optional)
 typedef struct {
-    float temperature;
-    float humidity;
-    float pressure;
+	float temperature;
+	float humidity;
+	float pressure;
 } bme280_data_t;
 
 // Public task function
