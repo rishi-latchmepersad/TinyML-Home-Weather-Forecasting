@@ -116,26 +116,105 @@ void test_basic_spi(void) {
 }
 
 void Test_SD_Card() {
-    // 1. Power cycle SD card
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
-    HAL_Delay(50);
+    printf("\n=== SD Card Initialization ===\n");
+
+    // 1. Power-up sequence (74+ clocks with CS high)
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET); // CS HIGH
+    HAL_Delay(100); // Longer delay for power stabilization
+
     uint8_t dummy = 0xFF;
-    for (int i = 0; i < 80; i++) HAL_SPI_Transmit(&hspi1, &dummy, 1, 100);
+    for (int i = 0; i < 10; i++) {  // 80 clocks
+        HAL_SPI_Transmit(&hspi1, &dummy, 1, 100);
+    }
 
-    // 2. Send CMD0 with extended CS delay
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
-    HAL_Delay(1);
-    uint8_t cmd0[] = {0x40, 0x00, 0x00, 0x00, 0x00, 0x95};
-    HAL_SPI_Transmit(&hspi1, cmd0, 6, 100);
-    HAL_Delay(5);
-
-    // 3. Check response
+    // 2. Send CMD0 (GO_IDLE_STATE) - try multiple times if needed
     uint8_t response;
-    HAL_SPI_Receive(&hspi1, &response, 1, 100);
-    printf("CMD0 response: 0x%02X\n", response);
+    int attempts = 0;
+    do {
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET); // CS LOW
+        uint8_t cmd0[] = {0x40, 0x00, 0x00, 0x00, 0x00, 0x95}; // Try different CRCs: 0x95, 0x87, 0xFF
+        HAL_SPI_Transmit(&hspi1, cmd0, 6, 100);
 
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+        // Wait for response (up to 8 bytes)
+        uint32_t timeout = HAL_GetTick();
+        do {
+            HAL_SPI_Receive(&hspi1, &response, 1, 100);
+            if (response != 0xFF) break;
+            if (HAL_GetTick() - timeout > 500) break;
+        } while (1);
 
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET); // CS HIGH
+        HAL_Delay(10);
+
+        printf("CMD0 attempt %d: 0x%02X\n", ++attempts, response);
+
+        if (attempts > 5) {
+            printf("Failed to get valid CMD0 response\n");
+            return;
+        }
+    } while (response != 0x01);
+
+    printf("CMD0 success (0x01 response)\n");
+
+    // 3. Send CMD8 to check voltage compatibility
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET); // CS LOW
+    uint8_t cmd8[] = {0x48, 0x00, 0x00, 0x01, 0xAA, 0x87}; // 2.7-3.6V, check pattern 0xAA
+    HAL_SPI_Transmit(&hspi1, cmd8, 6, 100);
+
+    // Read R7 response (5 bytes)
+    uint8_t r7_response[5];
+    HAL_SPI_Receive(&hspi1, r7_response, 5, 100);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET); // CS HIGH
+
+    printf("CMD8 response: %02X %02X %02X %02X %02X\n",
+           r7_response[0], r7_response[1], r7_response[2],
+           r7_response[3], r7_response[4]);
+
+    // 4. Initialize with ACMD41 (with HCS bit for SDHC/SDXC)
+    uint32_t init_timeout = HAL_GetTick();
+    do {
+        // First send CMD55 (APP_CMD)
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET); // CS LOW
+        uint8_t cmd55[] = {0x77, 0x00, 0x00, 0x00, 0x00, 0x01};
+        HAL_SPI_Transmit(&hspi1, cmd55, 6, 100);
+        HAL_SPI_Receive(&hspi1, &response, 1, 100);
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET); // CS HIGH
+
+        if (response != 0x01) {
+            printf("CMD55 failed: 0x%02X\n", response);
+            return;
+        }
+
+        // Then send ACMD41 with HCS bit set
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET); // CS LOW
+        uint8_t acmd41[] = {0x69, 0x40, 0x00, 0x00, 0x00, 0x01}; // HCS=1
+        HAL_SPI_Transmit(&hspi1, acmd41, 6, 100);
+        HAL_SPI_Receive(&hspi1, &response, 1, 100);
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET); // CS HIGH
+
+        if ((HAL_GetTick() - init_timeout) > 2000) {
+            printf("ACMD41 timeout!\n");
+            return;
+        }
+        HAL_Delay(10);
+    } while (response != 0x00);
+
+    printf("Card initialized successfully!\n");
+
+    // 5. Read OCR to verify card type
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET); // CS LOW
+    uint8_t cmd58[] = {0x7A, 0x00, 0x00, 0x00, 0x00, 0x01};
+    HAL_SPI_Transmit(&hspi1, cmd58, 6, 100);
+
+    // Read OCR (4 bytes after response)
+    uint8_t ocr_response[5];
+    HAL_SPI_Receive(&hspi1, ocr_response, 5, 100);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET); // CS HIGH
+
+    printf("OCR: %02X %02X %02X %02X (Response: 0x%02X)\n",
+           ocr_response[1], ocr_response[2],
+           ocr_response[3], ocr_response[4],
+           ocr_response[0]);
 }
 /* USER CODE END 0 */
 
@@ -340,7 +419,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
