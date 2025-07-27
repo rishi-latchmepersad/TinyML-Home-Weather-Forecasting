@@ -15,7 +15,7 @@
  *
  ******************************************************************************
  */
-/* USER CODE END Header */
+ /* USER CODE END Header */
 
 #ifdef USE_OBSOLETE_USER_CODE_SECTION_0
 /*
@@ -36,13 +36,13 @@
 #include <string.h>
 #include "ff_gen_drv.h"
 #include "diskio.h"
+#include "stdio.h"
+#include "sd_spi_helpers.h"
 #include "stm32f7xx_hal.h"
 #include "main.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
-#define CS_GPIO_Port GPIOB
-#define CS_Pin GPIO_PIN_6
 #define SD_DUMMY_BYTE 0xFF
 #define SD_TOKEN_OK 0x00
 #define SD_TOKEN_DATA 0xFE
@@ -53,174 +53,113 @@ extern SPI_HandleTypeDef hspi1;
 /* USER CODE END DECL */
 
 /* Private function prototypes -----------------------------------------------*/
-DSTATUS USER_initialize(BYTE pdrv);
-DSTATUS USER_status(BYTE pdrv);
-DRESULT USER_read(BYTE pdrv, BYTE *buff, DWORD sector, UINT count);
+DSTATUS USER_initialize (BYTE pdrv);
+DSTATUS USER_status (BYTE pdrv);
+DRESULT USER_read (BYTE pdrv, BYTE *buff, DWORD sector, UINT count);
 #if _USE_WRITE == 1
-DRESULT USER_write(BYTE pdrv, const BYTE *buff, DWORD sector, UINT count);
+  DRESULT USER_write (BYTE pdrv, const BYTE *buff, DWORD sector, UINT count);
 #endif /* _USE_WRITE == 1 */
 #if _USE_IOCTL == 1
-DRESULT USER_ioctl(BYTE pdrv, BYTE cmd, void *buff);
+  DRESULT USER_ioctl (BYTE pdrv, BYTE cmd, void *buff);
 #endif /* _USE_IOCTL == 1 */
 
-Diskio_drvTypeDef USER_Driver = { USER_initialize, USER_status, USER_read,
+Diskio_drvTypeDef  USER_Driver =
+{
+  USER_initialize,
+  USER_status,
+  USER_read,
 #if  _USE_WRITE
-		USER_write,
+  USER_write,
 #endif  /* _USE_WRITE == 1 */
 #if  _USE_IOCTL == 1
-		USER_ioctl,
+  USER_ioctl,
 #endif /* _USE_IOCTL == 1 */
-		};
+};
 
 /* Private functions ---------------------------------------------------------*/
-#ifndef __USER_DISKIO_SPI_HELPERS
-#define __USER_DISKIO_SPI_HELPERS
-/* USER CODE BEGIN FUNCTIONS */
-static void SD_Select(void) {
-	HAL_GPIO_WritePin(CS_GPIO_Port, CS_Pin, GPIO_PIN_RESET);
-}
 
-static void SD_Deselect(void) {
-	HAL_GPIO_WritePin(CS_GPIO_Port, CS_Pin, GPIO_PIN_SET);
-	uint8_t dummy = SD_DUMMY_BYTE;
-	HAL_SPI_Transmit(&hspi1, &dummy, 1, HAL_MAX_DELAY);
-}
-
-static uint8_t SD_Transmit(uint8_t data) {
-	uint8_t resp;
-	HAL_SPI_TransmitReceive(&hspi1, &data, &resp, 1, HAL_MAX_DELAY);
-	return resp;
-}
-
-static void SD_SendCmd(uint8_t cmd, uint32_t arg, uint8_t crc) {
-	uint8_t packet[6];
-
-	packet[0] = 0x40 | cmd;
-	packet[1] = (arg >> 24) & 0xFF;
-	packet[2] = (arg >> 16) & 0xFF;
-	packet[3] = (arg >> 8) & 0xFF;
-	packet[4] = arg & 0xFF;
-	packet[5] = crc;
-
-	SD_Select();
-	for (int i = 0; i < 6; i++) {
-		SD_Transmit(packet[i]);
-	}
-}
-
-static uint8_t SD_WaitReady(void) {
-	uint8_t res;
-	uint32_t timeout = HAL_GetTick();
-	do {
-		res = SD_Transmit(SD_DUMMY_BYTE);
-		if (res == 0xFF)
-			return 1;
-	} while ((HAL_GetTick() - timeout) < 500);
-	return 0;
-}
-/* USER CODE END FUNCTIONS */
-#endif
 /**
- * @brief  Initializes a Drive
- * @param  pdrv: Physical drive number (0..)
- * @retval DSTATUS: Operation status
- */
-DSTATUS USER_initialize(BYTE pdrv /* Physical drive nmuber to identify the drive */
-) {
-	/* USER CODE BEGIN INIT */
-	if (pdrv != 0)
-		return STA_NOINIT;
+  * @brief  Initializes a Drive
+  * @param  pdrv: Physical drive number (0..)
+  * @retval DSTATUS: Operation status
+  */
+DSTATUS USER_initialize (
+	BYTE pdrv           /* Physical drive nmuber to identify the drive */
+)
+{
+  /* USER CODE BEGIN INIT */
+	  if (pdrv != 0) return STA_NOINIT;
 
-	uint8_t resp, cmd, retry;
-	uint32_t timeout;
+	    // 1. Power-up delay (min 1ms for SD card)
+	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET); // CS HIGH
+	    HAL_Delay(50);
 
-	// 1. Initialize CS pin and send 80+ clock cycles
-	SD_Deselect();
-	HAL_Delay(1);
-	for (int i = 0; i < 10; i++)
-		SD_Transmit(SD_DUMMY_BYTE);
+	    // 2. Send 80+ dummy clocks with CS HIGH
+	    uint8_t dummy = 0xFF;
+	    for (int i = 0; i < 10; i++) {
+	        HAL_SPI_Transmit(&hspi1, &dummy, 1, 100);
+	    }
 
-	// 2. Send CMD0 to reset card (GO_IDLE_STATE)
-	SD_SendCmd(0, 0, 0x95);
-	do {
-		resp = SD_Transmit(SD_DUMMY_BYTE);
-	} while ((resp != 0x01) && (HAL_GetTick() - timeout < 1000));
+	    // 3. Send CMD0 (GO_IDLE_STATE) with CS LOW
+	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET); // CS LOW
+	    uint8_t cmd0[] = {0x40, 0x00, 0x00, 0x00, 0x00, 0x95};
+	    HAL_SPI_Transmit(&hspi1, cmd0, 6, 100);
 
-	if (resp != 0x01) {
-		SD_Deselect();
-		return STA_NOINIT;
-	}
+	    // 4. Wait for response (0x01 = success)
+	    uint8_t response;
+	    uint32_t timeout = HAL_GetTick();
+	    do {
+	        HAL_SPI_Receive(&hspi1, &response, 1, 100);
+	        if (HAL_GetTick() - timeout > 500) {
+	            printf("CMD0 timeout! No response.\n");
+	            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+	            return STA_NOINIT;
+	        }
+	    } while (response == 0xFF);
 
-	// 3. Send CMD8 to check SDv2 (SEND_IF_COND)
-	SD_SendCmd(8, 0x1AA, 0x87);
-	resp = SD_Transmit(SD_DUMMY_BYTE);
-	if (resp == 0x01) { // SDv2 card
-		// Read 4 bytes (should echo back 0x1AA)
-		uint8_t ocr[4];
-		for (int i = 0; i < 4; i++)
-			ocr[i] = SD_Transmit(SD_DUMMY_BYTE);
+	    printf("CMD0 response: 0x%02X\n", response);
+	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
 
-		// 4. Initialize with ACMD41 (SD_SEND_OP_COND)
-		timeout = HAL_GetTick();
-		do {
-			SD_SendCmd(55, 0, 0x65); // CMD55 precedes ACMD
-			SD_SendCmd(41, 0x40000000, 0x77); // ACMD41 with HCS bit
-			resp = SD_Transmit(SD_DUMMY_BYTE);
-		} while (resp != 0x00 && (HAL_GetTick() - timeout < 1000));
-	} else { // SDv1 or MMC
-			 // Try simpler initialization
-		timeout = HAL_GetTick();
-		do {
-			SD_SendCmd(1, 0, 0xF9); // CMD1 (MMC) or ACMD41 (SDv1)
-			resp = SD_Transmit(SD_DUMMY_BYTE);
-		} while (resp != 0x00 && (HAL_GetTick() - timeout < 1000));
-	}
+	    if (response != 0x01) {
+	        printf("SD init failed. Bad response.\n");
+	        return STA_NOINIT;
+	    }
 
-	if (resp != 0x00) {
-		SD_Deselect();
-		return STA_NOINIT;
-	}
+	    return 0;  // Success
 
-	// 5. Set block length to 512 bytes (CMD16)
-	SD_SendCmd(16, 512, 0x01);
-	if (SD_Transmit(SD_DUMMY_BYTE) != 0x00) {
-		SD_Deselect();
-		return STA_NOINIT;
-	}
-
-	Stat &= ~STA_NOINIT; // Clear initialization flag
-	SD_Deselect();
-	return Stat;
-
-	/* USER CODE END INIT */
+  /* USER CODE END INIT */
 }
 
 /**
- * @brief  Gets Disk Status
- * @param  pdrv: Physical drive number (0..)
- * @retval DSTATUS: Operation status
- */
-DSTATUS USER_status(BYTE pdrv /* Physical drive number to identify the drive */
-) {
-	/* USER CODE BEGIN STATUS */
+  * @brief  Gets Disk Status
+  * @param  pdrv: Physical drive number (0..)
+  * @retval DSTATUS: Operation status
+  */
+DSTATUS USER_status (
+	BYTE pdrv       /* Physical drive number to identify the drive */
+)
+{
+  /* USER CODE BEGIN STATUS */
 	return (pdrv == 0) ? Stat : STA_NOINIT;
-	/* USER CODE END STATUS */
+  /* USER CODE END STATUS */
 }
 
 /**
- * @brief  Reads Sector(s)
- * @param  pdrv: Physical drive number (0..)
- * @param  *buff: Data buffer to store read data
- * @param  sector: Sector address (LBA)
- * @param  count: Number of sectors to read (1..128)
- * @retval DRESULT: Operation result
- */
-DRESULT USER_read(BYTE pdrv, /* Physical drive nmuber to identify the drive */
-BYTE *buff, /* Data buffer to store read data */
-DWORD sector, /* Sector address in LBA */
-UINT count /* Number of sectors to read */
-) {
-	/* USER CODE BEGIN READ */
+  * @brief  Reads Sector(s)
+  * @param  pdrv: Physical drive number (0..)
+  * @param  *buff: Data buffer to store read data
+  * @param  sector: Sector address (LBA)
+  * @param  count: Number of sectors to read (1..128)
+  * @retval DRESULT: Operation result
+  */
+DRESULT USER_read (
+	BYTE pdrv,      /* Physical drive nmuber to identify the drive */
+	BYTE *buff,     /* Data buffer to store read data */
+	DWORD sector,   /* Sector address in LBA */
+	UINT count      /* Number of sectors to read */
+)
+{
+  /* USER CODE BEGIN READ */
 	if (pdrv != 0 || !count)
 		return RES_PARERR;
 	if (Stat & STA_NOINIT)
@@ -247,24 +186,26 @@ UINT count /* Number of sectors to read */
 
 	SD_Deselect();
 	return RES_OK;
-	/* USER CODE END READ */
+  /* USER CODE END READ */
 }
 
 /**
- * @brief  Writes Sector(s)
- * @param  pdrv: Physical drive number (0..)
- * @param  *buff: Data to be written
- * @param  sector: Sector address (LBA)
- * @param  count: Number of sectors to write (1..128)
- * @retval DRESULT: Operation result
- */
+  * @brief  Writes Sector(s)
+  * @param  pdrv: Physical drive number (0..)
+  * @param  *buff: Data to be written
+  * @param  sector: Sector address (LBA)
+  * @param  count: Number of sectors to write (1..128)
+  * @retval DRESULT: Operation result
+  */
 #if _USE_WRITE == 1
-DRESULT USER_write(BYTE pdrv, /* Physical drive nmuber to identify the drive */
-const BYTE *buff, /* Data to be written */
-DWORD sector, /* Sector address in LBA */
-UINT count /* Number of sectors to write */
-) {
-	/* USER CODE BEGIN WRITE */
+DRESULT USER_write (
+	BYTE pdrv,          /* Physical drive nmuber to identify the drive */
+	const BYTE *buff,   /* Data to be written */
+	DWORD sector,       /* Sector address in LBA */
+	UINT count          /* Number of sectors to write */
+)
+{
+  /* USER CODE BEGIN WRITE */
 	/* USER CODE HERE */
 	if (pdrv != 0 || !count)
 		return RES_PARERR;
@@ -288,23 +229,25 @@ UINT count /* Number of sectors to write */
 	SD_WaitReady();
 	SD_Deselect();
 	return RES_OK;
-	/* USER CODE END WRITE */
+  /* USER CODE END WRITE */
 }
 #endif /* _USE_WRITE == 1 */
 
 /**
- * @brief  I/O control operation
- * @param  pdrv: Physical drive number (0..)
- * @param  cmd: Control code
- * @param  *buff: Buffer to send/receive control data
- * @retval DRESULT: Operation result
- */
+  * @brief  I/O control operation
+  * @param  pdrv: Physical drive number (0..)
+  * @param  cmd: Control code
+  * @param  *buff: Buffer to send/receive control data
+  * @retval DRESULT: Operation result
+  */
 #if _USE_IOCTL == 1
-DRESULT USER_ioctl(BYTE pdrv, /* Physical drive nmuber (0..) */
-BYTE cmd, /* Control code */
-void *buff /* Buffer to send/receive control data */
-) {
-	/* USER CODE BEGIN IOCTL */
+DRESULT USER_ioctl (
+	BYTE pdrv,      /* Physical drive nmuber (0..) */
+	BYTE cmd,       /* Control code */
+	void *buff      /* Buffer to send/receive control data */
+)
+{
+  /* USER CODE BEGIN IOCTL */
 	if (pdrv != 0)
 		return RES_PARERR;
 
@@ -330,6 +273,7 @@ void *buff /* Buffer to send/receive control data */
 	default:
 		return RES_PARERR;
 	}
-	/* USER CODE END IOCTL */
+  /* USER CODE END IOCTL */
 }
 #endif /* _USE_IOCTL == 1 */
+

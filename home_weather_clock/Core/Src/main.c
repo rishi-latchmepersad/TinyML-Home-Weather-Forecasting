@@ -97,41 +97,6 @@ void StartDefaultTask(void *argument);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void test_sd_card(void) {
-    FRESULT res;
-
-    // 1. Initialize CS pin (active LOW)
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
-
-    // 2. Mount the SD card
-    res = f_mount(&fs, "", 1);  // 1=mount now
-
-    if (res == FR_OK) {
-        uint32_t free_clusters, total_sectors, free_sectors;
-        FATFS* fs_ptr = &fs;
-
-        // 3. Get free space
-        res = f_getfree("", &free_clusters, &fs_ptr);
-
-        if (res == FR_OK) {
-            total_sectors = (fs.n_fatent - 2) * fs.csize;
-            free_sectors = free_clusters * fs.csize;
-
-            // Print results (use your preferred output method)
-            printf("SD Card detected!\n");
-            printf("Total space: %lu KB\n", total_sectors / 2);
-            printf("Free space: %lu KB\n", free_sectors / 2);
-        }
-    } else {
-        printf("SD Card error: %d\n", res);
-
-        // Error code reference:
-        // FR_OK = 0, FR_DISK_ERR, FR_NOT_READY, FR_NO_FILESYSTEM, etc.
-    }
-
-    // 4. Always deactivate CS when done
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
-}
 
 void test_basic_spi(void) {
     uint8_t tx = 0x55;
@@ -148,6 +113,29 @@ void test_basic_spi(void) {
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
 
     printf("SPI status: %d, Sent: 0x55, Received: 0x%02X\n", status, rx);
+}
+
+void Test_SD_Card() {
+    // 1. Power cycle SD card
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+    HAL_Delay(50);
+    uint8_t dummy = 0xFF;
+    for (int i = 0; i < 80; i++) HAL_SPI_Transmit(&hspi1, &dummy, 1, 100);
+
+    // 2. Send CMD0 with extended CS delay
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
+    HAL_Delay(1);
+    uint8_t cmd0[] = {0x40, 0x00, 0x00, 0x00, 0x00, 0x95};
+    HAL_SPI_Transmit(&hspi1, cmd0, 6, 100);
+    HAL_Delay(5);
+
+    // 3. Check response
+    uint8_t response;
+    HAL_SPI_Receive(&hspi1, &response, 1, 100);
+    printf("CMD0 response: 0x%02X\n", response);
+
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+
 }
 /* USER CODE END 0 */
 
@@ -189,7 +177,7 @@ int main(void)
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
 	printf("Finished setup. Starting kernel and tasks.\n");
-	test_basic_spi();
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -432,7 +420,20 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(MicroSD_CS_GPIO_Port, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
+  __HAL_RCC_SPI1_CLK_ENABLE();  // Enable SPI1 clock
 
+  // Configure SPI pins (PA5=SCK, PA6=MISO, PA7=MOSI)
+  GPIO_InitStruct.Pin = GPIO_PIN_5 | GPIO_PIN_7;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  // MISO needs pull-up
+  GPIO_InitStruct.Pin = GPIO_PIN_6;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;  // Critical for SD cards
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
@@ -452,7 +453,9 @@ void StartDefaultTask(void *argument)
   /* USER CODE BEGIN 5 */
 	/* Infinite loop */
 	for (;;) {
-		osDelay(1);
+		test_basic_spi();
+		Test_SD_Card();
+		osDelay(3000);
 	}
   /* USER CODE END 5 */
 }
