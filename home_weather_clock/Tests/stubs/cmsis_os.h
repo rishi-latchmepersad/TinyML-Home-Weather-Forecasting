@@ -6,10 +6,11 @@ typedef void (*os_pthread)(void const *argument);
 
 typedef struct {
     os_pthread pthread;
-    void *dummy; // add what you need
+    void *dummy;
 } osThreadDef_t;
 
 #define osThreadDef(name, priority, instances, stacksize)  osThreadDef_t name = {0}
 #define osThread(name) 0
+#define osDelay(x) do {} while(0)
 
 #endif

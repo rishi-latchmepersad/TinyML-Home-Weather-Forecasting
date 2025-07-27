@@ -7,30 +7,19 @@
 
 #include "bme280_if.h"
 #include "bme280_defs.h"
+#include "bme280_task.h"
 #include "bme280.h"
 #include <stdio.h>
 #include "main.h"
+#ifdef UNIT_TESTING
+    #include "FreeRTOS_stub.h"
+#else
+    #include "FreeRTOS.h"
+#endif
 #include "cmsis_os.h"
 
 static uint8_t dev_addr = (BME280_I2C_ADDR_PRIM << 1);
 
-typedef enum {
-	BME280_STATE_INIT,
-	BME280_STATE_SETUP,
-	BME280_STATE_TRIGGER_MEASUREMENT,
-	BME280_STATE_WAIT_MEASUREMENT,
-	BME280_STATE_READ_DATA,
-	BME280_STATE_DELAY,
-	BME280_STATE_ERROR
-} bme280_state_t;
-
-typedef struct {
-	bme280_state_t state;
-	struct bme280_dev dev;
-	struct bme280_data data;
-	int8_t result;
-	uint32_t last_tick;
-} bme280_task_data_t;
 
 static int8_t bme280_setup(struct bme280_dev *dev) {
 	struct bme280_settings settings;
