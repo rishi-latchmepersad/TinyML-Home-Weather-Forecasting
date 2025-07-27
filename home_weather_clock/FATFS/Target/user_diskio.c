@@ -50,6 +50,16 @@
 /* Disk status */
 static volatile DSTATUS Stat = STA_NOINIT;
 extern SPI_HandleTypeDef hspi1;
+// SD Card Status
+typedef enum {
+    SD_OK = 0,
+    SD_ERROR,
+    SD_TIMEOUT,
+    SD_NOT_INITIALIZED,
+    SD_CMD_FAILED,
+    SD_UNSUPPORTED_CARD
+} SD_Status;
+
 /* USER CODE END DECL */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -84,85 +94,95 @@ Diskio_drvTypeDef  USER_Driver =
   * @retval DSTATUS: Operation status
   */
 DSTATUS USER_initialize (
-	BYTE pdrv           /* Physical drive nmuber to identify the drive */
+	BYTE pdrv           /* Physical drive number to identify the drive */
 )
 {
   /* USER CODE BEGIN INIT */
 	  if (pdrv != 0) return STA_NOINIT;
 
-	  // 1. Power-up sequence (74+ clocks with CS high)
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET); // CS HIGH
-	  uint8_t dummy = 0xFF;
-	  for (int i = 0; i < 10; i++) {  // 80 clocks
-	    HAL_SPI_Transmit(&hspi1, &dummy, 1, 100);
-	  }
+	    // 1. Power-up sequence (74+ clocks with CS high)
+	    SD_Deselect();
+	    HAL_Delay(10); // Minimum 1ms delay
 
-	  // 2. Send CMD0 (GO_IDLE_STATE)
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET); // CS LOW
-	  uint8_t cmd0[] = {0x40, 0x00, 0x00, 0x00, 0x00, 0x95};
-	  HAL_SPI_Transmit(&hspi1, cmd0, 6, 100);
-
-	  // 3. Wait for response (0x01)
-	  uint8_t response;
-	  uint32_t timeout = HAL_GetTick();
-	  do {
-	    HAL_SPI_Receive(&hspi1, &response, 1, 100);
-	    if (HAL_GetTick() - timeout > 500) {
-	      printf("CMD0 timeout!\n");
-	      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
-	      return STA_NOINIT;
-	    }
-	  } while (response != 0x01);
-
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET); // CS HIGH
-	  printf("CMD0 success (0x01 response)\n");
-
-	  // 4. Send CMD8 to check voltage compatibility
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET); // CS LOW
-	  uint8_t cmd8[] = {0x48, 0x00, 0x00, 0x01, 0xAA, 0x87}; // CMD8 with check pattern
-	  HAL_SPI_Transmit(&hspi1, cmd8, 6, 100);
-
-	  // Read R7 response (5 bytes)
-	  uint8_t r7_response[5];
-	  HAL_SPI_Receive(&hspi1, r7_response, 5, 100);
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET); // CS HIGH
-
-	  printf("CMD8 response: %02X %02X %02X %02X %02X\n",
-	         r7_response[0], r7_response[1], r7_response[2], r7_response[3], r7_response[4]);
-
-	  // 5. Initialize with ACMD41 (with HCS bit for SDHC/SDXC)
-	  timeout = HAL_GetTick();
-	  do {
-	    // Send CMD55 (APP_CMD)
-	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET); // CS LOW
-	    uint8_t cmd55[] = {0x77, 0x00, 0x00, 0x00, 0x00, 0x01};
-	    HAL_SPI_Transmit(&hspi1, cmd55, 6, 100);
-	    HAL_SPI_Receive(&hspi1, &response, 1, 100);
-	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET); // CS HIGH
-
-	    if (response != 0x01) {
-	      printf("CMD55 failed: %02X\n", response);
-	      return STA_NOINIT;
+	    // Send 80+ clocks (10 bytes)
+	    for (int i = 0; i < 10; i++) {
+	        SD_Transmit(SD_DUMMY_BYTE);
 	    }
 
-	    // Send ACMD41 with HCS bit set
-	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET); // CS LOW
-	    uint8_t acmd41[] = {0x69, 0x40, 0x00, 0x00, 0x00, 0x01}; // HCS=1
-	    HAL_SPI_Transmit(&hspi1, acmd41, 6, 100);
-	    HAL_SPI_Receive(&hspi1, &response, 1, 100);
-	    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET); // CS HIGH
+	    // 2. CMD0 with retry mechanism
+	    uint8_t response;
+	    int retry = 0;
+	    do {
+	        SD_SendCmd(0, 0, 0x95); // CMD0, arg=0, CRC=0x95
+	        response = SD_Transmit(SD_DUMMY_BYTE);
 
-	    if ((HAL_GetTick() - timeout) > 2000) {
-	      printf("ACMD41 timeout!\n");
-	      return STA_NOINIT;
+	        // Wait for valid response (up to 8 bytes)
+	        uint32_t timeout = HAL_GetTick();
+	        while (response == 0xFF) {
+	            response = SD_Transmit(SD_DUMMY_BYTE);
+	            if (HAL_GetTick() - timeout > 500) break;
+	        }
+
+	        SD_Deselect();
+
+	        if (response == 0x01) break;
+	        if (++retry > 10) {
+	            printf("CMD0 failed after 10 attempts\n");
+	            return STA_NOINIT;
+	        }
+	        HAL_Delay(100);
+	    } while (1);
+
+	    // 3. CMD8 for SDC V2 voltage check
+	    uint8_t r7[5];
+	    SD_SendCmd(8, 0x1AA, 0x87); // CMD8, arg=0x1AA, CRC=0x87
+	    response = SD_Transmit(SD_DUMMY_BYTE);
+	    if (response == 0x01) {
+	        r7[0] = response;
+	        for (int i = 1; i < 5; i++) {
+	            r7[i] = SD_Transmit(SD_DUMMY_BYTE);
+	        }
+	        printf("CMD8 response: %02X %02X %02X %02X %02X\n",
+	               r7[0], r7[1], r7[2], r7[3], r7[4]);
 	    }
-	  } while (response != 0x00);
+	    SD_Deselect();
 
-	  printf("Card initialized successfully!\n");
-	  return 0; // Success
+	    // 4. ACMD41 initialization with HCS bit
+	    uint32_t timeout = HAL_GetTick();
+	    do {
+	        SD_SendCmd(55, 0, 0x01); // CMD55
+	        response = SD_Transmit(SD_DUMMY_BYTE);
+	        SD_Deselect();
+
+	        SD_SendCmd(41, 0x40000000, 0x01); // ACMD41 with HCS bit
+	        response = SD_Transmit(SD_DUMMY_BYTE);
+	        SD_Deselect();
+
+	        if ((HAL_GetTick() - timeout) > 2000) {
+	            printf("ACMD41 timeout\n");
+	            return STA_NOINIT;
+	        }
+	        HAL_Delay(10);
+	    } while (response != 0x00);
+
+	    // 5. Read OCR to confirm card voltage
+	    uint8_t ocr[4];
+	    SD_SendCmd(58, 0, 0x01); // CMD58
+	    response = SD_Transmit(SD_DUMMY_BYTE);
+	    if (response == 0x00) {
+	        for (int i = 0; i < 4; i++) {
+	            ocr[i] = SD_Transmit(SD_DUMMY_BYTE);
+	        }
+	        printf("OCR: %02X %02X %02X %02X\n", ocr[0], ocr[1], ocr[2], ocr[3]);
+	    }
+	    SD_Deselect();
+
+	    Stat &= ~STA_NOINIT;
+	    printf("SD Card initialized successfully\n");
+	    return 0;
+}
 
   /* USER CODE END INIT */
-}
 
 /**
   * @brief  Gets Disk Status
