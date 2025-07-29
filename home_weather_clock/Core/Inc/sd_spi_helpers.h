@@ -1,23 +1,27 @@
 /*
- * sd_spi_helpers.h
+ * sd_spi_helpers.h - FIXED VERSION
  *
  *  Created on: Jul 27, 2025
  *      Author: rishi_latchmepersad
  */
 
-#ifndef INC_SD_SPI_HELPERS_H_
-#define INC_SD_SPI_HELPERS_H_
+#ifndef SD_SPI_HELPERS_H
+#define SD_SPI_HELPERS_H
 
-
-#include "main.h"
 #include "stm32f7xx_hal.h"
-#define SD_DUMMY_BYTE 0xFF
+#include <stdbool.h>
+
+// SD Card constants
+#define SD_DUMMY_BYTE   0xFF
+#define SD_TOKEN_DATA   0xFE
 
 // Function prototypes
 void SD_Select(void);
 void SD_Deselect(void);
 uint8_t SD_Transmit(uint8_t data);
-void SD_SendCmd(uint8_t cmd, uint32_t arg, uint8_t crc);
-uint8_t SD_WaitReady(void);
+uint8_t SD_TransmitReceive(uint8_t data);  // Added this function
+uint8_t SD_SendCmd(uint8_t cmd, uint32_t arg, uint8_t crc);  // Fixed return type
+uint8_t SD_WaitResponse(uint8_t expected, uint32_t timeout_ms);
+bool SD_WaitReady(void);  // Fixed return type
 
-#endif /* INC_SD_SPI_HELPERS_H_ */
+#endif /* SD_SPI_HELPERS_H */
