@@ -45,8 +45,6 @@ FATFS fs;
 FIL fil;
 FRESULT fres;
 extern Diskio_drvTypeDef USER_Driver;
-
-// Add debug variables
 extern Disk_drvTypeDef disk;
 /* USER CODE END PV */
 
