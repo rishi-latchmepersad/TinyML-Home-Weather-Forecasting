@@ -1,5 +1,6 @@
 #pragma once
 #include "ff.h"
+#include <stdbool.h>
 
 // Mount SD card via FatFs. Returns FR_OK on success.
 FRESULT SD_Mount(void);
@@ -16,3 +17,6 @@ DWORD SD_GetFreeKB(void);
 void SD_CS_Enable(void);
 
 void SD_CS_Disable(void);
+
+//Ensure that a csv file is created for the temperature data
+void sd_card_ensure_temperature_csv_file(void);

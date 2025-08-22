@@ -14,14 +14,13 @@
 #include <stdio.h>
 #include <string.h>
 #include "main.h"
+#include <stdbool.h>
+#include <app_error.h>
 
-// ---- existing in your file ----
 static FATFS s_fs;
 extern char USERPath[4];
 // --------------------------------
 
-// We will gently poke low-level HW here for robustness.
-// (If you prefer strict layering, we can move these to user_diskio.c and expose helpers.)
 extern SPI_HandleTypeDef hspi1;
 // From ff_gen_drv.c (for debug visibility)
 extern Disk_drvTypeDef disk;
@@ -53,11 +52,12 @@ static void sd_bus_fast(void) {
 static void sd_dummy_clocks(void) {
 	uint8_t ff = 0xFF;
 	HAL_GPIO_WritePin(SD_Card_CS_GPIO_Port, SD_Card_CS_Pin, GPIO_PIN_SET);
-	for (int i = 0; i < 10; ++i) {
+	for (int i = 0; i < 100; ++i) {
 		(void) HAL_SPI_Transmit(&hspi1, &ff, 1, 10);
 	}
 }
 
+//Run a basic read/write test to ensure that the MicroSD card works
 void SD_TestFatFs(void)
 
 {
@@ -97,17 +97,23 @@ void SD_TestFatFs(void)
 	} else {
 		printf("Failed to open file for reading, fr=%d\r\n", fr);
 	}
+}
 
-	FATFS *pfs;
-	DWORD free_clusters, free_sectors;
-	fr = f_getfree("0:", &free_clusters, &pfs);
-	if (fr == FR_OK) {
-		free_sectors = free_clusters * pfs->csize;
-		printf("Free space: %lu sectors (%lu KB)\r\n", free_sectors,
-				free_sectors / 2);
+void sd_card_ensure_temperature_csv_file(void) {
+	FRESULT file_result;
+	FIL file;
+	UINT buffer_write_len, buffer_read_len;
+	char buffer[100];
+
+	printf("Ensuring that the CSV file for temperature data is created.\r\n");
+	file_result = f_open(&file, "0:/temperature.csv", FA_CREATE_ALWAYS| FA_WRITE);
+	if (file_result == FR_OK) {
+		printf("File created.\r\n");
+		f_close(&file);
+		return;
 	} else {
-		printf("Failed to get free space, fr=%d\r\n", fr);
-
+		printf("Failed to create file, file_result=%d\r\n", file_result);
+		error_handler_with_message("Failed to create temperature CSV file.");
 	}
 }
 
@@ -139,6 +145,7 @@ void SD_DebugFatFsState(void) {
 #endif
 
 FRESULT SD_Mount(void) {
+	SD_DebugFatFsState();
 	// Unmount just in case a previous run left things half-mounted
 	f_mount(NULL, "0:", 0);
 
@@ -150,13 +157,13 @@ FRESULT SD_Mount(void) {
 		// Always start at slow speed for init and give the card dummy clocks
 		sd_bus_slow();
 		sd_dummy_clocks();
-		sd_sleep(10);
+		sd_sleep(1000);
 
 		// Force a fresh low-level init on drive 0
 		DSTATUS st = disk_initialize(0);
 		if (st & STA_NOINIT) {
 			// Card not ready yet — small backoff and retry
-			sd_sleep(50U * attempt);
+			sd_sleep(500U * attempt);
 			continue;
 		}
 

@@ -29,6 +29,7 @@
 #include "stdbool.h"
 #include "string.h"
 #include "sd_card.h"
+#include "app_error.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -38,9 +39,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#ifndef ERROR_DEFAULT_MSG
-#define ERROR_DEFAULT_MSG  "Fatal error. Rebooting in 5 seconds..."
-#endif
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -80,6 +78,7 @@ void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 int _write(int fd, char *ptr, int len);
+void Error_Handler_With_Message(const char *msg);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -380,16 +379,16 @@ static void MX_GPIO_Init(void) {
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument) {
 	/* USER CODE BEGIN 5 */
-	printf("\r\n=== STM32 SD Card Debug Test ===\r\n");
-	printf("System initialized\r\n");
 	printf("Attempting to mount filesystem...\r\n");
-
 	if (SD_Mount() == FR_OK) {       // Use the helper so we only mount once
 		printf("SD card mounted successfully!\r\n");
-		SD_TestFatFs();
 	} else {
-		printf("Mount error\r\n");
+		error_handler_with_message("Could not mount SD card.");
 	}
+	//ensure the file system works
+	SD_TestFatFs();
+	//ensure that the CSV files for storing sensor data are created
+	sd_card_ensure_temperature_csv_file();
 	while (1) {
 		HAL_Delay(5000);
 		printf("Default task loop running...\r\n");
@@ -445,27 +444,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	/* USER CODE END Callback 1 */
 }
 
-/**
- * @brief  This function is executed in case of error occurrence.
- * @retval None
- */
-void Error_Handler(void) {
-	/* USER CODE BEGIN Error_Handler_Debug */
-	// Minimal wrapper so HAL calls land here too.
-	printf("\r\n[ERROR] %s\r\n", ERROR_DEFAULT_MSG);
-	fflush(stdout);
-
-	if (!in_isr()) {
-		HAL_Delay(5000);
-	}
-
-	__DSB();
-	__ISB();
-	NVIC_SystemReset();
-	while (1) { /* no return */
-	}
-	/* USER CODE END Error_Handler_Debug */
-}
 #ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
