@@ -40,24 +40,3 @@ void error_handler_with_message(const char *msg) {
 
 	}
 }
-/**
- * @brief This is the default error function
- * @retval None
- */
-void Error_Handler(void) {
-	/* USER CODE BEGIN Error_Handler_Debug */
-	// Minimal wrapper so HAL calls land here too.
-	printf("\r\n[ERROR] %s\r\n", ERROR_DEFAULT_MSG);
-	fflush(stdout);
-
-	if (__get_IPSR() == 0U) {
-		HAL_Delay(5000);
-	}
-
-	__DSB();
-	__ISB();
-	NVIC_SystemReset();
-	while (1) { /* no return */
-	}
-	/* USER CODE END Error_Handler_Debug */
-}

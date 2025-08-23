@@ -14,7 +14,4 @@
 
 void error_handler_with_message(const char *msg);
 
-//default HAL function symbol
-void Error_Handler(void);
-
 #endif /* INC_APP_ERROR_H_ */

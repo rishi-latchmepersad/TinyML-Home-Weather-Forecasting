@@ -62,6 +62,7 @@
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/Unity"/>
 									<listOptionValue builtIn="false" value="../Tasks/Sensors"/>
 									<listOptionValue builtIn="false" value="../Drivers/BME280"/>
+									<listOptionValue builtIn="false" value="../Drivers/SD_Card/Inc"/>
 									<listOptionValue builtIn="false" value="../Drivers/STM32F7xx_HAL_Driver/Inc"/>
 									<listOptionValue builtIn="false" value="../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy"/>
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F7xx/Include"/>
@@ -405,15 +406,6 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.414270114;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.414270114.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1804649429;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.2437626">
-			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.1802929632;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.1802929632.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.836670539;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.454538949">
-			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-	</storageModule>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/home_weather_clock"/>
@@ -421,5 +413,14 @@
 		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/home_weather_clock"/>
 		</configuration>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.1802929632;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.1802929632.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.836670539;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.454538949">
+			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.414270114;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.414270114.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1804649429;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.2437626">
+			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 	</storageModule>
 </cproject>

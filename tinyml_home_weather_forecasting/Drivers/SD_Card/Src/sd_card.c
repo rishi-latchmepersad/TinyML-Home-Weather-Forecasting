@@ -99,22 +99,78 @@ void SD_TestFatFs(void)
 	}
 }
 
-void sd_card_ensure_temperature_csv_file(void) {
-	FRESULT file_result;
-	FIL file;
-	UINT buffer_write_len, buffer_read_len;
-	char buffer[100];
+// map a file result to a descriptive result/error string
+static const char* ff_errstr(FRESULT fr) {
+    switch (fr) {
+        case FR_OK: return "FR_OK";
+        case FR_DISK_ERR: return "FR_DISK_ERR";
+        case FR_INT_ERR: return "FR_INT_ERR";
+        case FR_NOT_READY: return "FR_NOT_READY";
+        case FR_NO_FILE: return "FR_NO_FILE";
+        case FR_NO_PATH: return "FR_NO_PATH";
+        case FR_INVALID_NAME: return "FR_INVALID_NAME";
+        case FR_DENIED: return "FR_DENIED";
+        case FR_EXIST: return "FR_EXIST";
+        case FR_INVALID_OBJECT: return "FR_INVALID_OBJECT";
+        case FR_WRITE_PROTECTED: return "FR_WRITE_PROTECTED";
+        case FR_INVALID_DRIVE: return "FR_INVALID_DRIVE";
+        case FR_NOT_ENABLED: return "FR_NOT_ENABLED";
+        case FR_NO_FILESYSTEM: return "FR_NO_FILESYSTEM";
+        case FR_MKFS_ABORTED: return "FR_MKFS_ABORTED";
+        case FR_TIMEOUT: return "FR_TIMEOUT";
+        case FR_LOCKED: return "FR_LOCKED";
+        case FR_NOT_ENOUGH_CORE: return "FR_NOT_ENOUGH_CORE";
+        case FR_TOO_MANY_OPEN_FILES: return "FR_TOO_MANY_OPEN_FILES";
+        default: return "FR_???";
+    }
+}
 
-	printf("Ensuring that the CSV file for temperature data is created.\r\n");
-	file_result = f_open(&file, "0:/temperature.csv", FA_CREATE_ALWAYS| FA_WRITE);
-	if (file_result == FR_OK) {
-		printf("File created.\r\n");
-		f_close(&file);
-		return;
-	} else {
-		printf("Failed to create file, file_result=%d\r\n", file_result);
-		error_handler_with_message("Failed to create temperature CSV file.");
-	}
+void sd_card_ensure_temperature_csv_file(void) {
+    const char *path = "0:/temperature.csv";
+    const char *header = "timestamp,temperature_c\r\n";
+
+    FRESULT file_result;
+    FIL file;
+    FILINFO file_info;
+
+    printf("Ensuring temperature CSV exists...\r\n");
+
+    //if it already exists, do nothing (don’t truncate!)
+    file_result = f_stat(path, &file_info);
+    if (file_result == FR_OK) {
+        printf("Found %s (size=%lu). Leaving as-is.\r\n", path, (unsigned long)file_info.fsize);
+        return;
+    } else if (file_result != FR_NO_FILE) {
+        printf("f_stat(%s) failed: %d (%s)\r\n", path, file_result, ff_errstr(file_result));
+        error_handler_with_message("f_stat failed for temperature.csv");
+        return;
+    }
+
+    // create a brand new file and write the csv header
+    file_result = f_open(&file, path, FA_CREATE_NEW | FA_WRITE);
+    if (file_result != FR_OK) {
+        printf("f_open(FA_CREATE_NEW|FA_WRITE) failed: %d (%s)\r\n", file_result, ff_errstr(file_result));
+        error_handler_with_message("Failed to create temperature.csv");
+        return;
+    }
+
+    UINT bw = 0;
+    file_result = f_write(&file, header, (UINT)strlen(header), &bw);
+    if (file_result != FR_OK || bw != strlen(header)) {
+        printf("f_write header failed: fr=%d (%s), bw=%u\r\n", file_result, ff_errstr(file_result), bw);
+        f_close(&file);
+        error_handler_with_message("Failed to write header to temperature.csv");
+        return;
+    }
+
+    file_result = f_sync(&file); // ensure it’s physically written
+    if (file_result != FR_OK) {
+        printf("f_sync failed: %d (%s)\r\n", file_result, ff_errstr(file_result));
+        // not fatal; proceed to close
+    }
+
+    f_close(&file);
+    printf("Created %s with header.\r\n", path);
 }
 
 DWORD SD_GetFreeKB(void) {
