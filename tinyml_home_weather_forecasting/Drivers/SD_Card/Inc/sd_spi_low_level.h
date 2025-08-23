@@ -56,16 +56,16 @@ extern "C" {
 #endif
 
 /* Low-level SPI helpers */
-void     SDLL_SendByte(uint8_t data);
-uint8_t  SDLL_ReadByte(void);
-void     SDLL_CS_Low(void);
-void     SDLL_CS_High(void);
-uint8_t  SDLL_WaitReady(uint32_t timeout_ms);
+void SDLL_SendByte(uint8_t data);
+uint8_t SDLL_ReadByte(void);
+void SDLL_CS_Low(void);
+void SDLL_CS_High(void);
+uint8_t SDLL_WaitReady(uint32_t timeout_ms);
 
 /* SD protocol helpers (SPI mode) */
-uint8_t  SDLL_SendCommand(uint8_t cmd, uint32_t arg);
-uint8_t  SDLL_ReadDataBlock(uint8_t *buff, uint32_t btr);
-uint8_t  SDLL_WriteDataBlock(const uint8_t *buff, uint8_t token);
+uint8_t SDLL_SendCommand(uint8_t cmd, uint32_t arg);
+uint8_t SDLL_ReadDataBlock(uint8_t *buff, uint32_t btr);
+uint8_t SDLL_WriteDataBlock(const uint8_t *buff, uint8_t token);
 
 #ifdef __cplusplus
 }

@@ -401,7 +401,7 @@ void StartDefaultTask(void *argument)
 	//ensure the file system works
 	SD_TestFatFs();
 	//ensure that the CSV files for storing sensor data are created
-	sd_card_ensure_temperature_csv_file();
+	sd_card_ensure_sensor_csv_files();
 	while (1) {
 		HAL_Delay(5000);
 		printf("Default task loop running...\r\n");
