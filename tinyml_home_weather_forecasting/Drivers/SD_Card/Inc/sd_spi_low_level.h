@@ -66,7 +66,7 @@ uint8_t SDLL_WaitReady(uint32_t timeout_ms);
 uint8_t SDLL_SendCommand(uint8_t cmd, uint32_t arg);
 uint8_t SDLL_ReadDataBlock(uint8_t *buff, uint32_t btr);
 uint8_t SDLL_WriteDataBlock(const uint8_t *buff, uint8_t token);
-
+void sd_spi_power_on_sequence(void);
 #ifdef __cplusplus
 }
 #endif

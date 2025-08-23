@@ -81,56 +81,57 @@ DSTATUS USER_initialize (
 )
 {
   /* USER CODE BEGIN INIT */
-  uint8_t n, ty = 0, ocr[4];
-  uint32_t timeout;
+	uint8_t n, ty = 0U, ocr[4];
+	uint32_t timeout;
+	uint8_t r1;
 
-  if (pdrv) return STA_NOINIT; /* single drive only */
+	/* 1) Power-on SPI handshake before ANY command */
+	sd_spi_power_on_sequence();
 
-  /* Deselect & send 80 dummy clocks */
-  SDLL_CS_High();
-  for (n = 0; n < 10; n++) SDLL_SendByte(0xFF);
+	/* 2) Now try CMD0 (go idle) with proper select/CRC inside SDLL_SendCommand */
+	r1 = SDLL_SendCommand(SD_CMD0, 0UL);
+	printf("CMD0(after handshake) R1=0x%02X\r\n", r1);
 
-  if (SDLL_SendCommand(SD_CMD0, 0) == 1) {           /* Enter Idle state */
-    timeout = HAL_GetTick() + 1000;                  /* 1s init window */
+	if (r1 == 1U)  /* Card entered Idle state */
+	{
+	    timeout = HAL_GetTick() + 1000U;
 
-    if (SDLL_SendCommand(SD_CMD8, 0x1AA) == 1) {     /* SDv2? */
-      for (n = 0; n < 4; n++) ocr[n] = SDLL_ReadByte();
-      if (ocr[2] == 0x01 && ocr[3] == 0xAA) {
-        while ((HAL_GetTick() < timeout) &&
-               SDLL_SendCommand(SD_CMD41 | 0x80, 1UL << 30))
-          ;
-        if ((HAL_GetTick() < timeout) && SDLL_SendCommand(SD_CMD58, 0) == 0) {
-          for (n = 0; n < 4; n++) ocr[n] = SDLL_ReadByte();
-          ty = (ocr[0] & 0x40) ? (CT_SD2 | CT_BLOCK) : CT_SD2;
-        }
-      }
-    } else {                                         /* SDv1 or MMCv3 */
-      uint8_t cmd;
-      if (SDLL_SendCommand(SD_CMD41 | 0x80, 0) <= 1) {
-        ty = CT_SD1; cmd = SD_CMD41 | 0x80;
-      } else {
-        ty = CT_MMC; cmd = SD_CMD1;
-      }
-      while ((HAL_GetTick() < timeout) && SDLL_SendCommand(cmd, 0))
-        ;
-      if ((HAL_GetTick() >= timeout) || SDLL_SendCommand(SD_CMD16, 512) != 0)
-        ty = 0;
-    }
-  }
+	    /* 3) Probe SDv2 with CMD8 */
+	    r1 = SDLL_SendCommand(SD_CMD8, 0x1AAUL);
+	    printf("CMD8 R1=0x%02X\r\n", r1);
 
-  CardType = ty;
-  SDLL_CS_High();
-  SDLL_SendByte(0xFF);
+	    if (r1 == 1U)
+	    {
+	        for (n = 0U; n < 4U; n++) { ocr[n] = SDLL_ReadByte(); }
+	        if ((ocr[2] == 0x01U) && (ocr[3] == 0xAAU))
+	        {
+	            while ((HAL_GetTick() < timeout) &&
+	                   SDLL_SendCommand(SD_CMD41 | 0x80U, 1UL << 30)) { /* ACMD41(HCS) */ }
+	            if ((HAL_GetTick() < timeout) && (SDLL_SendCommand(SD_CMD58, 0UL) == 0U))
+	            {
+	                for (n = 0U; n < 4U; n++) { ocr[n] = SDLL_ReadByte(); }
+	                ty = (ocr[0] & 0x40U) ? (CT_SD2 | CT_BLOCK) : CT_SD2;
+	            }
+	        }
+	    }
+	    else  /* SDv1/MMC path */
+	    {
+	        uint8_t cmd;
+	        if (SDLL_SendCommand(SD_CMD41 | 0x80U, 0UL) <= 1U) { ty = CT_SD1; cmd = SD_CMD41 | 0x80U; }
+	        else                                               { ty = CT_MMC; cmd = SD_CMD1;        }
 
-  if (ty) {
-    Stat &= ~STA_NOINIT;
-    /* Speed up SPI after init */
-    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
-    HAL_SPI_Init(&hspi1);
-  } else {
-    Stat = STA_NOINIT;
-  }
-  return Stat;
+	        while ((HAL_GetTick() < timeout) && SDLL_SendCommand(cmd, 0UL)) { /* wait ready */ }
+	        if ((HAL_GetTick() >= timeout) || (SDLL_SendCommand(SD_CMD16, 512U) != 0U)) { ty = 0U; }
+	    }
+	}
+
+	/* 4) Finish up */
+	CardType = ty;
+	SDLL_CS_High();
+	SDLL_SendByte(0xFF);
+
+	Stat = (ty != 0U) ? (Stat & (DSTATUS)~STA_NOINIT) : STA_NOINIT;
+	return Stat;
   /* USER CODE END INIT */
 }
 

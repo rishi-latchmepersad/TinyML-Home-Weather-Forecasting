@@ -8,7 +8,7 @@ extern SPI_HandleTypeDef hspi1;
 #define SD_CS_PORT     SD_Card_CS_GPIO_Port
 #define SD_CS_PIN      SD_Card_CS_Pin
 
-#define SD_SPI_TIMEOUT 200  /* ms */
+#define SD_SPI_TIMEOUT 1000  /* ms */
 
 /* ===== SPI byte I/O ===== */
 void SDLL_SendByte(uint8_t data) {
@@ -75,12 +75,62 @@ uint8_t SDLL_SendCommand(uint8_t cmd, uint32_t arg) {
 	if (cmd == SD_CMD12)
 		SDLL_ReadByte(); /* Skip a stuff byte when stop reading */
 
-	n = 10; /* Wait for a valid response within 10 attempts */
+	n = 20; /* Wait for a valid response within 10 attempts */
 	do {
 		res = SDLL_ReadByte();
 	} while ((res & 0x80) && --n);
 
 	return res;
+}
+
+/****************************************************************************************
+ * Function:    sd_spi_power_on_sequence
+ * Purpose:     Perform the SPI SD power-on handshake so the card enters SPI mode.
+ *
+ * Parameters:  void
+ *
+ * Returns:     void
+ *
+ * Side Effects:
+ *                - Drives chip-select (CS) high.
+ *                - Shifts at least 80 clock cycles with MOSI held high (0xFF bytes).
+ *
+ * Preconditions:
+ *                - SPI peripheral is initialized at a slow baud rate suitable for
+ *                  power-on (e.g., ≤ 400 kHz to a few MHz, per card tolerance).
+ *                - SD card is powered and stable.
+ *
+ * Postconditions:
+ *                - Card has received ≥ 80 clocks with CS high, ready for CMD0 with CS low.
+ *
+ * Concurrency:
+ *                - Not reentrant; must be serialized with other SPI users.
+ *
+ * Timing:
+ *                - Runs in microseconds; dominated by SPI clocks for 10 bytes.
+ *
+ * Errors:
+ *                - None directly. If skipped, subsequent commands (CMD0/CMD8) may
+ *                  return 0xFF (no response).
+ *
+ * Notes:
+ *                - SD Physical Layer Simplified Spec requires ≥ 74 clock cycles with
+ *                  CS high and DI (MOSI) high before the first command in SPI mode.
+ ****************************************************************************************/
+void sd_spi_power_on_sequence(void)
+{
+    uint8_t i;
+
+    /* Ensure CS is high (card deselected), then provide ≥ 80 clocks with DI high. */
+    SDLL_CS_High();
+    for (i = 0U; i < 10U; i++)
+    {
+        SDLL_SendByte(0xFF);  /* 8 clocks each, MOSI held high */
+    }
+    SDLL_CS_Low();
+    uint8_t spi_probe_byte = SDLL_ReadByte();  /* clocks once with CS low */
+    printf("SPI probe after select: 0x%02X\r\n", spi_probe_byte);
+    SDLL_CS_High();
 }
 
 /* ===== Data block I/O ===== */
