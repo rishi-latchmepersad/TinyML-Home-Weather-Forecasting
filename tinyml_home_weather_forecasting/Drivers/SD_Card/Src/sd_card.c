@@ -99,7 +99,6 @@ void SD_TestFatFs(void)
 	}
 }
 
-
 DWORD SD_GetFreeKB(void) {
 	FATFS *pfs;
 	DWORD free_clusters;

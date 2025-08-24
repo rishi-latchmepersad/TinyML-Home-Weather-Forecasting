@@ -19,8 +19,9 @@
 #include "cmsis_os.h"
 #include "ds3231.h"
 #include "measurement_logger_task.h"
+#include "led_service.h"
 
-#define BME280_TASK_STATE_DELAY (10000u) //ms
+#define BME280_TASK_STATE_DELAY (10000u) //take a measurement every X ms
 
 static uint8_t dev_addr = (BME280_I2C_ADDR_PRIM << 1);
 
@@ -110,7 +111,7 @@ void bme280SensorTask(void *argument) {
 						&(measurement_logger_message_t ) { SENSOR,
 										"humidity_pct", task_data.data.humidity,
 										"pct" }, 10);
-				printf("Enqueued sensor data from BME280");
+				led_service_activity_bump(100);
 			} else {
 				printf("Failed to read BME280 data! Error code: %d\r\n",
 						task_data.result);
@@ -129,6 +130,15 @@ void bme280SensorTask(void *argument) {
 			break;
 
 		case BME280_STATE_ERROR:
+			// show the red led
+			led_command_t err = {
+			  .led_identifier = led_identifier_ld3,
+			  .pattern_identifier = led_pattern_identifier_error_code,
+			  .error_code_count = 1,          /* one-blink code = sensor */
+			  .duration_ms = 0,               /* persist until cleared */
+			  .priority_level = 10
+			};
+			(void)led_service_set_pattern(&err);
 			// wait 5s and restart task loop
 			printf(
 					"We ran into an error with the BME280 sensor. Restarting task loop in 5s.");

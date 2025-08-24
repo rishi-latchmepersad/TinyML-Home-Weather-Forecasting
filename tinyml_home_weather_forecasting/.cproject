@@ -80,6 +80,7 @@
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Drivers/DS3231/Inc&quot;"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/Unity/src"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Tasks/Logging&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Tasks/User_Interfaces&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.2437626" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -106,7 +107,13 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="Middlewares/Third_Party/Unity|Tests" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="FATFS"/>
+						<entry excluding="Third_Party/Unity" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Tasks/Logging"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Tasks/Sensors"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Tasks/User_Interfaces"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -181,6 +188,7 @@
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Drivers/DS3231/Inc&quot;"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/Unity/src"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Tasks/Logging&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Tasks/User_Interfaces&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.454538949" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -258,6 +266,9 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="FATFS"/>
 						<entry excluding="Third_Party/Unity" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Tasks/Logging"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Tasks/Sensors"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Tasks/User_Interfaces"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -342,6 +353,7 @@
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/Unity/src"/>
 									<listOptionValue builtIn="false" value="../Tests/Stubs"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Tasks/Logging&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Tasks/User_Interfaces&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1675478880" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>

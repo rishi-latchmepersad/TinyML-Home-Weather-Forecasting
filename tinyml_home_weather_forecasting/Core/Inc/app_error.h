@@ -13,5 +13,6 @@
 #endif
 
 void error_handler_with_message(const char *msg);
+void error_indicator_red_led_solid_on(void);
 
 #endif /* INC_APP_ERROR_H_ */

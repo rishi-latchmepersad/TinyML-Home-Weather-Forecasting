@@ -5,6 +5,7 @@
 
 #include "ds3231.h"            /* ds3231_read_time_iso8601_utc_i2c1() */
 #include "diskio.h"
+#include "led_service.h"
 
 /* === Configuration macros (override in project settings if desired) ================= */
 #ifndef LOGGER_TASK_STACK_WORDS
@@ -23,7 +24,7 @@
 #define LOGGER_BASE_DIR           "0:/logs"    /* single logs directory */
 #endif
 #ifndef LOGGER_FLUSH_PERIOD_MS
-#define LOGGER_FLUSH_PERIOD_MS    (1000u)      /* periodic flush cadence */
+#define LOGGER_FLUSH_PERIOD_MS    (30000u)      /* periodic flush cadence */
 #endif
 #ifndef LOGGER_BACKOFF_MS
 #define LOGGER_BACKOFF_MS         (500u)       /* retry delay when errors occur */
@@ -179,7 +180,6 @@ static void measurement_logger_task_entry(void *argument) {
 			measurement_logger_message_t msg;
 			if (xQueueReceive(g_measurement_queue, &msg,
 					pdMS_TO_TICKS(200u)) == pdPASS) {
-				printf("New data received on queue\r\n");
 				char line[160];
 				size_t n = measurement_logger_format_csv_line(&msg, line,
 						sizeof line);
@@ -215,9 +215,9 @@ static void measurement_logger_task_entry(void *argument) {
 				if (before > 0u) {
 					printf("Flushed %lu bytes to file.\r\n",
 							(unsigned long) before);
-
+					led_service_activity_bump(1000);
 				} else {
-					printf("Flush skipped (no pending bytes).\r\n");
+				//we don't have any data to flush
 				}
 				state = LOGGER_STATE_RUNNING;
 			}
@@ -238,6 +238,13 @@ static void measurement_logger_task_entry(void *argument) {
 				(void) f_close(&g_active_file);
 				g_file_open = false;
 			}
+			// show the red led
+			led_command_t err = { .led_identifier = led_identifier_ld3,
+					.pattern_identifier = led_pattern_identifier_error_code,
+					.error_code_count = 2, /* two-blink code = storage */
+					.duration_ms = 0, /* persist until cleared */
+					.priority_level = 10 };
+			(void) led_service_set_pattern(&err);
 			vTaskDelay(pdMS_TO_TICKS(LOGGER_BACKOFF_MS));
 			state = LOGGER_STATE_ENSURE_DIR;
 			break;

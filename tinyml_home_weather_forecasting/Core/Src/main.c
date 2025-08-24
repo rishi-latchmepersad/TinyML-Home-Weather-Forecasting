@@ -31,6 +31,7 @@
 #include "sd_card.h"
 #include "app_error.h"
 #include "measurement_logger_task.h"
+#include "led_service.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,7 +60,7 @@ UART_HandleTypeDef huart3;
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = { .name = "defaultTask",
-		.stack_size = 512 * 4, .priority = (osPriority_t) osPriorityNormal, };
+		.stack_size = 512 * 4, .priority = (osPriority_t) osPriorityLow, };
 /* USER CODE BEGIN PV */
 osThreadId_t bme280SensorTaskHandle;
 const osThreadAttr_t bme280SensorTask_attributes = { .name = "bme280SensorTask",
@@ -164,7 +165,9 @@ int main(void) {
 	/* add threads, ... */
 	bme280SensorTaskHandle = osThreadNew(bme280SensorTask, NULL,
 			&bme280SensorTask_attributes);
-	(void)measurement_logger_task_create();
+	(void) measurement_logger_task_create();
+	(void) led_service_init();
+	(void) led_service_start(osPriorityLow1, 256 * 4);
 	/* USER CODE END RTOS_THREADS */
 
 	/* USER CODE BEGIN RTOS_EVENTS */
@@ -435,13 +438,11 @@ void StartDefaultTask(void *argument) {
 		printf("SD card mounted successfully!\r\n");
 	} else {
 		error_handler_with_message(
-				"Could not mount SD card. Please recheck the 5v cable.");
+				"Could not mount SD card. Please recheck the 5v cable and ground cable.");
 	}
 	//ensure the file system works
 	SD_TestFatFs();
 	while (1) {
-		HAL_Delay(10000);
-		printf("Default task loop running...\r\n");
 	}
 	/* USER CODE END 5 */
 }
@@ -503,6 +504,8 @@ void Error_Handler(void) {
 	printf("\r\n[ERROR] %s\r\n", ERROR_DEFAULT_MSG);
 	fflush(stdout);
 
+	//light up the LED;
+	error_indicator_red_led_solid_on();
 	if (__get_IPSR() == 0U) {
 		HAL_Delay(5000);
 	}
