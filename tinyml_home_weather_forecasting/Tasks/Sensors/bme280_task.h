@@ -11,7 +11,7 @@
 #include "cmsis_os.h"
 #include "bme280_defs.h"
 
-// Public struct for sensor data (optional)
+// Public struct for sensor data
 typedef struct {
 	float temperature;
 	float humidity;

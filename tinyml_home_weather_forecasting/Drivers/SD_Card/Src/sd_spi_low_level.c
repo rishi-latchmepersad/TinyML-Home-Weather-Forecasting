@@ -1,6 +1,7 @@
 #include "sd_spi_low_level.h"
 #include "main.h"
 #include "stm32f7xx_hal.h"
+#include <stdio.h>
 
 /* Configure SPI and chip-select according to your CubeMX pins */
 extern SPI_HandleTypeDef hspi1;

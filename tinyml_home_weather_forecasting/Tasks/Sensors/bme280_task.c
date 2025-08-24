@@ -14,12 +14,15 @@
 #ifdef UNIT_TESTING
     #include "FreeRTOS_stub.h"
 #else
-    #include "FreeRTOS.h"
+#include "FreeRTOS.h"
 #endif
 #include "cmsis_os.h"
+#include "ds3231.h"
+#include "measurement_logger_task.h"
+
+#define BME280_TASK_STATE_DELAY (10000u) //ms
 
 static uint8_t dev_addr = (BME280_I2C_ADDR_PRIM << 1);
-
 
 static int8_t bme280_setup(struct bme280_dev *dev) {
 	struct bme280_settings settings;
@@ -89,13 +92,25 @@ void bme280SensorTask(void *argument) {
 			}
 			break;
 
-		case BME280_STATE_READ_DATA:
+		case BME280_STATE_READ_DATA: {
 			task_data.result = bme280_get_sensor_data(BME280_ALL,
 					&task_data.data, &task_data.dev);
 			if (task_data.result == BME280_OK) {
-				printf("Temperature: %.2f °C\r\n", task_data.data.temperature);
-				printf("Pressure: %.2f Pa\r\n", task_data.data.pressure);
-				printf("Humidity: %.2f %%\r\n", task_data.data.humidity);
+				static const char *SENSOR = "bme280";
+				(void) measurement_logger_enqueue(
+						&(measurement_logger_message_t ) { SENSOR,
+										"temperature_c",
+										task_data.data.temperature, "degC" },
+						10);
+				(void) measurement_logger_enqueue(
+						&(measurement_logger_message_t ) { SENSOR,
+										"pressure_pa", task_data.data.pressure,
+										"Pa" }, 10);
+				(void) measurement_logger_enqueue(
+						&(measurement_logger_message_t ) { SENSOR,
+										"humidity_pct", task_data.data.humidity,
+										"pct" }, 10);
+				printf("Enqueued sensor data from BME280");
 			} else {
 				printf("Failed to read BME280 data! Error code: %d\r\n",
 						task_data.result);
@@ -104,17 +119,19 @@ void bme280SensorTask(void *argument) {
 			task_data.last_tick = xTaskGetTickCount();
 			task_data.state = BME280_STATE_DELAY;
 			break;
+		}
 
 		case BME280_STATE_DELAY:
 			if ((xTaskGetTickCount() - task_data.last_tick)
-					>= pdMS_TO_TICKS(2000)) {
+					>= pdMS_TO_TICKS(BME280_TASK_STATE_DELAY)) {
 				task_data.state = BME280_STATE_TRIGGER_MEASUREMENT;
 			}
 			break;
 
 		case BME280_STATE_ERROR:
 			// wait 5s and restart task loop
-			printf("We ran into an error with the BME280 sensor. Restarting task loop in 5s.");
+			printf(
+					"We ran into an error with the BME280 sensor. Restarting task loop in 5s.");
 			vTaskDelay(pdMS_TO_TICKS(5000));
 			task_data.state = BME280_STATE_INIT;
 			break;

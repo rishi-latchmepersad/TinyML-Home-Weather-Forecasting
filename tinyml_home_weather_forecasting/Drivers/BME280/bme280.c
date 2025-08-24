@@ -40,6 +40,7 @@
  * @brief Sensor driver for BME280 sensor
  */
 #include "bme280.h"
+#include <stdio.h>
 
 /**\name Internal macros */
 /* To identify osr settings selected by user */

@@ -1,5 +1,7 @@
 #include "unity.h"
-#include "FreeRTOS_stub.h"
+#if defined(UNITY_TEST)            /* only in Test_Debug */
+  #include "FreeRTOS_stub.h"
+#else                               /* normal firmware builds */
 #include "bme280_task.h"
 
 // Mock implementations
