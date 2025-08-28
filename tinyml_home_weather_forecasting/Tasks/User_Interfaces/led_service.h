@@ -10,12 +10,19 @@
  *             LD2 (blue) : PB7
  *             LD3 (red)  : PB14
  *             Solder bridges: SB120 ON / SB119 OFF → LD1 on PB0.
+ *             We also use a HW-479 arduino RGB LED board
+ *             B (blue): PE13
+ *             G (green): PE11
+ *             R (red): PE9
  *
  * \patterns   - Health (LD1): Heartbeat — 2 s period, ~500 ms pulse (default).
  *             - Activity (LD2): Single short blink per event via led_service_activity_bump(200);
  *                               for long transfers or other significant events use something like led_service_activity_bump(1000);
  *             - Faults (LD3): Coded N-blink with pause (1=sensor, 2=storage, 3=network).
  *                             Solid ON indicates fatal/latched safe mode until cleared.
+ *             - Sensors (HW-479): Used to make the sensor activity more intuitive. We can add a color for each sensor.
+ *             	 - BME280: Purple
+ *             	 - VEML7700: Teal
  *
  * \usage      bool ok = led_service_init();
  *             ok &= led_service_start(osPriorityLow1, 256*4);
@@ -33,12 +40,12 @@
 
 #pragma once
 #include "stm32f7xx_hal.h"
+#include "stm32f7xx_hal_tim.h"
 #include "FreeRTOS.h"
 #include "queue.h"
 #include "task.h"
 #include <stdbool.h>
 #include <stdint.h>
-
 /* ===== Board mapping: choose LD1 pin based on solder bridges SB119/SB120 ===== */
 // Define exactly one of these based on your board solder bridge setting.
 #define LED1_ON_PB0   1
@@ -182,4 +189,32 @@ void led_service_pulse_activity(void);
  * \notes        Call at the end of each measurement and/or after each log write.
  */
 void led_service_activity_bump(uint16_t credit_ms);
+
+/* ***************************************************************************
+ * Function: led_service_rgb_board_init
+ * Purpose : Initialize PWM outputs for an external RGB LED module.
+ * Params  : timer_handle_ptr  - pointer to the configured TIM instance (e.g., &htim3)
+ *           channel_red       - timer channel used for RED   (e.g., TIM_CHANNEL_1)
+ *           channel_green     - timer channel used for GREEN (e.g., TIM_CHANNEL_2)
+ *           channel_blue      - timer channel used for BLUE  (e.g., TIM_CHANNEL_4)
+ *           is_common_anode   - true for CA, false for CC (HW-479 is false)
+ * Returns : bool - true on success.
+ * Side effects : Starts PWM on the three channels (consumes those pins).
+ * Notes   : Timer base + PWM channels must be CubeMX-configured. Target ~0.5–2 kHz.
+ * ***************************************************************************/
+bool led_service_rgb_board_init(TIM_HandleTypeDef *timer_handle_ptr,
+		uint32_t channel_red, uint32_t channel_green, uint32_t channel_blue,
+		bool is_common_anode);
+
+/* ***************************************************************************
+ * Function: led_service_pulse_activity_rgb
+ * Purpose : Flash the RGB LED a requested color for a bounded duration, then turn it off.
+ * Params  : red_8bit, green_8bit, blue_8bit - 0..255 brightness per channel
+ *           duration_ms                     - flash length in milliseconds
+ * Returns : void
+ * Side effects : Updates a shared request consumed by the LED service task each tick.
+ * Notes   : Non-blocking; safe to call from normal task context. For ISR use, create an _from_isr variant.
+ * ***************************************************************************/
+void led_service_pulse_activity_rgb(uint8_t red_8bit, uint8_t green_8bit,
+		uint8_t blue_8bit, uint16_t duration_ms);
 

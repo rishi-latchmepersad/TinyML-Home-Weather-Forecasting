@@ -10,6 +10,15 @@
 #define LED_SERVICE_ERROR_PAUSE_MS                     (1000u)
 #define LED_SERVICE_ACTIVITY_CREDIT_DECAY_MS       (LED_SERVICE_TASK_TICK_MS) /* 20 ms per tick */
 #define LED_SERVICE_ACTIVITY_CREDIT_CAP_MS         (2000u)                    /* clamp to 2 s */
+#define LED_SERVICE_RGB_PULSE_QUEUE_LENGTH             (8u)
+
+/* Command for an RGB pulse (queued) */
+typedef struct {
+    uint8_t  r_8bit;
+    uint8_t  g_8bit;
+    uint8_t  b_8bit;
+    uint16_t duration_ms;
+} led_rgb_pulse_cmd_t;
 
 typedef struct {
 	GPIO_TypeDef *gpio_port;
@@ -30,6 +39,9 @@ typedef struct {
 static QueueHandle_t g_led_command_queue_handle = NULL;
 static TaskHandle_t g_led_task_handle = NULL;
 static led_runtime_t g_leds[3];
+/* Queue handle + currently active pulse */
+static QueueHandle_t g_rgb_pulse_queue_handle = NULL;
+
 
 static void prv_led_service_task(void *argument);
 static void prv_led_apply_output(led_runtime_t *led_ptr, bool turn_on);
@@ -40,7 +52,141 @@ static inline void prv_gpio_write(GPIO_TypeDef *port, uint16_t pin,
 	HAL_GPIO_WritePin(port, pin, state);
 }
 
-/* ===== Public API ===== */
+
+/* ===== External RGB (PWM) support ===== */
+static TIM_HandleTypeDef *g_rgb_timer_handle_ptr = NULL;
+static uint32_t g_rgb_channel_r = 0, g_rgb_channel_g = 0, g_rgb_channel_b = 0;
+static bool g_rgb_is_common_anode = false;
+
+typedef struct {
+	uint16_t remaining_ms;
+	uint8_t r_8bit;
+	uint8_t g_8bit;
+	uint8_t b_8bit;
+} led_rgb_flash_request_t;
+
+static led_rgb_flash_request_t g_rgb_flash_req = { 0, 0, 0, 0 };
+
+static inline void prv_rgb_apply_8bit(uint8_t r, uint8_t g, uint8_t b) {
+	if (g_rgb_timer_handle_ptr == NULL) {
+		return;
+	}
+
+	const uint32_t period = __HAL_TIM_GET_AUTORELOAD(g_rgb_timer_handle_ptr);
+	/* Map 0..255 -> 0..period */
+	uint32_t r_counts = ((uint32_t) r * period) / 255U;
+	uint32_t g_counts = ((uint32_t) g * period) / 255U;
+	uint32_t b_counts = ((uint32_t) b * period) / 255U;
+
+	if (g_rgb_is_common_anode) {
+		/* CA: brighter = lower compare (sink current) */
+		__HAL_TIM_SET_COMPARE(g_rgb_timer_handle_ptr, g_rgb_channel_r,
+				period - r_counts);
+		__HAL_TIM_SET_COMPARE(g_rgb_timer_handle_ptr, g_rgb_channel_g,
+				period - g_counts);
+		__HAL_TIM_SET_COMPARE(g_rgb_timer_handle_ptr, g_rgb_channel_b,
+				period - b_counts);
+	} else {
+		/* CC (HW-479): brighter = higher compare (source current) */
+		__HAL_TIM_SET_COMPARE(g_rgb_timer_handle_ptr, g_rgb_channel_r,
+				r_counts);
+		__HAL_TIM_SET_COMPARE(g_rgb_timer_handle_ptr, g_rgb_channel_g,
+				g_counts);
+		__HAL_TIM_SET_COMPARE(g_rgb_timer_handle_ptr, g_rgb_channel_b,
+				b_counts);
+	}
+}
+
+/* ***************************************************************************
+ * Function: led_service_rgb_board_init
+ * Purpose : Start PWM on three channels for the external RGB LED module.
+ * Params  : See header.
+ * Returns : bool - true on success.
+ * Side effects : Starts hardware PWM on given channels.
+ * Preconditions : Timer base + channels configured by CubeMX.
+ * Postconditions: RGB channels are ready for duty updates via CCR.
+ * Concurrency : Not thread-safe vs. another init; call once at startup.
+ * Timing  : O(1).
+ * Errors  : Returns false if timer_handle_ptr is NULL.
+ * Notes   : Recommended PWM freq ~1 kHz; keep GPIO current < MCU limits.
+ * ***************************************************************************/
+bool led_service_rgb_board_init(TIM_HandleTypeDef *timer_handle_ptr,
+		uint32_t channel_red, uint32_t channel_green, uint32_t channel_blue,
+		bool is_common_anode) {
+	if (timer_handle_ptr == NULL) {
+		return false;
+	}
+
+	g_rgb_timer_handle_ptr = timer_handle_ptr;
+	g_rgb_channel_r = channel_red;
+	g_rgb_channel_g = channel_green;
+	g_rgb_channel_b = channel_blue;
+	g_rgb_is_common_anode = is_common_anode;
+
+	/* Start PWM on all three channels */
+	if (HAL_TIM_PWM_Start(g_rgb_timer_handle_ptr, g_rgb_channel_r) != HAL_OK) {
+		return false;
+	}
+	if (HAL_TIM_PWM_Start(g_rgb_timer_handle_ptr, g_rgb_channel_g) != HAL_OK) {
+		return false;
+	}
+	if (HAL_TIM_PWM_Start(g_rgb_timer_handle_ptr, g_rgb_channel_b) != HAL_OK) {
+		return false;
+	}
+
+	/* Ensure OFF initially */
+	prv_rgb_apply_8bit(0, 0, 0);
+
+	g_rgb_pulse_queue_handle = xQueueCreate(LED_SERVICE_RGB_PULSE_QUEUE_LENGTH,
+	                                        sizeof(led_rgb_pulse_cmd_t));
+	if (g_rgb_pulse_queue_handle == NULL) {
+	    return false;
+	}
+
+	return true;
+}
+
+/* ***************************************************************************
+ * Function: led_service_pulse_activity_rgb
+ * Purpose  : Queue a timed RGB pulse (FIFO, non-preemptive).
+ * Params   : red_8bit, green_8bit, blue_8bit - 0..255 intensities
+ *            duration_ms - pulse length in milliseconds (0 => 1 ms)
+ * Returns  : void
+ * Side effects : Enqueues a pulse command; service task plays it later.
+ * Preconditions : led_service_init() and led_service_rgb_board_init() done.
+ * Postconditions: Each queued pulse will display fully, in order queued.
+ * Concurrency : Task-safe via FreeRTOS queue (non-blocking send, 0 timeout).
+ * Timing   : O(1).
+ * Errors   : If the queue is full, the newest pulse is dropped silently.
+ * Notes    : Add a *_from_isr() variant if you need to call from ISRs.
+ * ***************************************************************************/
+void led_service_pulse_activity_rgb(uint8_t red_8bit,
+                                    uint8_t green_8bit,
+                                    uint8_t blue_8bit,
+                                    uint16_t duration_ms)
+{
+    if (g_rgb_pulse_queue_handle == NULL) {
+        return;
+    }
+
+    led_rgb_pulse_cmd_t cmd;
+    cmd.r_8bit     = red_8bit;
+    cmd.g_8bit     = green_8bit;
+    cmd.b_8bit     = blue_8bit;
+    cmd.duration_ms = (duration_ms == 0u) ? 1u : duration_ms;
+
+    (void) xQueueSend(g_rgb_pulse_queue_handle, &cmd, 0);
+}
+
+void led_service_pulse_activity_rgb_from_isr(uint8_t r, uint8_t g, uint8_t b, uint16_t duration_ms)
+{
+    if (g_rgb_pulse_queue_handle == NULL) { return; }
+    led_rgb_pulse_cmd_t cmd = { r, g, b, (duration_ms == 0u) ? 1u : duration_ms };
+    BaseType_t hpw = pdFALSE;
+    (void) xQueueSendFromISR(g_rgb_pulse_queue_handle, &cmd, &hpw);
+    portYIELD_FROM_ISR(hpw);
+}
+
 
 bool led_service_init(void) {
 	/* Create queue */
@@ -270,6 +416,8 @@ static void prv_led_apply_output(led_runtime_t *led_ptr, bool turn_on) {
 	}
 }
 
+
+
 static void prv_led_service_task(void *argument) {
 	(void) argument;
 	const TickType_t tick_period = pdMS_TO_TICKS(LED_SERVICE_TASK_TICK_MS);
@@ -286,11 +434,10 @@ static void prv_led_service_task(void *argument) {
 			}
 		}
 
-		/* Render each LED */
-		/* Render each LED */
+		/* Render onboard LEDs */
 		/* LD1 (green): normal (heartbeat or whatever pattern is set) */
 		prv_led_render_tick(&g_leds[led_identifier_ld1],
-				LED_SERVICE_TASK_TICK_MS);
+		LED_SERVICE_TASK_TICK_MS);
 
 		/* LD2 (blue): rate-meter override — ON while credit remains */
 		if (g_led_activity_credit_ms > 0u) {
@@ -309,13 +456,53 @@ static void prv_led_service_task(void *argument) {
 		} else {
 			/* no recent activity -> render LD2’s configured pattern (usually OFF) */
 			prv_led_render_tick(&g_leds[led_identifier_ld2],
-					LED_SERVICE_TASK_TICK_MS);
+			LED_SERVICE_TASK_TICK_MS);
 		}
 
 		/* LD3 (red): normal (off, coded error, etc.) */
 		prv_led_render_tick(&g_leds[led_identifier_ld3],
-				LED_SERVICE_TASK_TICK_MS);
+		LED_SERVICE_TASK_TICK_MS);
+
+		//end onboard LED renders
+
+		/* External RGB pulse renderer: non-preemptive FIFO */
+		if (g_rgb_flash_req.remaining_ms > 0u) {
+		    /* keep showing the active color and decay its timer */
+		    prv_rgb_apply_8bit(g_rgb_flash_req.r_8bit,
+		                       g_rgb_flash_req.g_8bit,
+		                       g_rgb_flash_req.b_8bit);
+
+		    if (LED_SERVICE_TASK_TICK_MS >= g_rgb_flash_req.remaining_ms) {
+		        g_rgb_flash_req.remaining_ms = 0u;
+		    } else {
+		        g_rgb_flash_req.remaining_ms =
+		            (uint16_t)(g_rgb_flash_req.remaining_ms - LED_SERVICE_TASK_TICK_MS);
+		    }
+		} else {
+		    /* no active pulse -> try to start the next queued one */
+		    led_rgb_pulse_cmd_t next_cmd;
+		    if (g_rgb_pulse_queue_handle != NULL &&
+		        xQueueReceive(g_rgb_pulse_queue_handle, &next_cmd, 0) == pdPASS)
+		    {
+		        taskENTER_CRITICAL();
+		        g_rgb_flash_req.r_8bit      = next_cmd.r_8bit;
+		        g_rgb_flash_req.g_8bit      = next_cmd.g_8bit;
+		        g_rgb_flash_req.b_8bit      = next_cmd.b_8bit;
+		        g_rgb_flash_req.remaining_ms = (next_cmd.duration_ms == 0u) ? 1u : next_cmd.duration_ms;
+		        taskEXIT_CRITICAL();
+
+		        prv_rgb_apply_8bit(g_rgb_flash_req.r_8bit,
+		                           g_rgb_flash_req.g_8bit,
+		                           g_rgb_flash_req.b_8bit);
+		    } else {
+		        /* idle: ensure OFF */
+		        prv_rgb_apply_8bit(0, 0, 0);
+		    }
+		}
+
 
 		vTaskDelayUntil(&last_wake, tick_period);
 	}
 }
+
+

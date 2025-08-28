@@ -111,7 +111,8 @@ void bme280SensorTask(void *argument) {
 						&(measurement_logger_message_t ) { SENSOR,
 										"humidity_pct", task_data.data.humidity,
 										"pct" }, 10);
-				led_service_activity_bump(100);
+				//drive external RGB LED purple for this sensor
+				led_service_pulse_activity_rgb(128,0, 128, 1000);
 			} else {
 				printf("Failed to read BME280 data! Error code: %d\r\n",
 						task_data.result);
@@ -131,17 +132,15 @@ void bme280SensorTask(void *argument) {
 
 		case BME280_STATE_ERROR:
 			// show the red led
-			led_command_t err = {
-			  .led_identifier = led_identifier_ld3,
-			  .pattern_identifier = led_pattern_identifier_error_code,
-			  .error_code_count = 1,          /* one-blink code = sensor */
-			  .duration_ms = 0,               /* persist until cleared */
-			  .priority_level = 10
-			};
-			(void)led_service_set_pattern(&err);
+			led_command_t err = { .led_identifier = led_identifier_ld3,
+					.pattern_identifier = led_pattern_identifier_error_code,
+					.error_code_count = 1, /* one-blink code = sensor */
+					.duration_ms = 0, /* persist until cleared */
+					.priority_level = 10 };
+			(void) led_service_set_pattern(&err);
 			// wait 5s and restart task loop
 			printf(
-					"We ran into an error with the BME280 sensor. Restarting task loop in 5s.");
+					"We ran into an error with the BME280 sensor. Restarting task loop in 5s.\r\n");
 			vTaskDelay(pdMS_TO_TICKS(5000));
 			task_data.state = BME280_STATE_INIT;
 			break;
