@@ -13,6 +13,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "diskio.h"
 #include "ff_gen_drv.h"
+#include "stm32f7xx.h"
 
 #if defined ( __GNUC__ )
 #ifndef __weak
@@ -27,6 +28,20 @@ extern Disk_drvTypeDef  disk;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
+
+static void dcache_clean(void *addr, size_t len)
+{
+    uintptr_t start = ((uintptr_t)addr) & ~((uintptr_t)31);
+    uintptr_t end   = ((uintptr_t)addr + len + 31) & ~((uintptr_t)31);
+    SCB_CleanDCache_by_Addr((uint32_t*)start, (int32_t)(end - start));
+}
+
+static void dcache_invalidate(void *addr, size_t len)
+{
+    uintptr_t start = ((uintptr_t)addr) & ~((uintptr_t)31);
+    uintptr_t end   = ((uintptr_t)addr + len + 31) & ~((uintptr_t)31);
+    SCB_InvalidateDCache_by_Addr((uint32_t*)start, (int32_t)(end - start));
+}
 
 /**
   * @brief  Gets Disk Status
@@ -70,17 +85,15 @@ DSTATUS disk_initialize (
   * @param  count: Number of sectors to read (1..128)
   * @retval DRESULT: Operation result
   */
-DRESULT disk_read (
-	BYTE pdrv,		/* Physical drive nmuber to identify the drive */
-	BYTE *buff,		/* Data buffer to store read data */
-	DWORD sector,	        /* Sector address in LBA */
-	UINT count		/* Number of sectors to read */
-)
+DRESULT disk_read(BYTE pdrv, BYTE *buff, DWORD sector, UINT count)
 {
-  DRESULT res;
-
-  res = disk.drv[pdrv]->disk_read(disk.lun[pdrv], buff, sector, count);
-  return res;
+    DRESULT res = disk.drv[pdrv]->disk_read(disk.lun[pdrv], buff, sector, count);
+#if defined(__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+    if (res == RES_OK) {
+        dcache_invalidate(buff, (size_t)count * 512u);
+    }
+#endif
+    return res;
 }
 
 /**
@@ -92,17 +105,12 @@ DRESULT disk_read (
   * @retval DRESULT: Operation result
   */
 #if _USE_WRITE == 1
-DRESULT disk_write (
-	BYTE pdrv,		/* Physical drive nmuber to identify the drive */
-	const BYTE *buff,	/* Data to be written */
-	DWORD sector,		/* Sector address in LBA */
-	UINT count        	/* Number of sectors to write */
-)
+DRESULT disk_write(BYTE pdrv, const BYTE *buff, DWORD sector, UINT count)
 {
-  DRESULT res;
-
-  res = disk.drv[pdrv]->disk_write(disk.lun[pdrv], buff, sector, count);
-  return res;
+#if defined(__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+    dcache_clean((void*)buff, (size_t)count * 512u);
+#endif
+    return disk.drv[pdrv]->disk_write(disk.lun[pdrv], buff, sector, count);
 }
 #endif /* _USE_WRITE == 1 */
 
