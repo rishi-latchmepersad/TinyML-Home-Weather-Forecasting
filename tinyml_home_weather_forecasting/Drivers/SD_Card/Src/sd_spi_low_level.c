@@ -39,50 +39,66 @@ uint8_t SDLL_WaitReady(uint32_t timeout_ms) {
 }
 
 /* ===== SD command (SPI mode) ===== */
+/* Barr-C Header
+ * Name: SDLL_SendCommand
+ * Purpose: Transmit an SD command (SPI mode) and return the R1 status.
+ * Params: cmd - command index (bit7 set => ACMD flow), arg - 32-bit argument
+ * Returns: uint8_t R1 code (0x00=OK, 0x01=Idle, bit7=busy/no response)
+ * Side Effects: Leaves CS **LOW** on return so caller can read any extra bytes
+ *               (R3/R7) or subsequent data tokens. Caller must deassert CS.
+ * Preconditions: SPI running at slow speed for init or at data speed post-init.
+ * Postconditions: None (CS remains low).
+ * Concurrency: Not re-entrant; serialize access to the SPI bus.
+ * Timing: Bounded by SD response timing + SPI shifts.
+ * Errors: Returns 0xFF on timeout waiting for "ready" (non-CMD0 only).
+ * Notes: Caller must finish with SDLL_CS_High(); SDLL_SendByte(0xFF).
+ */
 uint8_t SDLL_SendCommand(uint8_t cmd, uint32_t arg) {
-	uint8_t n, res;
+    uint8_t n, res;
 
-	if (cmd & 0x80) { /* ACMD<n> is the command sequence of CMD55-CMD<n> */
-		cmd &= 0x7F;
-		res = SDLL_SendCommand(SD_CMD55, 0);
-		if (res > 1)
-			return res;
-	}
+    if (cmd & 0x80) {                 /* ACMD<n> sequence */
+        cmd &= 0x7F;
+        res = SDLL_SendCommand(SD_CMD55, 0);
+        if (res > 1) return res;
+    }
 
-	/* Select the card and wait for ready */
-	SDLL_CS_High();
-	SDLL_SendByte(0xFF);
-	SDLL_CS_Low();
+    SDLL_CS_High();
+    SDLL_SendByte(0xFF);
+    SDLL_CS_Low();
 
-	if (!SDLL_WaitReady(SD_SPI_TIMEOUT))
-		return 0xFF;
+    if (cmd != SD_CMD0) {
+        if (!SDLL_WaitReady(SD_SPI_TIMEOUT)) {
+            /* Leave CS high to avoid holding the bus */
+            SDLL_CS_High();
+            SDLL_SendByte(0xFF);
+            return 0xFF;
+        }
+    } else {
+        SDLL_SendByte(0xFF);          /* one extra clock helps some modules */
+    }
 
-	/* Send command packet */
-	SDLL_SendByte(0x40 | cmd); /* Start + Command index */
-	SDLL_SendByte((uint8_t) (arg >> 24)); /* Argument[31..24] */
-	SDLL_SendByte((uint8_t) (arg >> 16)); /* Argument[23..16] */
-	SDLL_SendByte((uint8_t) (arg >> 8)); /* Argument[15..8] */
-	SDLL_SendByte((uint8_t) arg); /* Argument[7..0] */
+    SDLL_SendByte(0x40 | cmd);
+    SDLL_SendByte((uint8_t)(arg >> 24));
+    SDLL_SendByte((uint8_t)(arg >> 16));
+    SDLL_SendByte((uint8_t)(arg >> 8));
+    SDLL_SendByte((uint8_t)arg);
 
-	/* CRC: only meaningful for CMD0 and CMD8 in SPI mode */
-	n = 0x01;
-	if (cmd == SD_CMD0)
-		n = 0x95;
-	if (cmd == SD_CMD8)
-		n = 0x87;
-	SDLL_SendByte(n);
+    n = 0x01;                         /* valid CRC only for CMD0/CMD8 */
+    if (cmd == SD_CMD0) n = 0x95;
+    if (cmd == SD_CMD8) n = 0x87;
+    SDLL_SendByte(n);
 
-	/* Receive command response */
-	if (cmd == SD_CMD12)
-		SDLL_ReadByte(); /* Skip a stuff byte when stop reading */
+    if (cmd == SD_CMD12) SDLL_ReadByte();  /* skip stuff byte */
 
-	n = 20; /* Wait for a valid response within 10 attempts */
-	do {
-		res = SDLL_ReadByte();
-	} while ((res & 0x80) && --n);
+    n = 20;
+    do {
+        res = SDLL_ReadByte();
+    } while ((res & 0x80) && --n);
 
-	return res;
+    /* IMPORTANT: CS stays LOW here! Caller will finish the transaction. */
+    return res;
 }
+
 
 /****************************************************************************************
  * Function:    sd_spi_power_on_sequence
@@ -157,24 +173,42 @@ uint8_t SDLL_ReadDataBlock(uint8_t *buff, uint32_t btr) {
 	return 1;
 }
 
-uint8_t SDLL_WriteDataBlock(const uint8_t *buff, uint8_t token) {
-	uint8_t resp;
-	uint32_t bc = 512U;
+/*
+ * Name: SDLL_WriteDataBlock
+ * Purpose: Send a single 512B data block (or STOP token) in SPI mode.
+ * Params: buff - 512B data (ignored for STOP), token - data/stop token
+ * Returns: 1 on success, 0 on failure or timeout
+ * Side Effects: Leaves CS LOW on return; caller must deassert CS.
+ * Preconditions: Card selected (CS low) and not busy.
+ * Postconditions: Card is no longer busy (write completed) on success.
+ * Errors: Returns 0 if data response not accepted or busy never releases.
+ */
+uint8_t SDLL_WriteDataBlock(const uint8_t *buff, uint8_t token)
+{
+    uint8_t resp;
+    uint32_t bc = 512U;
 
-	if (!SDLL_WaitReady(SD_SPI_TIMEOUT))
-		return 0;
+    if (!SDLL_WaitReady(SD_SPI_TIMEOUT))
+        return 0;
 
-	SDLL_SendByte(token);
-	if (token != 0xFD) { /* Is data token */
-		do {
-			SDLL_SendByte(*buff++);
-		} while (--bc);
-		SDLL_SendByte(0xFF); /* CRC (dummy) */
-		SDLL_SendByte(0xFF);
+    SDLL_SendByte(token);
+    if (token != 0xFD) {                 // data block
+        do { SDLL_SendByte(*buff++); } while (--bc);
+        SDLL_SendByte(0xFF);             // dummy CRC
+        SDLL_SendByte(0xFF);
 
-		resp = SDLL_ReadByte(); /* Data response */
-		if ((resp & 0x1F) != 0x05)
-			return 0; /* Not accepted */
-	}
-	return 1;
+        resp = SDLL_ReadByte();          // data response
+        if ((resp & 0x1F) != 0x05)
+            return 0;                    // not accepted
+
+        // >>> IMPORTANT: wait until the card releases busy (MISO==0xFF)
+        if (!SDLL_WaitReady(500))
+            return 0;
+    } else {
+        // STOP_TRAN for multi-block writes also leaves the card busy
+        if (!SDLL_WaitReady(500))
+            return 0;
+    }
+    return 1;
 }
+

@@ -16,6 +16,7 @@
 #include "main.h"
 #include <stdbool.h>
 #include <app_error.h>
+#include "sd_spi_low_level.h"
 
 static FATFS s_fs;
 extern char USERPath[4];
@@ -67,7 +68,13 @@ void SD_TestFatFs(void)
 	char buffer[100];
 
 	printf("\r\n=== Testing FATFS functionality ===\r\n");
+	fr = f_unlink("0:/test.txt"); // Attempt to delete the file
 
+	if (fr == FR_OK) {
+	    printf("test.txt deleted successfully\r\n");
+	} else {
+	   printf("Unable to delete text.txt\r\n");
+	}
 	fr = f_open(&fil, "0:/test.txt", FA_CREATE_ALWAYS | FA_WRITE);
 	if (fr == FR_OK) {
 		const char *test = "Hello from STM32 and SD card!\r\n";
@@ -123,7 +130,7 @@ void SD_DebugFatFsState(void) {
 
 // Optional: turn this on to auto-format blank cards
 #ifndef SD_ENABLE_AUTO_MKFS
-#define SD_ENABLE_AUTO_MKFS 1
+#define SD_ENABLE_AUTO_MKFS 0
 #endif
 
 FRESULT SD_Mount(void) {
@@ -138,7 +145,7 @@ FRESULT SD_Mount(void) {
 
 		// Always start at slow speed for init and give the card dummy clocks
 		sd_bus_slow();
-		sd_dummy_clocks();
+		sd_spi_power_on_sequence();   /* clocks with CS high, then quick probe */
 		sd_sleep(1000);
 
 		// Force a fresh low-level init on drive 0
@@ -159,32 +166,25 @@ FRESULT SD_Mount(void) {
 			return FR_OK;
 		}
 
-#if _USE_MKFS   // make sure this is 1 in ffconf.h
-		static BYTE work[4096]; // 4KB is safe; for plain FAT/FAT32 you can use 1024
-
-#if defined(MKFS_PARM)
-    // Newer FatFs (R0.14+)
-    MKFS_PARM mp = { FM_ANY, 0, 0, 0, 0 };
+#if SD_ENABLE_AUTO_MKFS && _USE_MKFS
+if (fr == FR_NO_FILESYSTEM) {
+    static BYTE work[4096];
+  #if defined(MKFS_PARM)
+    MKFS_PARM mp = (MKFS_PARM){ FM_ANY, 0, 0, 0, 0 };
     FRESULT mk = f_mkfs(USERPath, &mp, work, sizeof work);
   #else
-		// Older FatFs (e.g., R0.12c)
-		// f_mkfs(const TCHAR* path, BYTE sfd, UINT au, void* work, UINT len)
-		BYTE sfd = 0; // 0 = create MBR partition (FDISK), 1 = super-floppy (no MBR)
-		UINT au = 0;      // 0 = auto select allocation unit size
-		FRESULT mk = f_mkfs(USERPath, sfd, au, work, sizeof work);
-#endif
-
-		printf("f_mkfs -> %d\r\n", mk);
-		if (mk == FR_OK) {
-			FRESULT fr2 = f_mount(&s_fs, USERPath, 1);
-			printf("f_mount after mkfs -> %d\r\n", fr2);
-			if (fr2 == FR_OK) {
-				sd_bus_fast();
-				return FR_OK;
-			}
-		}
+    BYTE sfd = 0; UINT au = 0;
+    FRESULT mk = f_mkfs(USERPath, sfd, au, work, sizeof work);
+  #endif
+    printf("f_mkfs -> %d\r\n", mk);
+    if (mk == FR_OK) {
+        FRESULT fr2 = f_mount(&s_fs, USERPath, 1);
+        printf("f_mount after mkfs -> %d\r\n", fr2);
+        if (fr2 == FR_OK) { sd_bus_fast(); return FR_OK; }
+    }
+}
 #else
-  printf("mkfs disabled: set _USE_MKFS = 1 in ffconf.h to enable auto-format.\r\n");
+printf("mkfs disabled; enable SD_ENABLE_AUTO_MKFS && _USE_MKFS to format blank cards.\r\n");
 #endif
 
 		// If the card says "not ready", back off a bit more each time

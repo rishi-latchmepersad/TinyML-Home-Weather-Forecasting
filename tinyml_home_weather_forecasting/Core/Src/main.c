@@ -43,6 +43,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define FS_LOCK()   osMutexAcquire(g_fs_mutex, osWaitForever)
+#define FS_UNLOCK() osMutexRelease(g_fs_mutex)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -74,6 +76,7 @@ osThreadId_t bme280SensorTaskHandle;
 const osThreadAttr_t bme280SensorTask_attributes = { .name = "bme280SensorTask",
 		.stack_size = 256 * 4, .priority = (osPriority_t) osPriorityNormal, };
 osMutexId_t printfMutexHandle;
+osMutexId_t g_fs_mutex;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -156,6 +159,8 @@ int main(void)
 	if (printfMutexHandle == NULL) {
 		Error_Handler();
 	}
+	// a filesystem mutex to prevent concurrency issues in the SD card
+	g_fs_mutex = osMutexNew(NULL);
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
@@ -605,16 +610,6 @@ static void MX_GPIO_Init(void)
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
-
-	printf("Attempting to mount filesystem...\r\n");
-	if (SD_Mount() == FR_OK) {       // Use the helper so we only mount once
-		printf("SD card mounted successfully!\r\n");
-	} else {
-		error_handler_with_message(
-				"Could not mount SD card. Please recheck the 5v cable and ground cable, and manually cut the USB power.");
-	}
-	//ensure the file system works
-	SD_TestFatFs();
 	while (1) {
 		printf("The default task is alive.\r\n");
 		osDelay(10000);
