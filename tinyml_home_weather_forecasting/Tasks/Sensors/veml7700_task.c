@@ -1,14 +1,7 @@
 /*
  * File:    veml7700_task.c
  * Brief:   VEML7700 ambient light sensor task implemented as a deterministic
- *          state machine using CMSIS-RTOS2 (osThreadNew/osDelay). Follows the
- *          Barr C coding standard and the user's preference for long, descriptive
- *          identifiers and explicit function header comments.
- *
- * Notes:
- *  - Uses STM32 HAL I2C blocking transactions for simplicity and determinism.
- *  - Shares samples via a CMSIS-RTOS2 mutex to avoid race conditions.
- *  - Replace printf() with your logging macro if desired.
+ *          state machine using CMSIS-RTOS2 (osThreadNew/osDelay).
  */
 
 #include "veml7700_task.h"      /* Public API and defaults */
