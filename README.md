@@ -2,7 +2,7 @@
 
 This project attempts to provide a real-time, short term weather forecast (24 hours) using an embedded system. It can be useful in remote, isolated areas where weather is critical for some process, and Internet bandwidth (and/or electrical power) is limited or unavailable. Due to the low power requirements, it could be run off a battery powered by a solar panel.
 
-One such use case is on an offshore oil rig.
+Use cases might involve offshore oil/gas rigs, offshore wind farms and remote power stations. Agricultural fields and greenhouses might also find this very useful.
 
 This TinyML home weather forecasting project is my first real embedded project (since my undergrad days). An STM32 F767 board is used as the heart of the system.
 
