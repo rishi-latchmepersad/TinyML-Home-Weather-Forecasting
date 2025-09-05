@@ -20,20 +20,20 @@ Once I have the basics down, I will implement TinyML to try to predict the weath
 
 ### Block Diagram
 
-<img style="border-radius:5px;border:2px solid #ccc" alt="Block Diagram" width="600px" src="./tinyml_home_weather_forecasting-Block Diagram.PNG" />
+<img style="border-radius:5px;border:2px solid #ccc" alt="Block Diagram" width="600px" src="./tinyml_home_weather_forecasting-Block Diagram.png" />
 
 ### MicroSD Card State Machine Diagram
 
-<img style="border-radius:5px;border:2px solid #ccc" alt="MicroSD Card State Machine Diagram" width="600px" src="./tinyml_home_weather_forecasting-MicroSD Card State Machine Diagram.PNG" />
+<img style="border-radius:5px;border:2px solid #ccc" alt="MicroSD Card State Machine Diagram" width="600px" src="./tinyml_home_weather_forecasting-MicroSD Card State Machine Diagram.png" />
 
 ### BME280 State Machine Diagram
 
-<img style="border-radius:5px;border:2px solid #ccc" alt="BME280 State Machine Diagram" width="600px" src="./tinyml_home_weather_forecasting-BME280 State Machine Diagram.PNG" />
+<img style="border-radius:5px;border:2px solid #ccc" alt="BME280 State Machine Diagram" width="600px" src="./tinyml_home_weather_forecasting-BME280 State Machine Diagram.png" />
 
 ### VEML7700 State Machine Diagram
 
-<img style="border-radius:5px;border:2px solid #ccc" alt="VEML7700 State Machine Diagram" width="600px" src="./tinyml_home_weather_forecasting-VEML7700 State Machine Diagram.PNG" />
+<img style="border-radius:5px;border:2px solid #ccc" alt="VEML7700 State Machine Diagram" width="600px" src="./tinyml_home_weather_forecasting-VEML7700 State Machine Diagram.png" />
 
 ### LM393 State Machine Diagram
 
-<img style="border-radius:5px;border:2px solid #ccc" alt="LM393 State Machine Diagram" width="600px" src="./tinyml_home_weather_forecasting-LM393 State Machine Diagram.PNG" />
+<img style="border-radius:5px;border:2px solid #ccc" alt="LM393 State Machine Diagram" width="600px" src="./tinyml_home_weather_forecasting-LM393 State Machine Diagram.png" />
