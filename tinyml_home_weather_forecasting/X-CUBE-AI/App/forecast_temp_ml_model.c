@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * @file    network.c
+  * @file    forecast_temp_ml_model.c
   * @author  AST Embedded Analytics Research Platform
-  * @date    2025-11-03T19:38:24-0400
+  * @date    2025-11-03T19:43:35-0400
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * @attention
@@ -17,8 +17,8 @@
   */
 
 
-#include "network.h"
-#include "network_data.h"
+#include "forecast_temp_ml_model.h"
+#include "forecast_temp_ml_model_data.h"
 
 #include "ai_platform.h"
 #include "ai_platform_interface.h"
@@ -32,26 +32,26 @@
 
 
 #undef AI_NET_OBJ_INSTANCE
-#define AI_NET_OBJ_INSTANCE g_network
+#define AI_NET_OBJ_INSTANCE g_forecast_temp_ml_model
  
-#undef AI_NETWORK_MODEL_SIGNATURE
-#define AI_NETWORK_MODEL_SIGNATURE     "0x6396d1a0856fec88080073a129330ab2"
+#undef AI_FORECAST_TEMP_ML_MODEL_MODEL_SIGNATURE
+#define AI_FORECAST_TEMP_ML_MODEL_MODEL_SIGNATURE     "0x6396d1a0856fec88080073a129330ab2"
 
 #ifndef AI_TOOLS_REVISION_ID
 #define AI_TOOLS_REVISION_ID     ""
 #endif
 
 #undef AI_TOOLS_DATE_TIME
-#define AI_TOOLS_DATE_TIME   "2025-11-03T19:38:24-0400"
+#define AI_TOOLS_DATE_TIME   "2025-11-03T19:43:35-0400"
 
 #undef AI_TOOLS_COMPILE_TIME
 #define AI_TOOLS_COMPILE_TIME    __DATE__ " " __TIME__
 
-#undef AI_NETWORK_N_BATCHES
-#define AI_NETWORK_N_BATCHES         (1)
+#undef AI_FORECAST_TEMP_ML_MODEL_N_BATCHES
+#define AI_FORECAST_TEMP_ML_MODEL_N_BATCHES         (1)
 
-static ai_ptr g_network_activations_map[1] = AI_C_ARRAY_INIT;
-static ai_ptr g_network_weights_map[1] = AI_C_ARRAY_INIT;
+static ai_ptr g_forecast_temp_ml_model_activations_map[1] = AI_C_ARRAY_INIT;
+static ai_ptr g_forecast_temp_ml_model_weights_map[1] = AI_C_ARRAY_INIT;
 
 
 
@@ -640,9 +640,9 @@ AI_NETWORK_OBJ_DECLARE(
   AI_BUFFER_INIT(AI_FLAG_NONE,  AI_BUFFER_FORMAT_U8,
     AI_BUFFER_SHAPE_INIT(AI_SHAPE_BCWH, 4, 1, 28288, 1, 1),
     28288, NULL, NULL),
-  AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_NETWORK_IN_NUM, &serving_default_pruned_model_input0_output),
-  AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_NETWORK_OUT_NUM, &gemm_14_output),
-  &conv2d_1_layer, 0xb00fab2f, NULL)
+  AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_FORECAST_TEMP_ML_MODEL_IN_NUM, &serving_default_pruned_model_input0_output),
+  AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_FORECAST_TEMP_ML_MODEL_OUT_NUM, &gemm_14_output),
+  &conv2d_1_layer, 0xca7d2bfd, NULL)
 
 #else
 
@@ -660,9 +660,9 @@ AI_NETWORK_OBJ_DECLARE(
       AI_BUFFER_SHAPE_INIT(AI_SHAPE_BCWH, 4, 1, 28288, 1, 1),
       28288, NULL, NULL)
   ),
-  AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_NETWORK_IN_NUM, &serving_default_pruned_model_input0_output),
-  AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_NETWORK_OUT_NUM, &gemm_14_output),
-  &conv2d_1_layer, 0xb00fab2f, NULL)
+  AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_FORECAST_TEMP_ML_MODEL_IN_NUM, &serving_default_pruned_model_input0_output),
+  AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_FORECAST_TEMP_ML_MODEL_OUT_NUM, &gemm_14_output),
+  &conv2d_1_layer, 0xca7d2bfd, NULL)
 
 #endif	/*(AI_TOOLS_API_VERSION < AI_TOOLS_API_VERSION_1_5)*/
 
@@ -670,42 +670,42 @@ AI_NETWORK_OBJ_DECLARE(
 
 /******************************************************************************/
 AI_DECLARE_STATIC
-ai_bool network_configure_activations(
+ai_bool forecast_temp_ml_model_configure_activations(
   ai_network* net_ctx, const ai_network_params* params)
 {
   AI_ASSERT(net_ctx)
 
-  if (ai_platform_get_activations_map(g_network_activations_map, 1, params)) {
+  if (ai_platform_get_activations_map(g_forecast_temp_ml_model_activations_map, 1, params)) {
     /* Updating activations (byte) offsets */
     
-    serving_default_pruned_model_input0_output_array.data = AI_PTR(g_network_activations_map[0] + 5300);
-    serving_default_pruned_model_input0_output_array.data_start = AI_PTR(g_network_activations_map[0] + 5300);
-    conv2d_1_scratch0_array.data = AI_PTR(g_network_activations_map[0] + 6476);
-    conv2d_1_scratch0_array.data_start = AI_PTR(g_network_activations_map[0] + 6476);
-    conv2d_1_output_array.data = AI_PTR(g_network_activations_map[0] + 11152);
-    conv2d_1_output_array.data_start = AI_PTR(g_network_activations_map[0] + 11152);
-    conv2d_4_pad_before_output_array.data = AI_PTR(g_network_activations_map[0] + 11044);
-    conv2d_4_pad_before_output_array.data_start = AI_PTR(g_network_activations_map[0] + 11044);
-    conv2d_4_scratch0_array.data = AI_PTR(g_network_activations_map[0] + 4604);
-    conv2d_4_scratch0_array.data_start = AI_PTR(g_network_activations_map[0] + 4604);
-    conv2d_4_output_array.data = AI_PTR(g_network_activations_map[0] + 20224);
-    conv2d_4_output_array.data_start = AI_PTR(g_network_activations_map[0] + 20224);
-    pool_7_output_array.data = AI_PTR(g_network_activations_map[0] + 4604);
-    pool_7_output_array.data_start = AI_PTR(g_network_activations_map[0] + 4604);
-    conv2d_10_scratch0_array.data = AI_PTR(g_network_activations_map[0] + 8636);
-    conv2d_10_scratch0_array.data_start = AI_PTR(g_network_activations_map[0] + 8636);
-    conv2d_10_output_array.data = AI_PTR(g_network_activations_map[0] + 24256);
-    conv2d_10_output_array.data_start = AI_PTR(g_network_activations_map[0] + 24256);
-    conv2d_11_scratch0_array.data = AI_PTR(g_network_activations_map[0] + 21504);
-    conv2d_11_scratch0_array.data_start = AI_PTR(g_network_activations_map[0] + 21504);
-    conv2d_11_output_array.data = AI_PTR(g_network_activations_map[0] + 0);
-    conv2d_11_output_array.data_start = AI_PTR(g_network_activations_map[0] + 0);
-    pool_13_output_array.data = AI_PTR(g_network_activations_map[0] + 21504);
-    pool_13_output_array.data_start = AI_PTR(g_network_activations_map[0] + 21504);
-    gemm_14_scratch0_array.data = AI_PTR(g_network_activations_map[0] + 0);
-    gemm_14_scratch0_array.data_start = AI_PTR(g_network_activations_map[0] + 0);
-    gemm_14_output_array.data = AI_PTR(g_network_activations_map[0] + 512);
-    gemm_14_output_array.data_start = AI_PTR(g_network_activations_map[0] + 512);
+    serving_default_pruned_model_input0_output_array.data = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 5300);
+    serving_default_pruned_model_input0_output_array.data_start = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 5300);
+    conv2d_1_scratch0_array.data = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 6476);
+    conv2d_1_scratch0_array.data_start = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 6476);
+    conv2d_1_output_array.data = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 11152);
+    conv2d_1_output_array.data_start = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 11152);
+    conv2d_4_pad_before_output_array.data = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 11044);
+    conv2d_4_pad_before_output_array.data_start = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 11044);
+    conv2d_4_scratch0_array.data = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 4604);
+    conv2d_4_scratch0_array.data_start = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 4604);
+    conv2d_4_output_array.data = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 20224);
+    conv2d_4_output_array.data_start = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 20224);
+    pool_7_output_array.data = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 4604);
+    pool_7_output_array.data_start = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 4604);
+    conv2d_10_scratch0_array.data = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 8636);
+    conv2d_10_scratch0_array.data_start = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 8636);
+    conv2d_10_output_array.data = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 24256);
+    conv2d_10_output_array.data_start = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 24256);
+    conv2d_11_scratch0_array.data = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 21504);
+    conv2d_11_scratch0_array.data_start = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 21504);
+    conv2d_11_output_array.data = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 0);
+    conv2d_11_output_array.data_start = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 0);
+    pool_13_output_array.data = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 21504);
+    pool_13_output_array.data_start = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 21504);
+    gemm_14_scratch0_array.data = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 0);
+    gemm_14_scratch0_array.data_start = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 0);
+    gemm_14_output_array.data = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 512);
+    gemm_14_output_array.data_start = AI_PTR(g_forecast_temp_ml_model_activations_map[0] + 512);
     return true;
   }
   AI_ERROR_TRAP(net_ctx, INIT_FAILED, NETWORK_ACTIVATIONS);
@@ -717,44 +717,44 @@ ai_bool network_configure_activations(
 
 /******************************************************************************/
 AI_DECLARE_STATIC
-ai_bool network_configure_weights(
+ai_bool forecast_temp_ml_model_configure_weights(
   ai_network* net_ctx, const ai_network_params* params)
 {
   AI_ASSERT(net_ctx)
 
-  if (ai_platform_get_weights_map(g_network_weights_map, 1, params)) {
+  if (ai_platform_get_weights_map(g_forecast_temp_ml_model_weights_map, 1, params)) {
     /* Updating weights (byte) offsets */
     
     conv2d_1_weights_array.format |= AI_FMT_FLAG_CONST;
-    conv2d_1_weights_array.data = AI_PTR(g_network_weights_map[0] + 0);
-    conv2d_1_weights_array.data_start = AI_PTR(g_network_weights_map[0] + 0);
+    conv2d_1_weights_array.data = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 0);
+    conv2d_1_weights_array.data_start = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 0);
     conv2d_1_bias_array.format |= AI_FMT_FLAG_CONST;
-    conv2d_1_bias_array.data = AI_PTR(g_network_weights_map[0] + 1892);
-    conv2d_1_bias_array.data_start = AI_PTR(g_network_weights_map[0] + 1892);
+    conv2d_1_bias_array.data = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 1892);
+    conv2d_1_bias_array.data_start = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 1892);
     conv2d_4_weights_array.format |= AI_FMT_FLAG_CONST;
-    conv2d_4_weights_array.data = AI_PTR(g_network_weights_map[0] + 2108);
-    conv2d_4_weights_array.data_start = AI_PTR(g_network_weights_map[0] + 2108);
+    conv2d_4_weights_array.data = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 2108);
+    conv2d_4_weights_array.data_start = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 2108);
     conv2d_4_bias_array.format |= AI_FMT_FLAG_CONST;
-    conv2d_4_bias_array.data = AI_PTR(g_network_weights_map[0] + 9884);
-    conv2d_4_bias_array.data_start = AI_PTR(g_network_weights_map[0] + 9884);
+    conv2d_4_bias_array.data = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 9884);
+    conv2d_4_bias_array.data_start = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 9884);
     conv2d_10_weights_array.format |= AI_FMT_FLAG_CONST;
-    conv2d_10_weights_array.data = AI_PTR(g_network_weights_map[0] + 10076);
-    conv2d_10_weights_array.data_start = AI_PTR(g_network_weights_map[0] + 10076);
+    conv2d_10_weights_array.data = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 10076);
+    conv2d_10_weights_array.data_start = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 10076);
     conv2d_10_bias_array.format |= AI_FMT_FLAG_CONST;
-    conv2d_10_bias_array.data = AI_PTR(g_network_weights_map[0] + 10220);
-    conv2d_10_bias_array.data_start = AI_PTR(g_network_weights_map[0] + 10220);
+    conv2d_10_bias_array.data = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 10220);
+    conv2d_10_bias_array.data_start = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 10220);
     conv2d_11_weights_array.format |= AI_FMT_FLAG_CONST;
-    conv2d_11_weights_array.data = AI_PTR(g_network_weights_map[0] + 10412);
-    conv2d_11_weights_array.data_start = AI_PTR(g_network_weights_map[0] + 10412);
+    conv2d_11_weights_array.data = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 10412);
+    conv2d_11_weights_array.data_start = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 10412);
     conv2d_11_bias_array.format |= AI_FMT_FLAG_CONST;
-    conv2d_11_bias_array.data = AI_PTR(g_network_weights_map[0] + 22700);
-    conv2d_11_bias_array.data_start = AI_PTR(g_network_weights_map[0] + 22700);
+    conv2d_11_bias_array.data = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 22700);
+    conv2d_11_bias_array.data_start = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 22700);
     gemm_14_weights_array.format |= AI_FMT_FLAG_CONST;
-    gemm_14_weights_array.data = AI_PTR(g_network_weights_map[0] + 23724);
-    gemm_14_weights_array.data_start = AI_PTR(g_network_weights_map[0] + 23724);
+    gemm_14_weights_array.data = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 23724);
+    gemm_14_weights_array.data_start = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 23724);
     gemm_14_bias_array.format |= AI_FMT_FLAG_CONST;
-    gemm_14_bias_array.data = AI_PTR(g_network_weights_map[0] + 23980);
-    gemm_14_bias_array.data_start = AI_PTR(g_network_weights_map[0] + 23980);
+    gemm_14_bias_array.data = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 23980);
+    gemm_14_bias_array.data_start = AI_PTR(g_forecast_temp_ml_model_weights_map[0] + 23980);
     return true;
   }
   AI_ERROR_TRAP(net_ctx, INIT_FAILED, NETWORK_WEIGHTS);
@@ -768,7 +768,7 @@ ai_bool network_configure_weights(
 
 AI_DEPRECATED
 AI_API_ENTRY
-ai_bool ai_network_get_info(
+ai_bool ai_forecast_temp_ml_model_get_info(
   ai_handle network, ai_network_report* report)
 {
   ai_network* net_ctx = AI_NETWORK_ACQUIRE_CTX(network);
@@ -776,8 +776,8 @@ ai_bool ai_network_get_info(
   if (report && net_ctx)
   {
     ai_network_report r = {
-      .model_name        = AI_NETWORK_MODEL_NAME,
-      .model_signature   = AI_NETWORK_MODEL_SIGNATURE,
+      .model_name        = AI_FORECAST_TEMP_ML_MODEL_MODEL_NAME,
+      .model_signature   = AI_FORECAST_TEMP_ML_MODEL_MODEL_SIGNATURE,
       .model_datetime    = AI_TOOLS_DATE_TIME,
       
       .compile_datetime  = AI_TOOLS_COMPILE_TIME,
@@ -801,7 +801,7 @@ ai_bool ai_network_get_info(
       .params            = AI_STRUCT_INIT,
       .activations       = AI_STRUCT_INIT,
       .n_nodes           = 0,
-      .signature         = 0xb00fab2f,
+      .signature         = 0xca7d2bfd,
     };
 
     if (!ai_platform_api_get_network_report(network, &r)) return false;
@@ -815,7 +815,7 @@ ai_bool ai_network_get_info(
 
 
 AI_API_ENTRY
-ai_bool ai_network_get_report(
+ai_bool ai_forecast_temp_ml_model_get_report(
   ai_handle network, ai_network_report* report)
 {
   ai_network* net_ctx = AI_NETWORK_ACQUIRE_CTX(network);
@@ -823,8 +823,8 @@ ai_bool ai_network_get_report(
   if (report && net_ctx)
   {
     ai_network_report r = {
-      .model_name        = AI_NETWORK_MODEL_NAME,
-      .model_signature   = AI_NETWORK_MODEL_SIGNATURE,
+      .model_name        = AI_FORECAST_TEMP_ML_MODEL_MODEL_NAME,
+      .model_signature   = AI_FORECAST_TEMP_ML_MODEL_MODEL_SIGNATURE,
       .model_datetime    = AI_TOOLS_DATE_TIME,
       
       .compile_datetime  = AI_TOOLS_COMPILE_TIME,
@@ -849,7 +849,7 @@ ai_bool ai_network_get_report(
       .map_weights       = AI_STRUCT_INIT,
       .map_activations   = AI_STRUCT_INIT,
       .n_nodes           = 0,
-      .signature         = 0xb00fab2f,
+      .signature         = 0xca7d2bfd,
     };
 
     if (!ai_platform_api_get_network_report(network, &r)) return false;
@@ -862,14 +862,14 @@ ai_bool ai_network_get_report(
 
 
 AI_API_ENTRY
-ai_error ai_network_get_error(ai_handle network)
+ai_error ai_forecast_temp_ml_model_get_error(ai_handle network)
 {
   return ai_platform_network_get_error(network);
 }
 
 
 AI_API_ENTRY
-ai_error ai_network_create(
+ai_error ai_forecast_temp_ml_model_create(
   ai_handle* network, const ai_buffer* network_config)
 {
   return ai_platform_network_create(
@@ -880,42 +880,42 @@ ai_error ai_network_create(
 
 
 AI_API_ENTRY
-ai_error ai_network_create_and_init(
+ai_error ai_forecast_temp_ml_model_create_and_init(
   ai_handle* network, const ai_handle activations[], const ai_handle weights[])
 {
   ai_error err;
   ai_network_params params;
 
-  err = ai_network_create(network, AI_NETWORK_DATA_CONFIG);
+  err = ai_forecast_temp_ml_model_create(network, AI_FORECAST_TEMP_ML_MODEL_DATA_CONFIG);
   if (err.type != AI_ERROR_NONE) {
     return err;
   }
   
-  if (ai_network_data_params_get(&params) != true) {
-    err = ai_network_get_error(*network);
+  if (ai_forecast_temp_ml_model_data_params_get(&params) != true) {
+    err = ai_forecast_temp_ml_model_get_error(*network);
     return err;
   }
-#if defined(AI_NETWORK_DATA_ACTIVATIONS_COUNT)
+#if defined(AI_FORECAST_TEMP_ML_MODEL_DATA_ACTIVATIONS_COUNT)
   /* set the addresses of the activations buffers */
   for (ai_u16 idx=0; activations && idx<params.map_activations.size; idx++) {
     AI_BUFFER_ARRAY_ITEM_SET_ADDRESS(&params.map_activations, idx, activations[idx]);
   }
 #endif
-#if defined(AI_NETWORK_DATA_WEIGHTS_COUNT)
+#if defined(AI_FORECAST_TEMP_ML_MODEL_DATA_WEIGHTS_COUNT)
   /* set the addresses of the weight buffers */
   for (ai_u16 idx=0; weights && idx<params.map_weights.size; idx++) {
     AI_BUFFER_ARRAY_ITEM_SET_ADDRESS(&params.map_weights, idx, weights[idx]);
   }
 #endif
-  if (ai_network_init(*network, &params) != true) {
-    err = ai_network_get_error(*network);
+  if (ai_forecast_temp_ml_model_init(*network, &params) != true) {
+    err = ai_forecast_temp_ml_model_get_error(*network);
   }
   return err;
 }
 
 
 AI_API_ENTRY
-ai_buffer* ai_network_inputs_get(ai_handle network, ai_u16 *n_buffer)
+ai_buffer* ai_forecast_temp_ml_model_inputs_get(ai_handle network, ai_u16 *n_buffer)
 {
   if (network == AI_HANDLE_NULL) {
     network = (ai_handle)&AI_NET_OBJ_INSTANCE;
@@ -926,7 +926,7 @@ ai_buffer* ai_network_inputs_get(ai_handle network, ai_u16 *n_buffer)
 
 
 AI_API_ENTRY
-ai_buffer* ai_network_outputs_get(ai_handle network, ai_u16 *n_buffer)
+ai_buffer* ai_forecast_temp_ml_model_outputs_get(ai_handle network, ai_u16 *n_buffer)
 {
   if (network == AI_HANDLE_NULL) {
     network = (ai_handle)&AI_NET_OBJ_INSTANCE;
@@ -937,22 +937,22 @@ ai_buffer* ai_network_outputs_get(ai_handle network, ai_u16 *n_buffer)
 
 
 AI_API_ENTRY
-ai_handle ai_network_destroy(ai_handle network)
+ai_handle ai_forecast_temp_ml_model_destroy(ai_handle network)
 {
   return ai_platform_network_destroy(network);
 }
 
 
 AI_API_ENTRY
-ai_bool ai_network_init(
+ai_bool ai_forecast_temp_ml_model_init(
   ai_handle network, const ai_network_params* params)
 {
   ai_network* net_ctx = AI_NETWORK_OBJ(ai_platform_network_init(network, params));
   ai_bool ok = true;
 
   if (!net_ctx) return false;
-  ok &= network_configure_weights(net_ctx, params);
-  ok &= network_configure_activations(net_ctx, params);
+  ok &= forecast_temp_ml_model_configure_weights(net_ctx, params);
+  ok &= forecast_temp_ml_model_configure_activations(net_ctx, params);
 
   ok &= ai_platform_network_post_init(network);
 
@@ -961,7 +961,7 @@ ai_bool ai_network_init(
 
 
 AI_API_ENTRY
-ai_i32 ai_network_run(
+ai_i32 ai_forecast_temp_ml_model_run(
   ai_handle network, const ai_buffer* input, ai_buffer* output)
 {
   return ai_platform_network_process(network, input, output);
@@ -969,14 +969,14 @@ ai_i32 ai_network_run(
 
 
 AI_API_ENTRY
-ai_i32 ai_network_forward(ai_handle network, const ai_buffer* input)
+ai_i32 ai_forecast_temp_ml_model_forward(ai_handle network, const ai_buffer* input)
 {
   return ai_platform_network_process(network, input, NULL);
 }
 
 
 
-#undef AI_NETWORK_MODEL_SIGNATURE
+#undef AI_FORECAST_TEMP_ML_MODEL_MODEL_SIGNATURE
 #undef AI_NET_OBJ_INSTANCE
 #undef AI_TOOLS_DATE_TIME
 #undef AI_TOOLS_COMPILE_TIME

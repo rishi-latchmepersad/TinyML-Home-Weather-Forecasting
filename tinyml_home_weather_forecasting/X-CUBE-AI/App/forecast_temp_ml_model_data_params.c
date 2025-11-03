@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * @file    network_data_params.c
+  * @file    forecast_temp_ml_model_data_params.c
   * @author  AST Embedded Analytics Research Platform
-  * @date    2025-11-03T19:38:24-0400
+  * @date    2025-11-03T19:43:35-0400
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * Copyright (c) 2025 STMicroelectronics.
@@ -14,11 +14,11 @@
   ******************************************************************************
   */
 
-#include "network_data_params.h"
+#include "forecast_temp_ml_model_data_params.h"
 
 
 /**  Activations Section  ****************************************************/
-ai_handle g_network_activations_table[1 + 2] = {
+ai_handle g_forecast_temp_ml_model_activations_table[1 + 2] = {
   AI_HANDLE_PTR(AI_MAGIC_MARKER),
   AI_HANDLE_PTR(NULL),
   AI_HANDLE_PTR(AI_MAGIC_MARKER),
@@ -29,7 +29,7 @@ ai_handle g_network_activations_table[1 + 2] = {
 
 /**  Weights Section  ********************************************************/
 AI_ALIGNED(32)
-const ai_u64 s_network_weights_array_u64[2998] = {
+const ai_u64 s_forecast_temp_ml_model_weights_array_u64[2998] = {
   0xecc0e2eb3713fdecU, 0xf3dcbe1e05527efaU, 0x80cca077fd1155cU, 0xe623d5fe100ad617U,
   0x18baddea0acb120eU, 0x243c4dddd77f0233U, 0x5c403030153e4f50U, 0x2446442bfc3d3fc4U,
   0x49d4541c2b381aa5U, 0x1e31bafa32c9bca4U, 0xd308f310fc13661dU, 0x4681ee27a05e4238U,
@@ -783,9 +783,9 @@ const ai_u64 s_network_weights_array_u64[2998] = {
 };
 
 
-ai_handle g_network_weights_table[1 + 2] = {
+ai_handle g_forecast_temp_ml_model_weights_table[1 + 2] = {
   AI_HANDLE_PTR(AI_MAGIC_MARKER),
-  AI_HANDLE_PTR(s_network_weights_array_u64),
+  AI_HANDLE_PTR(s_forecast_temp_ml_model_weights_array_u64),
   AI_HANDLE_PTR(AI_MAGIC_MARKER),
 };
 

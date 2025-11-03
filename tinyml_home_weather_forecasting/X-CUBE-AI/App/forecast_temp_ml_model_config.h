@@ -1,9 +1,9 @@
 
 /**
   ******************************************************************************
-  * @file    network_config.h
+  * @file    forecast_temp_ml_model_config.h
   * @author  AST Embedded Analytics Research Platform
-  * @date    2025-11-03T19:38:24-0400
+  * @date    2025-11-03T19:43:35-0400
   * @brief   AI Tool Automatic Code Generator for Custom Layers Implementation
   ******************************************************************************
   * @attention
@@ -17,8 +17,8 @@
   ******************************************************************************
   */
 
-#ifndef AI_NETWORK_CONFIG_H
-#define AI_NETWORK_CONFIG_H
+#ifndef AI_FORECAST_TEMP_ML_MODEL_CONFIG_H
+#define AI_FORECAST_TEMP_ML_MODEL_CONFIG_H
 
 #undef AI_TOOLS_VERSION_MAJOR
 #undef AI_TOOLS_VERSION_MINOR
@@ -43,4 +43,4 @@
 #define AI_TOOLS_API_VERSION_MINOR (5)
 #define AI_TOOLS_API_VERSION_MICRO (0)
 
-#endif /*AI_NETWORK_CONFIG_H*/
+#endif /*AI_FORECAST_TEMP_ML_MODEL_CONFIG_H*/
