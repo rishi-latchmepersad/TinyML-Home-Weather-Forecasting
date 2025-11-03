@@ -1,0 +1,239 @@
+ST Edge AI Core v2.2.0-20266 2adc00962
+Created date          : 2025-11-03 19:38:25
+Parameters            : generate --target stm32f7 --name network -m C:/Users/rishi_latchmepersad/Downloads/pruned_int8.tflite --compression none --verbosity 1 --workspace C:/Users/RISHI_~1/AppData/Local/Temp/mxAI_workspace60065899832660015138020078275732501 --output C:/Users/rishi_latchmepersad/.stm32cubemx/network_output
+
+Exec/report summary (generate)
+----------------------------------------------------------------------------------------------------------------------------------
+model file         :   C:\Users\rishi_latchmepersad\Downloads\pruned_int8.tflite                                                  
+type               :   tflite                                                                                                     
+c_name             :   network                                                                                                    
+compression        :   none                                                                                                       
+options            :   allocate-inputs, allocate-outputs                                                                          
+optimization       :   balanced                                                                                                   
+target/series      :   stm32f7                                                                                                    
+workspace dir      :   C:\Users\RISHI_~1\AppData\Local\Temp\mxAI_workspace60065899832660015138020078275732501                     
+output dir         :   C:\Users\rishi_latchmepersad\.stm32cubemx\network_output                                                   
+model_fmt          :   ss/sa per channel                                                                                          
+model_name         :   pruned_int8                                                                                                
+model_hash         :   0x6396d1a0856fec88080073a129330ab2                                                                         
+params #           :   22,761 items (23.42 KiB)                                                                                   
+----------------------------------------------------------------------------------------------------------------------------------
+input 1/1          :   'serving_default_pr..del_input0', int8(1x168x7), 1.15 KBytes, QLinear(0.028399387,-19,int8), activations   
+output 1/1         :   'gemm_14', int8(1x1), 1 Bytes, QLinear(0.164417803,-128,int8), activations                                 
+macc               :   2,698,407                                                                                                  
+weights (ro)       :   23,984 B (23.42 KiB) (1 segment) / -67,060(-73.7%) vs float model                                          
+activations (rw)   :   28,288 B (27.62 KiB) (1 segment) *                                                                         
+ram (total)        :   28,288 B (27.62 KiB) = 28,288 + 0 + 0                                                                      
+----------------------------------------------------------------------------------------------------------------------------------
+(*) 'input'/'output' buffers are allocated in the activations buffer
+
+Model name - pruned_int8
+------ ------------------------------------------ ---------------------- --------------- ----------- -------------------------------- --- ------------- ------------------ -------------------- 
+m_id   layer (type,original)                      oshape                 param/size             macc                     connected to   | c_size        c_macc             c_type               
+------ ------------------------------------------ ---------------------- --------------- ----------- -------------------------------- --- ------------- ------------------ -------------------- 
+0      serving_default_pr..del_input0 (Input, )   [b:1,h:168,c:7]                                                                       |                                  
+       reshape_0 (Reshape, EXPAND_DIMS)           [b:1,h:1,w:168,c:7]                                  serving_default_pr..del_input0   |                                  
+------ ------------------------------------------ ---------------------- --------------- ----------- -------------------------------- --- ------------- ------------------ -------------------- 
+1      conv2d_1 (Conv2D, CONV_2D)                 [b:1,h:1,w:168,c:54]   1,944/2,106         317,574                        reshape_0   |                                  Conv2D_[0]           
+       nl_1_nl (Nonlinearity, CONV_2D)            [b:1,h:1,w:168,c:54]                         9,072                         conv2d_1   |               -9,072(-100.0%)    
+------ ------------------------------------------ ---------------------- --------------- ----------- -------------------------------- --- ------------- ------------------ -------------------- 
+2      reshape_2 (Reshape, RESHAPE)               [b:1,h:168,c:54]                                                            nl_1_nl   |                                  
+------ ------------------------------------------ ---------------------- --------------- ----------- -------------------------------- --- ------------- ------------------ -------------------- 
+3      reshape_3 (Reshape, EXPAND_DIMS)           [b:1,h:1,w:168,c:54]                                                      reshape_2   |                                  
+------ ------------------------------------------ ---------------------- --------------- ----------- -------------------------------- --- ------------- ------------------ -------------------- 
+4      conv2d_4 (Conv2D, CONV_2D)                 [b:1,h:1,w:168,c:48]   7,824/7,968       1,306,416                        reshape_3   |                                  Pad_/Conv2D_[1, 2]   
+       nl_4_nl (Nonlinearity, CONV_2D)            [b:1,h:1,w:168,c:48]                         8,064                         conv2d_4   |               -8,064(-100.0%)    
+------ ------------------------------------------ ---------------------- --------------- ----------- -------------------------------- --- ------------- ------------------ -------------------- 
+5      reshape_5 (Reshape, RESHAPE)               [b:1,h:168,c:48]                                                            nl_4_nl   |                                  
+------ ------------------------------------------ ---------------------- --------------- ----------- -------------------------------- --- ------------- ------------------ -------------------- 
+6      reshape_6 (Reshape, EXPAND_DIMS)           [b:1,h:1,w:168,c:48]                                                      reshape_5   |                                  
+------ ------------------------------------------ ---------------------- --------------- ----------- -------------------------------- --- ------------- ------------------ -------------------- 
+7      pool_7 (Pool, MAX_POOL_2D)                 [b:1,h:1,w:84,c:48]                          8,064                        reshape_6   |                                  Pool_[3]             
+------ ------------------------------------------ ---------------------- --------------- ----------- -------------------------------- --- ------------- ------------------ -------------------- 
+8      reshape_8 (Reshape, RESHAPE)               [b:1,h:84,c:48]                                                              pool_7   |                                  
+------ ------------------------------------------ ---------------------- --------------- ----------- -------------------------------- --- ------------- ------------------ -------------------- 
+9      reshape_9 (Reshape, EXPAND_DIMS)           [b:1,h:1,w:84,c:48]                                                       reshape_8   |                                  
+------ ------------------------------------------ ---------------------- --------------- ----------- -------------------------------- --- ------------- ------------------ -------------------- 
+10     conv2d_10 (Conv2D, DEPTHWISE_CONV_2D)      [b:1,h:1,w:84,c:48]    192/336              12,144                        reshape_9   |                                  Conv2D_[4]           
+------ ------------------------------------------ ---------------------- --------------- ----------- -------------------------------- --- ------------- ------------------ -------------------- 
+11     conv2d_11 (Conv2D, CONV_2D)                [b:1,h:1,w:84,c:256]   12,544/13,312     1,032,448                        conv2d_10   |                                  Conv2D_[5]           
+       nl_11_nl (Nonlinearity, CONV_2D)           [b:1,h:1,w:84,c:256]                        21,504                        conv2d_11   |               -21,504(-100.0%)   
+------ ------------------------------------------ ---------------------- --------------- ----------- -------------------------------- --- ------------- ------------------ -------------------- 
+12     reshape_12 (Reshape, RESHAPE)              [b:1,h:84,c:256]                                                           nl_11_nl   |                                  
+------ ------------------------------------------ ---------------------- --------------- ----------- -------------------------------- --- ------------- ------------------ -------------------- 
+13     pool_13 (Pool, MEAN)                       [b:1,h:1,c:256]                             21,504                       reshape_12   |                                  Pool_[6]             
+       reshape_13_reshape (Reshape, MEAN)         [b:1,c:256]                                                                 pool_13   |                                  
+------ ------------------------------------------ ---------------------- --------------- ----------- -------------------------------- --- ------------- ------------------ -------------------- 
+14     tfl_pseudo_qconst1 (Placeholder, )         [b:1,c:256]            256/256                                                        | +4(+1.6%)     +257(+100.0%)      Dense_[o][7]         
+       tfl_pseudo_qconst (Placeholder, )          [b:1]                  1/4                                                            | -4(-100.0%)                      
+       gemm_14 (Gemm, FULLY_CONNECTED)            [b:1,c:1]                                      257               reshape_13_reshape   |               -257(-100.0%)      
+                                                                                                                   tfl_pseudo_qconst1   | 
+                                                                                                                    tfl_pseudo_qconst   | 
+------ ------------------------------------------ ---------------------- --------------- ----------- -------------------------------- --- ------------- ------------------ -------------------- 
+model/c-model: macc=2,737,047/2,698,407 -38,640(-1.4%) weights=23,982/23,984 +2(+0.0%) activations=--/28,288 io=--/0
+
+
+
+Generated C-graph summary
+------------------------------------------------------------------------------------------------------------------------
+model name            : pruned_int8
+c-name                : network
+c-node #              : 8
+c-array #             : 24
+activations size      : 28288 (1 segment)
+weights size          : 23984 (1 segment)
+macc                  : 2698407
+inputs                : ['serving_default_pruned_model_input0_output']
+outputs               : ['gemm_14_output']
+
+C-Arrays (24)
+------ -------------------------------------------- ------------- ------------------------- ----------- --------- 
+c_id   name (*_array)                               item/size     domain/mem-pool           c-type      comment   
+------ -------------------------------------------- ------------- ------------------------- ----------- --------- 
+0      conv2d_10_bias                               48/192        weights/weights           const s32             
+1      conv2d_10_output                             4032/4032     activations/**default**   s8                    
+2      conv2d_10_scratch0                           913/913       activations/**default**   s8                    
+3      conv2d_10_weights                            144/144       weights/weights           const s8              
+4      conv2d_11_bias                               256/1024      weights/weights           const s32             
+5      conv2d_11_output                             21504/21504   activations/**default**   s8                    
+6      conv2d_11_scratch0                           2752/2752     activations/**default**   s8                    
+7      conv2d_11_weights                            12288/12288   weights/weights           const s8              
+8      conv2d_1_bias                                54/216        weights/weights           const s32             
+9      conv2d_1_output                              9072/9072     activations/**default**   s8                    
+10     conv2d_1_scratch0                            4676/4676     activations/**default**   s8                    
+11     conv2d_1_weights                             1890/1890     weights/weights           const s8              
+12     conv2d_4_bias                                48/192        weights/weights           const s32             
+13     conv2d_4_output                              8064/8064     activations/**default**   s8                    
+14     conv2d_4_pad_before_output                   9180/9180     activations/**default**   s8                    
+15     conv2d_4_scratch0                            6440/6440     activations/**default**   s8                    
+16     conv2d_4_weights                             7776/7776     weights/weights           const s8              
+17     gemm_14_bias                                 1/4           weights/weights           const s32             
+18     gemm_14_output                               1/1           activations/**default**   s8          /output   
+19     gemm_14_scratch0                             256/512       activations/**default**   s16                   
+20     gemm_14_weights                              256/256       weights/weights           const s8              
+21     pool_13_output                               256/256       activations/**default**   s8                    
+22     pool_7_output                                4032/4032     activations/**default**   s8                    
+23     serving_default_pruned_model_input0_output   1176/1176     activations/**default**   s8          /input    
+------ -------------------------------------------- ------------- ------------------------- ----------- --------- 
+
+C-Layers (8)
+------ --------------------- ---- ------------ --------- ------- ----------------------------------------------- ----------------------- 
+c_id   name (*_layer)        id   layer_type   macc      rom     tensors                                         shape (array id)        
+------ --------------------- ---- ------------ --------- ------- ----------------------------------------------- ----------------------- 
+0      conv2d_1              1    Conv2D       317574    2106    I: serving_default_pruned_model_input0_output   int8(1x168x7) (23)      
+                                                                 S: conv2d_1_scratch0                                                    
+                                                                 W: conv2d_1_weights                             int8(54x1x5x7) (11)     
+                                                                 W: conv2d_1_bias                                int32(54) (8)           
+                                                                 O: conv2d_1_output                              int8(1x1x168x54) (9)    
+------ --------------------- ---- ------------ --------- ------- ----------------------------------------------- ----------------------- 
+1      conv2d_4_pad_before   4    Pad          0         0       I: conv2d_1_output                              int8(1x1x168x54) (9)    
+                                                                 O: conv2d_4_pad_before_output                   int8(1x1x170x54) (14)   
+------ --------------------- ---- ------------ --------- ------- ----------------------------------------------- ----------------------- 
+2      conv2d_4              4    Conv2D       1306416   7968    I: conv2d_4_pad_before_output                   int8(1x1x170x54) (14)   
+                                                                 S: conv2d_4_scratch0                                                    
+                                                                 W: conv2d_4_weights                             int8(48x1x3x54) (16)    
+                                                                 W: conv2d_4_bias                                int32(48) (12)          
+                                                                 O: conv2d_4_output                              int8(1x1x168x48) (13)   
+------ --------------------- ---- ------------ --------- ------- ----------------------------------------------- ----------------------- 
+3      pool_7                7    Pool         8064      0       I: conv2d_4_output                              int8(1x1x168x48) (13)   
+                                                                 O: pool_7_output                                int8(1x1x84x48) (22)    
+------ --------------------- ---- ------------ --------- ------- ----------------------------------------------- ----------------------- 
+4      conv2d_10             10   Conv2D       12144     336     I: pool_7_output                                int8(1x1x84x48) (22)    
+                                                                 S: conv2d_10_scratch0                                                   
+                                                                 W: conv2d_10_weights                            int8(1x1x3x48) (3)      
+                                                                 W: conv2d_10_bias                               int32(48) (0)           
+                                                                 O: conv2d_10_output                             int8(1x1x84x48) (1)     
+------ --------------------- ---- ------------ --------- ------- ----------------------------------------------- ----------------------- 
+5      conv2d_11             11   Conv2D       1032448   13312   I: conv2d_10_output                             int8(1x1x84x48) (1)     
+                                                                 S: conv2d_11_scratch0                                                   
+                                                                 W: conv2d_11_weights                            int8(256x1x1x48) (7)    
+                                                                 W: conv2d_11_bias                               int32(256) (4)          
+                                                                 O: conv2d_11_output                             int8(1x1x84x256) (5)    
+------ --------------------- ---- ------------ --------- ------- ----------------------------------------------- ----------------------- 
+6      pool_13               13   Pool         21504     0       I: conv2d_11_output                             int8(1x1x84x256) (5)    
+                                                                 O: pool_13_output                               int8(1x1x256) (21)      
+------ --------------------- ---- ------------ --------- ------- ----------------------------------------------- ----------------------- 
+7      gemm_14               14   Dense        257       260     I: pool_13_output                               int8(1x1x256) (21)      
+                                                                 S: gemm_14_scratch0                                                     
+                                                                 W: gemm_14_weights                              int8(1x256) (20)        
+                                                                 W: gemm_14_bias                                 int32(1) (17)           
+                                                                 O: gemm_14_output                               int8(1x1) (18)          
+------ --------------------- ---- ------------ --------- ------- ----------------------------------------------- ----------------------- 
+
+
+
+Number of operations per c-layer
+------- ------ --------------------------- ----------- ------------ 
+c_id    m_id   name (type)                         #op         type 
+------- ------ --------------------------- ----------- ------------ 
+0       1      conv2d_1 (Conv2D)               317,574   smul_s8_s8 
+1       4      conv2d_4_pad_before (Pad)             0   smul_s8_s8 
+2       4      conv2d_4 (Conv2D)             1,306,416   smul_s8_s8 
+3       7      pool_7 (Pool)                     8,064   smul_s8_s8 
+4       10     conv2d_10 (Conv2D)               12,144   smul_s8_s8 
+5       11     conv2d_11 (Conv2D)            1,032,448   smul_s8_s8 
+6       13     pool_13 (Pool)                   21,504   smul_s8_s8 
+7       14     gemm_14 (Dense)                     257   smul_s8_s8 
+------- ------ --------------------------- ----------- ------------ 
+total                                        2,698,407 
+
+Number of operation types
+---------------- ----------- ----------- 
+operation type             #           % 
+---------------- ----------- ----------- 
+smul_s8_s8         2,698,407      100.0% 
+
+Complexity report (model)
+------ -------------------- ------------------------- ------------------------- -------- 
+m_id   name                 c_macc                    c_rom                     c_id     
+------ -------------------- ------------------------- ------------------------- -------- 
+1      conv2d_1             ||||              11.8%   |||                8.8%   [0]      
+4      conv2d_4             ||||||||||||||||  48.4%   |||||||||         33.2%   [1, 2]   
+7      pool_7               |                  0.3%   |                  0.0%   [3]      
+10     conv2d_10            |                  0.5%   |                  1.4%   [4]      
+11     conv2d_11            ||||||||||||      38.3%   ||||||||||||||||  55.5%   [5]      
+13     pool_13              |                  0.8%   |                  0.0%   [6]      
+14     tfl_pseudo_qconst1   |                  0.0%   |                  1.1%   [7]      
+------ -------------------- ------------------------- ------------------------- -------- 
+macc=2,698,407 weights=23,984 act=28,288 ram_io=0
+ 
+ Requested memory size by section - "stm32f7" target
+ ------------------------------ -------- -------- ------- -------- 
+ module                             text   rodata    data      bss 
+ ------------------------------ -------- -------- ------- -------- 
+ NetworkRuntime1020_CM7_GCC.a     30,764        0       0        0 
+ network.o                           764    2,385   3,192      200 
+ network_data.o                       48       16      88        0 
+ lib (toolchain)*                  2,116        0       0        0 
+ ------------------------------ -------- -------- ------- -------- 
+ RT total**                       33,692    2,401   3,280      200 
+ ------------------------------ -------- -------- ------- -------- 
+ weights                               0   23,984       0        0 
+ activations                           0        0       0   28,288 
+ io                                    0        0       0        0 
+ ------------------------------ -------- -------- ------- -------- 
+ TOTAL                            33,692   26,385   3,280   28,488 
+ ------------------------------ -------- -------- ------- -------- 
+ *  toolchain objects (libm/libgcc*)
+ ** RT AI runtime objects (kernels+infrastructure)
+  
+  Summary - "stm32f7" target
+  ---------------------------------------------------
+               FLASH (ro)      %*   RAM (rw)       % 
+  ---------------------------------------------------
+  RT total         39,373   62.1%      3,480   11.0% 
+  ---------------------------------------------------
+  TOTAL            63,357             31,768         
+  ---------------------------------------------------
+  *  rt/total
+
+
+Generated files (7)
+-------------------------------------------------------------------------------- 
+C:\Users\rishi_latchmepersad\.stm32cubemx\network_output\network_data_params.h   
+C:\Users\rishi_latchmepersad\.stm32cubemx\network_output\network_data_params.c   
+C:\Users\rishi_latchmepersad\.stm32cubemx\network_output\network_data.h          
+C:\Users\rishi_latchmepersad\.stm32cubemx\network_output\network_data.c          
+C:\Users\rishi_latchmepersad\.stm32cubemx\network_output\network_config.h        
+C:\Users\rishi_latchmepersad\.stm32cubemx\network_output\network.h               
+C:\Users\rishi_latchmepersad\.stm32cubemx\network_output\network.c               
