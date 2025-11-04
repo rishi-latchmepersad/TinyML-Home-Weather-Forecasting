@@ -8,8 +8,12 @@
 #ifndef BME280_BME280_TASK_H_
 #define BME280_BME280_TASK_H_
 
+// Pull in the CMSIS-RTOS definitions for mutex and thread primitives.
 #include "cmsis_os.h"
+// Pull in the Bosch driver definitions for register constants and structs.
 #include "bme280_defs.h"
+// Pull in stdbool so we can return success flags from helpers.
+#include <stdbool.h>
 
 // Public struct for sensor data
 typedef struct {
@@ -41,4 +45,6 @@ void bme280_task_init(bme280_task_data_t *task_data);
 
 // Public task function
 void bme280SensorTask(void *argument);
+// Allow other tasks to grab the latest BME280 reading when available.
+bool bme280_get_latest(float *temperature_c_out, float *humidity_pct_out, float *pressure_pa_out);
 #endif /* BME280_TASK_H */
