@@ -38,7 +38,7 @@
 // Declare how often (in milliseconds) we poll the sensors for a new reading.
 #define FORECAST_TEMP_TASK_PERIOD_MS        (60000u)
 // Declare how many hourly samples we keep inside the sliding input window.
-#define FORECAST_TEMP_WINDOW_LENGTH         (168u)
+#define FORECAST_TEMP_WINDOW_LENGTH         (6u)
 // Declare how many minute samples we fold into a single hourly aggregate.
 #define FORECAST_TEMP_MINUTES_PER_HOUR      (60u)
 // Declare how many hours back we look when computing the temperature delta.
