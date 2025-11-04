@@ -18,18 +18,29 @@
 #include "Tasks/Sensors/veml7700_task.h"
 // Pull in the DS3231 driver so we can ask the RTC for the current time.
 #include "Drivers/DS3231/Inc/ds3231.h"
+// Pull in the FatFs declarations so we can read persisted CSV logs.
+#include "ff.h"
 // Pull in the auto-generated network API so we can run inference.
 #include "X-CUBE-AI/App/forecast_temp_ml_model.h"
 // Pull in the data helpers so we can allocate the activation buffers correctly.
 #include "X-CUBE-AI/App/forecast_temp_ml_model_data.h"
 // Pull in the data parameter helpers so we can set up the activation table.
 #include "X-CUBE-AI/App/forecast_temp_ml_model_data_params.h"
+// Pull in stdlib so we can convert CSV strings into floats.
+#include <stdlib.h>
 
 // Provide a fallback for M_PI when the math library does not define it.
 #ifndef M_PI
 // Define M_PI as a float literal so our sine calculation has a sensible value.
 #define M_PI 3.14159265358979323846f
 #endif
+
+// Declare the filesystem mutex so we can coordinate with the logger task.
+extern osMutexId_t g_fs_mutex;
+// Provide a helper macro that acquires the filesystem mutex before touching FatFs.
+#define FS_LOCK()   osMutexAcquire(g_fs_mutex, osWaitForever)
+// Provide a helper macro that releases the filesystem mutex after a FatFs call.
+#define FS_UNLOCK() osMutexRelease(g_fs_mutex)
 
 // Declare how many 32-bit words the forecasting task stack should use.
 #define FORECAST_TEMP_TASK_STACK_WORDS      (1024u)
@@ -49,6 +60,58 @@
 #define FORECAST_TEMP_FEATURE_COUNT         (7u)
 // Declare the capacity of our raw history ring so pressure deltas have room.
 #define FORECAST_TEMP_HISTORY_CAPACITY      (FORECAST_TEMP_WINDOW_LENGTH + FORECAST_TEMP_DELTA_P_LAG_HOURS)
+// Declare how many daily log files we will scan when replaying persisted data.
+#define FORECAST_TEMP_BOOTSTRAP_MAX_FILES   (32u)
+// Declare the FatFs directory where the measurement logger writes CSV files.
+#define FORECAST_TEMP_LOG_DIRECTORY         "0:/logs"
+
+// Define a small struct that records a measurement log filename and its date key.
+typedef struct {
+        // Store the basename of the CSV file discovered on the SD card.
+        char filename[48];
+        // Store the sortable integer representation of the YYYY-MM-DD date.
+        uint32_t date_key;
+} forecast_temp_log_file_t;
+
+// Define a struct that groups individual sensor readings by timestamp.
+typedef struct {
+        // Remember the ISO-8601 timestamp shared by the grouped measurements.
+        char timestamp_iso8601[32];
+        // Track whether this bundle currently holds any readings.
+        bool in_use;
+        // Track whether we captured a temperature value for this timestamp.
+        bool has_temperature;
+        // Track whether we captured a humidity value for this timestamp.
+        bool has_humidity;
+        // Track whether we captured a pressure value for this timestamp.
+        bool has_pressure;
+        // Track whether we captured an illuminance value for this timestamp.
+        bool has_illuminance;
+        // Hold the temperature reading associated with this timestamp.
+        float temperature_c;
+        // Hold the humidity reading associated with this timestamp.
+        float humidity_pct;
+        // Hold the pressure reading associated with this timestamp.
+        float pressure_pa;
+        // Hold the illuminance reading associated with this timestamp.
+        float illuminance_lux;
+} forecast_temp_measurement_bundle_t;
+
+// Define a struct that aggregates completed bundles into hourly averages.
+typedef struct {
+        // Remember which hour the current accumulation represents.
+        char hour_key[16];
+        // Track the running sum of temperature readings inside this hour.
+        float temperature_sum;
+        // Track the running sum of humidity readings inside this hour.
+        float humidity_sum;
+        // Track the running sum of pressure readings inside this hour.
+        float pressure_sum;
+        // Track the running sum of illuminance readings inside this hour.
+        float illuminance_sum;
+        // Track how many samples contribute to the running sums.
+        uint32_t sample_count;
+} forecast_temp_hour_bucket_t;
 
 // Store the feature means calculated during the data-preparation phase.
 static const float g_feature_means[FORECAST_TEMP_FEATURE_COUNT] = {
@@ -156,6 +219,18 @@ static void forecast_temp_append_feature_vector(const float normalized_features[
 static bool forecast_temp_export_window_to_network(int8_t *destination_buffer);
 // Forward declare a helper that runs the model once the window is full.
 static bool forecast_temp_run_inference(float *prediction_out);
+// Forward declare a helper that replays persisted CSV data into the sliding window.
+static void forecast_temp_bootstrap_from_sd_card(void);
+// Forward declare a helper that resets a measurement bundle back to an empty state.
+static void forecast_temp_bootstrap_reset_bundle(forecast_temp_measurement_bundle_t *bundle);
+// Forward declare a helper that feeds a completed bundle into the hourly accumulator.
+static void forecast_temp_bootstrap_submit_bundle(forecast_temp_measurement_bundle_t *bundle, forecast_temp_hour_bucket_t *hour_bucket, uint32_t *minute_counter, uint32_t *hour_counter);
+// Forward declare a helper that accumulates a bundle into the current hour bucket.
+static void forecast_temp_bootstrap_accumulate_bundle(const forecast_temp_measurement_bundle_t *bundle, forecast_temp_hour_bucket_t *hour_bucket, uint32_t *minute_counter, uint32_t *hour_counter);
+// Forward declare a helper that finalizes the current hour bucket into features.
+static void forecast_temp_bootstrap_finalize_hour(forecast_temp_hour_bucket_t *bucket, uint32_t *hour_counter);
+// Forward declare a helper that streams one CSV file into the bootstrap machinery.
+static void forecast_temp_bootstrap_process_file(const char *file_path, forecast_temp_hour_bucket_t *hour_bucket, uint32_t *minute_counter, uint32_t *hour_counter);
 
 // Spin up the forecasting task if it is not already running.
 bool forecast_temp_task_start(void) {
@@ -210,6 +285,418 @@ bool forecast_temp_get_latest_prediction(float *temperature_c_out) {
         return has_prediction;
 }
 
+// Reset a measurement bundle so future lines can reuse it safely.
+static void forecast_temp_bootstrap_reset_bundle(forecast_temp_measurement_bundle_t *bundle) {
+        // Guard against a NULL pointer so we do not dereference it.
+        if (bundle == NULL) {
+                return;
+        }
+        // Clear the stored timestamp string.
+        memset(bundle->timestamp_iso8601, 0, sizeof(bundle->timestamp_iso8601));
+        // Mark the bundle as currently unused.
+        bundle->in_use = false;
+        // Mark that we have not yet captured a temperature reading.
+        bundle->has_temperature = false;
+        // Mark that we have not yet captured a humidity reading.
+        bundle->has_humidity = false;
+        // Mark that we have not yet captured a pressure reading.
+        bundle->has_pressure = false;
+        // Mark that we have not yet captured an illuminance reading.
+        bundle->has_illuminance = false;
+        // Reset the cached temperature value.
+        bundle->temperature_c = 0.0f;
+        // Reset the cached humidity value.
+        bundle->humidity_pct = 0.0f;
+        // Reset the cached pressure value.
+        bundle->pressure_pa = 0.0f;
+        // Reset the cached illuminance value.
+        bundle->illuminance_lux = 0.0f;
+}
+
+// Accumulate a completed measurement bundle into the active hour bucket.
+static void forecast_temp_bootstrap_accumulate_bundle(const forecast_temp_measurement_bundle_t *bundle, forecast_temp_hour_bucket_t *hour_bucket, uint32_t *minute_counter, uint32_t *hour_counter) {
+        // Guard against NULL arguments before we touch any fields.
+        if ((bundle == NULL) || (hour_bucket == NULL)) {
+                return;
+        }
+        // Bail out early when the bundle is missing any of the required readings.
+        if (!(bundle->has_temperature && bundle->has_humidity && bundle->has_pressure && bundle->has_illuminance)) {
+                return;
+        }
+        // Ignore bundles that do not carry a timestamp yet.
+        if (!bundle->in_use) {
+                return;
+        }
+        // Skip the bundle if the timestamp string is unexpectedly short.
+        if (strlen(bundle->timestamp_iso8601) < 13u) {
+                return;
+        }
+        // Allocate a small buffer where we can store the YYYY-MM-DDTHH hour key.
+        char bundle_hour_key[16] = { 0 };
+        // Copy only the first 13 characters so we keep the date and hour portion.
+        (void) strncpy(bundle_hour_key, bundle->timestamp_iso8601, 13u);
+        // Ensure the copied hour key is null-terminated.
+        bundle_hour_key[13] = '\0';
+        // Detect when the active bucket belongs to a different hour than this bundle.
+        if ((hour_bucket->sample_count > 0u) && (strncmp(hour_bucket->hour_key, bundle_hour_key, sizeof(hour_bucket->hour_key)) != 0)) {
+                // Finalize the existing bucket so the new hour can start fresh.
+                forecast_temp_bootstrap_finalize_hour(hour_bucket, hour_counter);
+        }
+        // Initialize the hour key whenever this is the first sample for the bucket.
+        if (hour_bucket->sample_count == 0u) {
+                // Copy the bundle hour key into the bucket so future comparisons work.
+                (void) strncpy(hour_bucket->hour_key, bundle_hour_key, sizeof(hour_bucket->hour_key) - 1u);
+                // Guarantee the stored hour key is null-terminated.
+                hour_bucket->hour_key[sizeof(hour_bucket->hour_key) - 1u] = '\0';
+        }
+        // Add the bundle temperature into the running hourly sum.
+        hour_bucket->temperature_sum += bundle->temperature_c;
+        // Add the bundle humidity into the running hourly sum.
+        hour_bucket->humidity_sum += bundle->humidity_pct;
+        // Add the bundle pressure into the running hourly sum.
+        hour_bucket->pressure_sum += bundle->pressure_pa;
+        // Add the bundle illuminance into the running hourly sum.
+        hour_bucket->illuminance_sum += bundle->illuminance_lux;
+        // Count how many bundles contribute to the current hour.
+        hour_bucket->sample_count += 1u;
+        // Increment the optional minute counter when the caller provided one.
+        if (minute_counter != NULL) {
+                *minute_counter += 1u;
+        }
+}
+
+// Finalize an hour bucket by generating features and running inference if possible.
+static void forecast_temp_bootstrap_finalize_hour(forecast_temp_hour_bucket_t *bucket, uint32_t *hour_counter) {
+        // Guard against NULL pointers and empty buckets.
+        if ((bucket == NULL) || (bucket->sample_count == 0u)) {
+                return;
+        }
+        // Compute the reciprocal of the sample count so we can form averages.
+        const float reciprocal = 1.0f / (float) bucket->sample_count;
+        // Derive the average temperature across the hour.
+        const float hourly_temperature = bucket->temperature_sum * reciprocal;
+        // Derive the average humidity across the hour.
+        const float hourly_humidity = bucket->humidity_sum * reciprocal;
+        // Derive the average pressure across the hour.
+        const float hourly_pressure = bucket->pressure_sum * reciprocal;
+        // Derive the average illuminance across the hour.
+        const float hourly_illuminance = bucket->illuminance_sum * reciprocal;
+        // Allocate storage for the normalized feature vector.
+        float normalized_features[FORECAST_TEMP_FEATURE_COUNT] = { 0.0f };
+        // Populate the normalized features using the same pipeline as the live task.
+        forecast_temp_prepare_features(hourly_temperature, hourly_humidity, hourly_pressure, hourly_illuminance, normalized_features);
+        // Push the normalized features into the sliding window ring buffer.
+        forecast_temp_append_feature_vector(normalized_features);
+        // Check whether the window has enough history to satisfy the model.
+        if (g_feature_window_count >= FORECAST_TEMP_WINDOW_LENGTH) {
+                // Attempt to export the normalized window into the quantized network buffer.
+                if (forecast_temp_export_window_to_network(g_network_input_buffer)) {
+                        // Prepare a variable to hold the predicted temperature.
+                        float predicted = 0.0f;
+                        // Invoke the neural network to obtain a prediction.
+                        if (forecast_temp_run_inference(&predicted)) {
+                                // Acquire the mutex before updating the shared prediction state.
+                                if (g_prediction_mutex != NULL) {
+                                        (void) osMutexAcquire(g_prediction_mutex, osWaitForever);
+                                }
+                                // Store the freshly predicted temperature.
+                                g_latest_prediction_c = predicted;
+                                // Flag that a prediction is now available.
+                                g_latest_prediction_valid = true;
+                                // Release the mutex once the shared state is updated.
+                                if (g_prediction_mutex != NULL) {
+                                        (void) osMutexRelease(g_prediction_mutex);
+                                }
+                        }
+                }
+        }
+        // Increment the hour counter when the caller supplied storage for it.
+        if (hour_counter != NULL) {
+                *hour_counter += 1u;
+        }
+        // Clear the hour key so the next accumulation knows it is starting fresh.
+        bucket->hour_key[0] = '\0';
+        // Reset the temperature sum back to zero.
+        bucket->temperature_sum = 0.0f;
+        // Reset the humidity sum back to zero.
+        bucket->humidity_sum = 0.0f;
+        // Reset the pressure sum back to zero.
+        bucket->pressure_sum = 0.0f;
+        // Reset the illuminance sum back to zero.
+        bucket->illuminance_sum = 0.0f;
+        // Reset the sample counter back to zero.
+        bucket->sample_count = 0u;
+}
+
+// Forward a completed bundle into the hourly accumulator and reset it for reuse.
+static void forecast_temp_bootstrap_submit_bundle(forecast_temp_measurement_bundle_t *bundle, forecast_temp_hour_bucket_t *hour_bucket, uint32_t *minute_counter, uint32_t *hour_counter) {
+        // Guard against NULL pointers before doing any work.
+        if ((bundle == NULL) || (hour_bucket == NULL)) {
+                return;
+        }
+        // Skip bundles that were never populated with a timestamp.
+        if (!bundle->in_use) {
+                return;
+        }
+        // Only accumulate bundles that contain every required reading.
+        if (bundle->has_temperature && bundle->has_humidity && bundle->has_pressure && bundle->has_illuminance) {
+                // Hand the bundle to the hour accumulator so the sums stay current.
+                forecast_temp_bootstrap_accumulate_bundle(bundle, hour_bucket, minute_counter, hour_counter);
+        }
+        // Reset the bundle so the next timestamp starts with clean state.
+        forecast_temp_bootstrap_reset_bundle(bundle);
+}
+
+// Parse one CSV file and feed its samples into the bootstrap machinery.
+static void forecast_temp_bootstrap_process_file(const char *file_path, forecast_temp_hour_bucket_t *hour_bucket, uint32_t *minute_counter, uint32_t *hour_counter) {
+        // Guard against NULL inputs before attempting to open the file.
+        if ((file_path == NULL) || (hour_bucket == NULL)) {
+                return;
+        }
+        // Declare a FatFs file object that will represent the open CSV.
+        FIL file;
+        // Take the filesystem mutex so the logger task does not race us.
+        FS_LOCK();
+        // Attempt to open the CSV file for reading.
+        FRESULT fr = f_open(&file, file_path, FA_READ);
+        // If the open call failed we can release the mutex and bail out.
+        if (fr != FR_OK) {
+                // Release the filesystem mutex now that we are done with FatFs.
+                FS_UNLOCK();
+                // Emit a diagnostic so we know which file could not be opened.
+                printf("[forecast] bootstrap failed to open %s fr=%d\r\n", file_path, (int) fr);
+                // Nothing more we can do for this file.
+                return;
+        }
+        // Prepare a reusable bundle so we can group lines by timestamp.
+        forecast_temp_measurement_bundle_t bundle;
+        // Reset the bundle to its empty state before parsing lines.
+        forecast_temp_bootstrap_reset_bundle(&bundle);
+        // Track whether we have skipped the CSV header yet.
+        bool header_skipped = false;
+        // Loop until we reach the end of the file.
+        for (;;) {
+                // Allocate a buffer to hold one CSV line including the newline terminator.
+                char line[192] = { 0 };
+                // Read the next line from the CSV file.
+                char *result = f_gets(line, (int) sizeof(line), &file);
+                // Break the loop once FatFs signals end-of-file.
+                if (result == NULL) {
+                        break;
+                }
+                // Skip the header row on the first iteration.
+                if (!header_skipped) {
+                        // Mark that future iterations should parse data rows.
+                        header_skipped = true;
+                        // Continue to the next line without processing the header.
+                        continue;
+                }
+                // Remove trailing CR/LF characters so string operations behave predictably.
+                line[strcspn(line, "\r\n")] = '\0';
+                // Tokenize the line using commas as separators.
+                char *timestamp = strtok(line, ",");
+                // Grab the sensor column from the CSV row.
+                char *sensor = strtok(NULL, ",");
+                // Grab the quantity column from the CSV row.
+                char *quantity = strtok(NULL, ",");
+                // Grab the numeric value column from the CSV row.
+                char *value_str = strtok(NULL, ",");
+                // Grab the unit column from the CSV row (may be unused).
+                char *unit = strtok(NULL, ",");
+                // Ignore lines that do not have the expected number of columns.
+                if ((timestamp == NULL) || (sensor == NULL) || (quantity == NULL) || (value_str == NULL)) {
+                        continue;
+                }
+                // Trim any lingering whitespace or newline characters from the unit string.
+                if (unit != NULL) {
+                        unit[strcspn(unit, "\r\n")] = '\0';
+                }
+                // Convert the numeric value from ASCII into a float.
+                const float value = strtof(value_str, NULL);
+                // Detect when a new timestamp begins so we can flush the previous bundle.
+                if (!bundle.in_use || (strncmp(bundle.timestamp_iso8601, timestamp, sizeof(bundle.timestamp_iso8601)) != 0)) {
+                        // Submit the previous bundle before starting the new one.
+                        forecast_temp_bootstrap_submit_bundle(&bundle, hour_bucket, minute_counter, hour_counter);
+                        // Reset the bundle so it can hold readings for the new timestamp.
+                        forecast_temp_bootstrap_reset_bundle(&bundle);
+                        // Copy the new timestamp into the bundle for future comparisons.
+                        (void) strncpy(bundle.timestamp_iso8601, timestamp, sizeof(bundle.timestamp_iso8601) - 1u);
+                        // Guarantee the stored timestamp is null-terminated.
+                        bundle.timestamp_iso8601[sizeof(bundle.timestamp_iso8601) - 1u] = '\0';
+                        // Mark that the bundle now contains an active timestamp.
+                        bundle.in_use = true;
+                }
+                // Match the sensor and quantity so we can file the value into the correct slot.
+                if ((strcmp(sensor, "bme280") == 0) && (strcmp(quantity, "temperature_c") == 0)) {
+                        // Cache the BME280 temperature reading.
+                        bundle.temperature_c = value;
+                        // Record that the bundle now has a temperature measurement.
+                        bundle.has_temperature = true;
+                } else if ((strcmp(sensor, "bme280") == 0) && (strcmp(quantity, "humidity_pct") == 0)) {
+                        // Cache the BME280 humidity reading.
+                        bundle.humidity_pct = value;
+                        // Record that the bundle now has a humidity measurement.
+                        bundle.has_humidity = true;
+                } else if ((strcmp(sensor, "bme280") == 0) && (strcmp(quantity, "pressure_pa") == 0)) {
+                        // Cache the BME280 pressure reading.
+                        bundle.pressure_pa = value;
+                        // Record that the bundle now has a pressure measurement.
+                        bundle.has_pressure = true;
+                } else if ((strcmp(sensor, "veml7700") == 0) && (strcmp(quantity, "lux_lx") == 0)) {
+                        // Cache the VEML7700 illuminance reading.
+                        bundle.illuminance_lux = value;
+                        // Record that the bundle now has an illuminance measurement.
+                        bundle.has_illuminance = true;
+                } else {
+                        // Ignore other sensor quantities that the forecasting model does not consume.
+                        continue;
+                }
+        }
+        // Submit the final bundle so the last timestamp contributes to the aggregates.
+        forecast_temp_bootstrap_submit_bundle(&bundle, hour_bucket, minute_counter, hour_counter);
+        // Close the CSV file now that parsing is complete.
+        (void) f_close(&file);
+        // Release the filesystem mutex so other tasks may use FatFs.
+        FS_UNLOCK();
+}
+
+// Discover recent CSV logs on the SD card and replay them into the feature window.
+static void forecast_temp_bootstrap_from_sd_card(void) {
+        // Allocate storage for the set of measurement files we care about.
+        forecast_temp_log_file_t files[FORECAST_TEMP_BOOTSTRAP_MAX_FILES];
+        // Track how many files we actually discovered in the directory.
+        size_t file_count = 0u;
+        // Declare a FatFs directory object so we can iterate through 0:/logs.
+        DIR directory;
+        // Take the filesystem mutex before issuing FatFs calls.
+        FS_LOCK();
+        // Attempt to open the logs directory on the SD card.
+        FRESULT fr = f_opendir(&directory, FORECAST_TEMP_LOG_DIRECTORY);
+        // Abort the bootstrap when the directory cannot be opened.
+        if (fr != FR_OK) {
+                // Release the filesystem mutex now that we are done with FatFs.
+                FS_UNLOCK();
+                // Emit a diagnostic so we know why the replay step was skipped.
+                printf("[forecast] bootstrap failed to open %s fr=%d\r\n", FORECAST_TEMP_LOG_DIRECTORY, (int) fr);
+                // Without directory access we cannot preload anything.
+                return;
+        }
+        // Loop through every entry that FatFs reports inside the directory.
+        for (;;) {
+                // Clear the file-info structure before each read.
+                FILINFO info;
+                memset(&info, 0, sizeof(info));
+                // Fetch the next directory entry from FatFs.
+                fr = f_readdir(&directory, &info);
+                // Break out of the loop when an error occurs.
+                if (fr != FR_OK) {
+                        break;
+                }
+                // Stop the scan once FatFs reports the end of the directory.
+                if (info.fname[0] == '\0') {
+                        break;
+                }
+                // Skip subdirectories because we only care about CSV files.
+                if ((info.fattrib & AM_DIR) != 0) {
+                        continue;
+                }
+                // Prefer the long filename when available, else fall back to the 8.3 alias.
+                const char *name_ptr = (info.fname[0] != '\0') ? info.fname : info.altname;
+                // Skip entries without a usable filename string.
+                if ((name_ptr == NULL) || (name_ptr[0] == '\0')) {
+                        continue;
+                }
+                // Parse the date components embedded within the filename.
+                unsigned int year = 0u;
+                unsigned int month = 0u;
+                unsigned int day = 0u;
+                // Extract YYYY, MM, and DD from names like measurements_2025-10-21.csv.
+                if (sscanf(name_ptr, "measurements_%4u-%2u-%2u.csv", &year, &month, &day) != 3) {
+                        continue;
+                }
+                // Combine the date components into a sortable integer key.
+                const uint32_t date_key = (year * 10000u) + (month * 100u) + day;
+                // When we still have capacity we append the file to the list.
+                if (file_count < FORECAST_TEMP_BOOTSTRAP_MAX_FILES) {
+                        // Copy the filename so we can build full paths later on.
+                        (void) strncpy(files[file_count].filename, name_ptr, sizeof(files[file_count].filename) - 1u);
+                        // Guarantee the stored filename is null-terminated.
+                        files[file_count].filename[sizeof(files[file_count].filename) - 1u] = '\0';
+                        // Store the sortable date key alongside the filename.
+                        files[file_count].date_key = date_key;
+                        // Increase the count now that we added a file.
+                        file_count += 1u;
+                } else {
+                        // Track which entry currently represents the oldest date.
+                        size_t oldest_index = 0u;
+                        // Remember the smallest date key seen so far.
+                        uint32_t oldest_key = files[0].date_key;
+                        // Walk the array to locate the oldest file we have stored.
+                        for (size_t i = 1u; i < file_count; ++i) {
+                                if (files[i].date_key < oldest_key) {
+                                        oldest_key = files[i].date_key;
+                                        oldest_index = i;
+                                }
+                        }
+                        // Replace the oldest entry only when the new file is more recent.
+                        if (date_key > oldest_key) {
+                                (void) strncpy(files[oldest_index].filename, name_ptr, sizeof(files[oldest_index].filename) - 1u);
+                                files[oldest_index].filename[sizeof(files[oldest_index].filename) - 1u] = '\0';
+                                files[oldest_index].date_key = date_key;
+                        }
+                }
+        }
+        // Close the directory handle now that we are done scanning it.
+        (void) f_closedir(&directory);
+        // Release the filesystem mutex after the directory walk completes.
+        FS_UNLOCK();
+        // Abort when no measurement files were discovered.
+        if (file_count == 0u) {
+                printf("[forecast] bootstrap found no CSV logs to replay\r\n");
+                return;
+        }
+        // Sort the discovered files by date so we replay them chronologically.
+        for (size_t i = 0u; i < file_count; ++i) {
+                // Walk every subsequent entry so we can bubble the earliest date forward.
+                for (size_t j = i + 1u; j < file_count; ++j) {
+                        // Swap the entries whenever we find an earlier date out of order.
+                        if (files[j].date_key < files[i].date_key) {
+                                // Temporarily stash the ith entry while we swap it with the jth.
+                                forecast_temp_log_file_t tmp = files[i];
+                                // Move the newer file into the current position.
+                                files[i] = files[j];
+                                // Move the previously stored file into the later slot.
+                                files[j] = tmp;
+                        }
+                }
+        }
+        // Prepare the hour bucket that will accumulate bundles into hourly averages.
+        forecast_temp_hour_bucket_t hour_bucket;
+        // Zero-initialize the hour bucket before it sees any data.
+        memset(&hour_bucket, 0, sizeof(hour_bucket));
+        // Track how many minute-level bundles we replay from storage.
+        uint32_t minute_counter = 0u;
+        // Track how many hourly aggregates we reconstruct during replay.
+        uint32_t hour_counter = 0u;
+        // Iterate over the sorted files so older data feeds the window first.
+        for (size_t i = 0u; i < file_count; ++i) {
+                // Build the absolute path to the CSV file on the SD card.
+                char path[96];
+                (void) snprintf(path, sizeof(path), "%s/%s", FORECAST_TEMP_LOG_DIRECTORY, files[i].filename);
+                // Process the CSV so its samples contribute to the bootstrap replay.
+                forecast_temp_bootstrap_process_file(path, &hour_bucket, &minute_counter, &hour_counter);
+        }
+        // Flush any partial hour that may still be sitting in the accumulator.
+        forecast_temp_bootstrap_finalize_hour(&hour_bucket, &hour_counter);
+        // Emit a summary so we know how much persisted data was consumed.
+        if (hour_counter > 0u) {
+                printf("[forecast] bootstrap replayed %lu samples across %lu hours\r\n", (unsigned long) minute_counter, (unsigned long) hour_counter);
+                printf("[forecast] bootstrap window_count=%lu history_count=%lu\r\n", (unsigned long) g_feature_window_count, (unsigned long) g_hourly_history_count);
+        } else {
+                printf("[forecast] bootstrap did not assemble any complete hours\r\n");
+        }
+}
+
 // Main loop that polls sensors, updates features, and runs the model.
 static void forecast_temp_task_entry(void *argument) {
         // Silence the unused-parameter warning for CMSIS.
@@ -218,6 +705,8 @@ static void forecast_temp_task_entry(void *argument) {
         if (!forecast_temp_initialize_network()) {
                 printf("[forecast] failed to init neural network\r\n");
         }
+        // Replay any persisted SD-card measurements so the window fills immediately.
+        forecast_temp_bootstrap_from_sd_card();
         // Remember the scheduler tick count so we can sleep accurately.
         TickType_t last_wake_tick = xTaskGetTickCount();
         // Loop forever so the prediction stays up to date.
