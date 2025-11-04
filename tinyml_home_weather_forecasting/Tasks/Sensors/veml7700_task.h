@@ -49,6 +49,13 @@ osThreadId_t veml7700_start_task(I2C_HandleTypeDef *hi2c,
  */
 bool veml7700_get_latest(float *lux_out, uint16_t *als_counts_out, uint16_t *white_counts_out);
 
+/**
+ * \brief Convenience wrapper that only returns the cached lux estimate.
+ * \param lux_out          [out] approximate lux (required, not NULL)
+ * \return bool            true if values are valid
+ */
+bool veml7700_get_latest_lux(float *lux_out);
+
 #ifdef __cplusplus
 }
 #endif

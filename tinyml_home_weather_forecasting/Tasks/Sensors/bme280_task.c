@@ -24,6 +24,9 @@
 #define BME280_TASK_STATE_DELAY (10000u) //take a measurement every X ms
 
 static uint8_t dev_addr = (BME280_I2C_ADDR_PRIM << 1);
+static osMutexId_t g_bme_latest_mutex = NULL;
+static bme280_data_t g_bme_latest_sample = { 0.0f, 0.0f, 0.0f };
+static bool g_bme_has_latest_sample = false;
 
 static int8_t bme280_setup(struct bme280_dev *dev) {
 	struct bme280_settings settings;
@@ -59,8 +62,15 @@ static int8_t bme280_setup(struct bme280_dev *dev) {
 }
 
 void bme280SensorTask(void *argument) {
-	bme280_task_data_t task_data = { .state = BME280_STATE_INIT, .last_tick =
-			xTaskGetTickCount() };
+        bme280_task_data_t task_data = { .state = BME280_STATE_INIT, .last_tick =
+                        xTaskGetTickCount() };
+
+        if (g_bme_latest_mutex == NULL) {
+                const osMutexAttr_t mutex_attributes = { .name = "bme280_latest_mutex",
+                                .attr_bits = osMutexRecursive | osMutexPrioInherit, .cb_mem =
+                                                NULL, .cb_size = 0u };
+                g_bme_latest_mutex = osMutexNew(&mutex_attributes);
+        }
 
 	while (1) {
 		switch (task_data.state) {
@@ -96,10 +106,23 @@ void bme280SensorTask(void *argument) {
 		case BME280_STATE_READ_DATA: {
 			task_data.result = bme280_get_sensor_data(BME280_ALL,
 					&task_data.data, &task_data.dev);
-			if (task_data.result == BME280_OK) {
-				static const char *SENSOR = "bme280";
-				(void) measurement_logger_enqueue(
-						&(measurement_logger_message_t ) { SENSOR,
+                        if (task_data.result == BME280_OK) {
+                                if (g_bme_latest_mutex != NULL) {
+                                        (void) osMutexAcquire(g_bme_latest_mutex, osWaitForever);
+                                }
+                                g_bme_latest_sample.temperature =
+                                                (float) task_data.data.temperature;
+                                g_bme_latest_sample.pressure =
+                                                (float) task_data.data.pressure;
+                                g_bme_latest_sample.humidity =
+                                                (float) task_data.data.humidity;
+                                g_bme_has_latest_sample = true;
+                                if (g_bme_latest_mutex != NULL) {
+                                        (void) osMutexRelease(g_bme_latest_mutex);
+                                }
+                                static const char *SENSOR = "bme280";
+                                (void) measurement_logger_enqueue(
+                                                &(measurement_logger_message_t ) { SENSOR,
 										"temperature_c",
 										task_data.data.temperature, "degC" },
 						10);
@@ -148,4 +171,25 @@ void bme280SensorTask(void *argument) {
 
 		vTaskDelay(1); // Small delay to prevent tight loop
 	}
+}
+
+bool bme280_get_latest(float *temperature_c_out, float *humidity_pct_out,
+                float *pressure_pa_out) {
+        if ((temperature_c_out == NULL) || (humidity_pct_out == NULL)
+                        || (pressure_pa_out == NULL)) {
+                return false;
+        }
+        if (g_bme_latest_mutex != NULL) {
+                (void) osMutexAcquire(g_bme_latest_mutex, osWaitForever);
+        }
+        const bool has_sample = g_bme_has_latest_sample;
+        if (has_sample) {
+                *temperature_c_out = g_bme_latest_sample.temperature;
+                *humidity_pct_out = g_bme_latest_sample.humidity;
+                *pressure_pa_out = g_bme_latest_sample.pressure;
+        }
+        if (g_bme_latest_mutex != NULL) {
+                (void) osMutexRelease(g_bme_latest_mutex);
+        }
+        return has_sample;
 }

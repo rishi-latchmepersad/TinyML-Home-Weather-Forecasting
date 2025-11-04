@@ -464,8 +464,8 @@ osThreadId_t veml7700_start_task(I2C_HandleTypeDef *hi2c, osPriority_t prio,
  * =======================================================================
  */
 bool veml7700_get_latest(float *lux_out, uint16_t *als_counts_out,
-		uint16_t *white_counts_out) {
-	bool is_valid = false;
+                uint16_t *white_counts_out) {
+        bool is_valid = false;
 
 	if (g_veml7700_sample_mutex_id != NULL) {
 		(void) osMutexAcquire(g_veml7700_sample_mutex_id, osWaitForever);
@@ -488,5 +488,27 @@ bool veml7700_get_latest(float *lux_out, uint16_t *als_counts_out,
 		(void) osMutexRelease(g_veml7700_sample_mutex_id);
 	}
 
-	return is_valid;
+        return is_valid;
+}
+
+/* =======================================================================
+ * Function: veml7700_get_latest_lux
+ * Purpose:  Retrieve only the cached lux value from the latest sample.
+ * Params:   lux_out            - pointer to receive lux estimate (must be non-NULL).
+ * Returns:  true if a valid sample is available; false otherwise.
+ * Side Effects:   None beyond copying data via veml7700_get_latest().
+ * Preconditions:  VEML thread has run at least once and produced a sample.
+ * Postconditions: *lux_out updated on success.
+ * Concurrency:    Delegates locking to veml7700_get_latest().
+ * Timing:         Short and bounded; no I2C operations.
+ * Errors:         false if no sample available yet or lux_out is NULL.
+ * Notes:          Convenience wrapper so callers do not need to supply NULLs.
+ * =======================================================================
+ */
+bool veml7700_get_latest_lux(float *lux_out) {
+        if (lux_out == NULL) {
+                return false;
+        }
+
+        return veml7700_get_latest(lux_out, NULL, NULL);
 }
