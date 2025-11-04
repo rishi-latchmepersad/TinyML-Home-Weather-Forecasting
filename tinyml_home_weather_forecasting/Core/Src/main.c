@@ -34,6 +34,7 @@
 #include "led_service.h"
 #include "veml7700_task.h"
 #include "lm393_task.h"
+#include "Tasks/ML_Inference/forecast_temp_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -194,8 +195,10 @@ int main(void)
 	(void) measurement_logger_task_create();
 	(void) led_service_init();
 	(void) led_service_start(osPriorityLow1, 256 * 4);
-	veml7700_start_task(&hi2c4, osPriorityNormal, 768u);
-	lm393_init_and_start_task();
+        veml7700_start_task(&hi2c4, osPriorityNormal, 768u);
+        lm393_init_and_start_task();
+        // start the inference task so it can consume the cached sensor readings
+        (void) forecast_temp_task_start();
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

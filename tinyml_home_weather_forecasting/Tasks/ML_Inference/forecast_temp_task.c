@@ -231,7 +231,7 @@ static void forecast_temp_task_entry(void *argument) {
                 const bool have_bme = bme280_get_latest(&temperature_c, &humidity_pct, &pressure_pa);
                 // Pull the latest VEML7700 sample so we have illuminance.
                 float illuminance_lux = 0.0f;
-                const bool have_veml = veml7700_get_latest(&illuminance_lux, NULL, NULL);
+                const bool have_veml = veml7700_get_latest_lux(&illuminance_lux);
                 // Skip this minute if either sensor has not produced a valid sample yet.
                 if (!(have_bme && have_veml)) {
                         continue;
