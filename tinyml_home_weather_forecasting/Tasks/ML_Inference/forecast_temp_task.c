@@ -181,6 +181,58 @@ typedef struct {
 // Instantiate a single accumulator that the task updates each minute.
 static forecast_temp_hour_accumulator_t g_hour_accumulator = { 0 };
 
+// Enumerate the states that drive the forecasting task state machine.
+typedef enum {
+        // Perform one-time neural-network initialization work.
+        FORECAST_TEMP_STATE_INIT_NETWORK = 0,
+        // Replay persisted CSV logs from the SD card into the feature window.
+        FORECAST_TEMP_STATE_BOOTSTRAP,
+        // Sleep until the next minute tick fires.
+        FORECAST_TEMP_STATE_WAIT_MINUTE,
+        // Fetch the latest sensor samples from the producer tasks.
+        FORECAST_TEMP_STATE_FETCH_SENSORS,
+        // Fold the freshly fetched minute sample into the hourly accumulator.
+        FORECAST_TEMP_STATE_ACCUMULATE_MINUTE,
+        // Determine whether a full hour has elapsed and averages can be computed.
+        FORECAST_TEMP_STATE_CHECK_HOUR,
+        // Generate normalized features for the completed hour.
+        FORECAST_TEMP_STATE_PREPARE_FEATURES,
+        // Append the normalized feature vector into the sliding window.
+        FORECAST_TEMP_STATE_APPEND_FEATURES,
+        // Export the sliding window into the quantized tensor expected by the model.
+        FORECAST_TEMP_STATE_EXPORT_WINDOW,
+        // Run the neural network and capture the resulting prediction.
+        FORECAST_TEMP_STATE_RUN_INFERENCE,
+        // Publish the prediction so other modules can consume it.
+        FORECAST_TEMP_STATE_PUBLISH_PREDICTION
+} forecast_temp_task_state_t;
+
+// Track working data that flows across state-machine transitions.
+typedef struct {
+        // Remember the scheduler tick used when sleeping for a minute.
+        TickType_t last_wake_tick;
+        // Cache the most recent minute-level BME280 temperature reading.
+        float temperature_c;
+        // Cache the most recent minute-level BME280 humidity reading.
+        float humidity_pct;
+        // Cache the most recent minute-level BME280 pressure reading.
+        float pressure_pa;
+        // Cache the most recent minute-level VEML7700 illuminance reading.
+        float illuminance_lux;
+        // Cache the averaged hourly temperature during the CHECK_HOUR step.
+        float hourly_temperature_c;
+        // Cache the averaged hourly humidity during the CHECK_HOUR step.
+        float hourly_humidity_pct;
+        // Cache the averaged hourly pressure during the CHECK_HOUR step.
+        float hourly_pressure_pa;
+        // Cache the averaged hourly illuminance during the CHECK_HOUR step.
+        float hourly_illuminance_lux;
+        // Hold the normalized features generated for the current hour.
+        float normalized_features[FORECAST_TEMP_FEATURE_COUNT];
+        // Hold the most recent neural-network prediction prior to publication.
+        float predicted_temperature_c;
+} forecast_temp_task_context_t;
+
 // Store the raw hourly temperature history so delta computations are easy.
 static float g_hourly_temperature_history[FORECAST_TEMP_HISTORY_CAPACITY] = { 0.0f };
 // Store the raw hourly pressure history so delta computations are easy.
@@ -697,74 +749,125 @@ static void forecast_temp_bootstrap_from_sd_card(void) {
         }
 }
 
-// Main loop that polls sensors, updates features, and runs the model.
+// Main loop implemented as a state machine that polls sensors, updates features, and runs the model.
 static void forecast_temp_task_entry(void *argument) {
         // Silence the unused-parameter warning for CMSIS.
         (void) argument;
-        // Initialize the neural network before we start looping.
-        if (!forecast_temp_initialize_network()) {
-                printf("[forecast] failed to init neural network\r\n");
-        }
-        // Replay any persisted SD-card measurements so the window fills immediately.
-        forecast_temp_bootstrap_from_sd_card();
-        // Remember the scheduler tick count so we can sleep accurately.
-        TickType_t last_wake_tick = xTaskGetTickCount();
-        // Loop forever so the prediction stays up to date.
+        // Initialize the state-machine context so every field starts from a known value.
+        forecast_temp_task_context_t context;
+        memset(&context, 0, sizeof(context));
+        // Begin execution in the initialization state.
+        forecast_temp_task_state_t state = FORECAST_TEMP_STATE_INIT_NETWORK;
+        // Stay in the state machine forever so the prediction remains fresh.
         for (;;) {
-                // Sleep until the next one-minute boundary.
-                vTaskDelayUntil(&last_wake_tick, pdMS_TO_TICKS(FORECAST_TEMP_TASK_PERIOD_MS));
-                // Pull the latest BME280 sample so we have temperature, humidity, and pressure.
-                float temperature_c = 0.0f;
-                float humidity_pct = 0.0f;
-                float pressure_pa = 0.0f;
-                const bool have_bme = bme280_get_latest(&temperature_c, &humidity_pct, &pressure_pa);
-                // Pull the latest VEML7700 sample so we have illuminance.
-                float illuminance_lux = 0.0f;
-                const bool have_veml = veml7700_get_latest_lux(&illuminance_lux);
-                // Skip this minute if either sensor has not produced a valid sample yet.
-                if (!(have_bme && have_veml)) {
-                        continue;
+                switch (state) {
+                case FORECAST_TEMP_STATE_INIT_NETWORK:
+                        // Initialize the neural network before the task begins processing data.
+                        if (!forecast_temp_initialize_network()) {
+                                printf("[forecast] failed to init neural network\r\n");
+                        }
+                        // Proceed immediately to the bootstrap phase regardless of success so the loop continues.
+                        state = FORECAST_TEMP_STATE_BOOTSTRAP;
+                        break;
+                case FORECAST_TEMP_STATE_BOOTSTRAP:
+                        // Replay persisted SD-card measurements so the window fills immediately.
+                        forecast_temp_bootstrap_from_sd_card();
+                        // Initialize the tick count used by vTaskDelayUntil().
+                        context.last_wake_tick = xTaskGetTickCount();
+                        // Transition into the periodic wait state.
+                        state = FORECAST_TEMP_STATE_WAIT_MINUTE;
+                        break;
+                case FORECAST_TEMP_STATE_WAIT_MINUTE:
+                        // Lazily initialize the wake tick when the state machine ever re-enters this state.
+                        if (context.last_wake_tick == 0) {
+                                context.last_wake_tick = xTaskGetTickCount();
+                        }
+                        // Sleep until the next one-minute boundary.
+                        vTaskDelayUntil(&context.last_wake_tick, pdMS_TO_TICKS(FORECAST_TEMP_TASK_PERIOD_MS));
+                        // After sleeping, attempt to fetch new sensor data.
+                        state = FORECAST_TEMP_STATE_FETCH_SENSORS;
+                        break;
+                case FORECAST_TEMP_STATE_FETCH_SENSORS: {
+                        // Pull the latest BME280 sample so we have temperature, humidity, and pressure.
+                        const bool have_bme = bme280_get_latest(&context.temperature_c, &context.humidity_pct, &context.pressure_pa);
+                        // Pull the latest VEML7700 sample so we have illuminance.
+                        const bool have_veml = veml7700_get_latest_lux(&context.illuminance_lux);
+                        // Skip this minute if either sensor has not produced a valid sample yet.
+                        if (!(have_bme && have_veml)) {
+                                state = FORECAST_TEMP_STATE_WAIT_MINUTE;
+                                break;
+                        }
+                        // Fold the valid minute into the running hourly sums.
+                        state = FORECAST_TEMP_STATE_ACCUMULATE_MINUTE;
+                        break;
                 }
-                // Fold this minute into the running hourly sums.
-                forecast_temp_accumulate_minute_sample(temperature_c, humidity_pct, pressure_pa, illuminance_lux);
-                // See whether we have collected a full hour of data yet.
-                float hourly_temperature_c = 0.0f;
-                float hourly_humidity_pct = 0.0f;
-                float hourly_pressure_pa = 0.0f;
-                float hourly_illuminance_lux = 0.0f;
-                const bool have_full_hour = forecast_temp_finalize_hour_sample(&hourly_temperature_c, &hourly_humidity_pct, &hourly_pressure_pa, &hourly_illuminance_lux);
-                // Only proceed to feature generation when a full hour rolls over.
-                if (!have_full_hour) {
-                        continue;
+                case FORECAST_TEMP_STATE_ACCUMULATE_MINUTE:
+                        // Fold this minute into the running hourly sums.
+                        forecast_temp_accumulate_minute_sample(context.temperature_c, context.humidity_pct, context.pressure_pa, context.illuminance_lux);
+                        // Check whether a full hour boundary has been reached yet.
+                        state = FORECAST_TEMP_STATE_CHECK_HOUR;
+                        break;
+                case FORECAST_TEMP_STATE_CHECK_HOUR: {
+                        // Determine if the accumulator has enough data to emit an hourly average.
+                        const bool have_full_hour = forecast_temp_finalize_hour_sample(&context.hourly_temperature_c, &context.hourly_humidity_pct, &context.hourly_pressure_pa, &context.hourly_illuminance_lux);
+                        if (!have_full_hour) {
+                                // Wait for additional minute samples when an hour has not elapsed.
+                                state = FORECAST_TEMP_STATE_WAIT_MINUTE;
+                                break;
+                        }
+                        // A full hour rolled over, so continue with feature preparation.
+                        state = FORECAST_TEMP_STATE_PREPARE_FEATURES;
+                        break;
                 }
-                // Build the normalized feature vector for this completed hour.
-                float normalized_features[FORECAST_TEMP_FEATURE_COUNT] = { 0.0f };
-                forecast_temp_prepare_features(hourly_temperature_c, hourly_humidity_pct, hourly_pressure_pa, hourly_illuminance_lux, normalized_features);
-                // Push the new feature vector into the sliding window history.
-                forecast_temp_append_feature_vector(normalized_features);
-                // Run inference only when the window is completely full.
-                if (g_feature_window_count < FORECAST_TEMP_WINDOW_LENGTH) {
-                        continue;
-                }
-                // Export the sliding window into the int8 input tensor.
-                if (!forecast_temp_export_window_to_network(g_network_input_buffer)) {
-                        continue;
-                }
-                // Run the neural network and capture the predicted value.
-                float predicted_temperature_c = 0.0f;
-                const bool inference_ok = forecast_temp_run_inference(&predicted_temperature_c);
-                // Skip publication when the runtime reports an error.
-                if (!inference_ok) {
-                        continue;
-                }
-                // Publish the prediction under the mutex so other modules can read it.
-                if (g_prediction_mutex != NULL) {
-                        (void) osMutexAcquire(g_prediction_mutex, osWaitForever);
-                }
-                g_latest_prediction_c = predicted_temperature_c;
-                g_latest_prediction_valid = true;
-                if (g_prediction_mutex != NULL) {
-                        (void) osMutexRelease(g_prediction_mutex);
+                case FORECAST_TEMP_STATE_PREPARE_FEATURES:
+                        // Build the normalized feature vector for this completed hour.
+                        forecast_temp_prepare_features(context.hourly_temperature_c, context.hourly_humidity_pct, context.hourly_pressure_pa, context.hourly_illuminance_lux, context.normalized_features);
+                        // Queue the normalized vector for insertion into the sliding window.
+                        state = FORECAST_TEMP_STATE_APPEND_FEATURES;
+                        break;
+                case FORECAST_TEMP_STATE_APPEND_FEATURES:
+                        // Push the new feature vector into the sliding window history.
+                        forecast_temp_append_feature_vector(context.normalized_features);
+                        // Run inference only when the window is completely full.
+                        if (g_feature_window_count < FORECAST_TEMP_WINDOW_LENGTH) {
+                                state = FORECAST_TEMP_STATE_WAIT_MINUTE;
+                        } else {
+                                state = FORECAST_TEMP_STATE_EXPORT_WINDOW;
+                        }
+                        break;
+                case FORECAST_TEMP_STATE_EXPORT_WINDOW:
+                        // Export the sliding window into the int8 input tensor and bail out on failure.
+                        if (!forecast_temp_export_window_to_network(g_network_input_buffer)) {
+                                state = FORECAST_TEMP_STATE_WAIT_MINUTE;
+                        } else {
+                                state = FORECAST_TEMP_STATE_RUN_INFERENCE;
+                        }
+                        break;
+                case FORECAST_TEMP_STATE_RUN_INFERENCE:
+                        // Run the neural network and capture the predicted value.
+                        if (!forecast_temp_run_inference(&context.predicted_temperature_c)) {
+                                state = FORECAST_TEMP_STATE_WAIT_MINUTE;
+                        } else {
+                                state = FORECAST_TEMP_STATE_PUBLISH_PREDICTION;
+                        }
+                        break;
+                case FORECAST_TEMP_STATE_PUBLISH_PREDICTION:
+                        // Publish the prediction under the mutex so other modules can read it.
+                        if (g_prediction_mutex != NULL) {
+                                (void) osMutexAcquire(g_prediction_mutex, osWaitForever);
+                        }
+                        g_latest_prediction_c = context.predicted_temperature_c;
+                        g_latest_prediction_valid = true;
+                        if (g_prediction_mutex != NULL) {
+                                (void) osMutexRelease(g_prediction_mutex);
+                        }
+                        // Return to the wait state so the cycle repeats on the next minute.
+                        state = FORECAST_TEMP_STATE_WAIT_MINUTE;
+                        break;
+                default:
+                        // Recover gracefully by restarting the periodic loop.
+                        state = FORECAST_TEMP_STATE_WAIT_MINUTE;
+                        break;
                 }
         }
 }
