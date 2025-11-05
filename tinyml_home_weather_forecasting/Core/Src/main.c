@@ -31,6 +31,7 @@
 #include "sd_card.h"
 #include "app_error.h"
 #include "measurement_logger_task.h"
+#include "inference_logger_task.h"
 #include "led_service.h"
 #include "veml7700_task.h"
 #include "lm393_task.h"
@@ -192,7 +193,8 @@ int main(void)
 	/* add threads, ... */
 	bme280SensorTaskHandle = osThreadNew(bme280SensorTask, NULL,
 			&bme280SensorTask_attributes);
-	(void) measurement_logger_task_create();
+        (void) measurement_logger_task_create();
+        (void) inference_logger_task_create();
 	(void) led_service_init();
 	(void) led_service_start(osPriorityLow1, 256 * 4);
         veml7700_start_task(&hi2c4, osPriorityNormal, 768u);
