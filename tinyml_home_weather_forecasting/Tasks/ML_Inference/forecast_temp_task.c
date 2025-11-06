@@ -13,19 +13,19 @@
 // Pull in ctype so we can validate digits when parsing the RTC timestamp.
 #include <ctype.h>
 // Pull in our BME280 task interface to read the latest environmental sample.
-#include "Tasks/Sensors/bme280_task.h"
+#include "../Sensors/bme280_task.h"
 // Pull in our VEML7700 interface to grab illuminance readings.
-#include "Tasks/Sensors/veml7700_task.h"
+#include "../Sensors/veml7700_task.h"
 // Pull in the DS3231 driver so we can ask the RTC for the current time.
-#include "Drivers/DS3231/Inc/ds3231.h"
+#include "../../Drivers/DS3231/Inc/ds3231.h"
 // Pull in the FatFs declarations so we can read persisted CSV logs.
 #include "ff.h"
 // Pull in the auto-generated network API so we can run inference.
-#include "X-CUBE-AI/App/forecast_temp_ml_model.h"
+#include "forecast_temp_ml_model.h"
 // Pull in the data helpers so we can allocate the activation buffers correctly.
-#include "X-CUBE-AI/App/forecast_temp_ml_model_data.h"
+#include "forecast_temp_ml_model_data.h"
 // Pull in the data parameter helpers so we can set up the activation table.
-#include "X-CUBE-AI/App/forecast_temp_ml_model_data_params.h"
+#include "forecast_temp_ml_model_data_params.h"
 // Pull in stdlib so we can convert CSV strings into floats.
 #include <stdlib.h>
 
@@ -527,7 +527,7 @@ static void forecast_temp_bootstrap_process_file(const char *file_path, forecast
         // Track whether we have skipped the CSV header yet.
         bool header_skipped = false;
         // Loop until we reach the end of the file.
-        for (;;) {
+        while(1) {
                 // Allocate a buffer to hold one CSV line including the newline terminator.
                 char line[192] = { 0 };
                 // Read the next line from the CSV file.
@@ -634,7 +634,7 @@ static void forecast_temp_bootstrap_from_sd_card(void) {
                 return;
         }
         // Loop through every entry that FatFs reports inside the directory.
-        for (;;) {
+        while(1) {
                 // Clear the file-info structure before each read.
                 FILINFO info;
                 memset(&info, 0, sizeof(info));
@@ -759,7 +759,7 @@ static void forecast_temp_task_entry(void *argument) {
         // Begin execution in the initialization state.
         forecast_temp_task_state_t state = FORECAST_TEMP_STATE_INIT_NETWORK;
         // Stay in the state machine forever so the prediction remains fresh.
-        for (;;) {
+        while(1) {
                 switch (state) {
                 case FORECAST_TEMP_STATE_INIT_NETWORK:
                         // Initialize the neural network before the task begins processing data.

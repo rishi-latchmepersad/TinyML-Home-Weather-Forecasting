@@ -35,7 +35,7 @@
 #include "led_service.h"
 #include "veml7700_task.h"
 #include "lm393_task.h"
-#include "Tasks/ML_Inference/forecast_temp_task.h"
+#include "forecast_temp_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
