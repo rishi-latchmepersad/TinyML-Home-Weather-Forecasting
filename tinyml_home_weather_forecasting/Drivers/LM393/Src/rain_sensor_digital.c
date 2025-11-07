@@ -170,8 +170,8 @@ static void RainDigital_Priv_MaybePrintHeartbeat(void) {
 		g_last_heartbeat_ms = now_ms;
 		const int is_raining_state =
 				(g_public_state == RAIN_DIGITAL_STATE_WET) ? 1 : 0;
-		printf("[RAIN] HEARTBEAT: is_raining=%d (t=%lu ms)\r\n",
-				is_raining_state, (unsigned long) now_ms);
+		//printf("[RAIN] HEARTBEAT: is_raining=%d (t=%lu ms)\r\n",
+			//	is_raining_state, (unsigned long) now_ms);
 		//put the sensor data on the queue for the SD card
 		(void) measurement_logger_enqueue(&(measurement_logger_message_t ) {
 						SENSOR, "is_raining", is_raining_state, "N/A" },

@@ -315,7 +315,11 @@ static void measurement_logger_task_entry(void *argument) {
 		case LOGGER_STATE_OPEN_TODAY: {
 			char ts[24];
 			if (ds3231_read_time_iso8601_utc_i2c1(ts, sizeof ts) != HAL_OK) {
+				printf("We weren't able to get the current time from the DS3231\n");
 				(void) snprintf(ts, sizeof ts, "2000-01-01T00:00:00Z");
+			}
+			else{
+				printf("The DS3231 seems to be responding. \n");
 			}
 			char date[11];
 			memcpy(date, ts, 10);
@@ -338,6 +342,7 @@ static void measurement_logger_task_entry(void *argument) {
 			char ts_now[24];
 			if (ds3231_read_time_iso8601_utc_i2c1(ts_now, sizeof ts_now)
 					!= HAL_OK) {
+				printf("We weren't able to get the current time from the DS3231\n");
 				(void) snprintf(ts_now, sizeof ts_now, "2000-01-01T00:00:00Z");
 			}
 			char date_now[11];
@@ -384,6 +389,7 @@ static void measurement_logger_task_entry(void *argument) {
 			char ts_now[24];
 			if (ds3231_read_time_iso8601_utc_i2c1(ts_now, sizeof ts_now)
 					!= HAL_OK) {
+				printf("We weren't able to get the current time from the DS3231\n");
 				(void) snprintf(ts_now, sizeof ts_now, "2000-01-01T00:00:00Z");
 			}
 			const size_t before = g_write_used;

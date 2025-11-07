@@ -1,8 +1,8 @@
 #include "inference_logger_task.h" // Pull in the interface definition so this implementation stays in sync with the header.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
 #include <stdio.h> // Provide snprintf for formatting strings before writing them to disk.
 #include <string.h> // Provide memcpy/strncpy for manipulating filenames and timestamps.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
 #include "FreeRTOS.h" // Include core FreeRTOS types needed for task management and delays.
 #include "cmsis_os.h" // Access CMSIS-RTOS abstraction used for mutexes and thread creation.
 #include "ds3231.h" // Allow reading timestamps from the DS3231 real-time clock.
@@ -12,7 +12,7 @@
 #include "led_service.h" // Control the LED to indicate successful logging activity.
 #include "sd_card.h" // Use helper functions for mounting the SD card before file access.
 #include "task.h" // Access FreeRTOS task utilities such as vTaskDelayUntil.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
 #ifndef INFERENCE_LOGGER_TASK_STACK_WORDS // Allow overriding the stack allocation for the logger task at build time.
 #define INFERENCE_LOGGER_TASK_STACK_WORDS   (512u) // Default stack size in words chosen to balance memory use and safety margin.
 #endif // End of default stack size guard.
@@ -31,13 +31,13 @@
 #ifndef INFERENCE_LOGGER_PERIOD_MS // Allow customizing how often we poll for new inference data.
 #define INFERENCE_LOGGER_PERIOD_MS          (300000u) // Default to five-minute logging intervals to balance detail and storage.
 #endif // End of default logging period guard.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
 extern osMutexId_t g_fs_mutex; // Reference the shared filesystem mutex declared elsewhere so we can synchronize access.
 #ifndef FS_LOCK // Allow overriding the lock macros if the platform provides specialized locking.
 #define FS_LOCK()   osMutexAcquire(g_fs_mutex, osWaitForever) // Acquire the filesystem mutex, blocking until it is available to ensure exclusive access.
 #define FS_UNLOCK() osMutexRelease(g_fs_mutex) // Release the filesystem mutex so other tasks can interact with the SD card.
 #endif // End of lock macro override guard.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
 static void inference_logger_task_entry(void *argument); // Forward declaration of the task entry function used when creating the thread.
 static bool inference_logger_ensure_directory_exists(const char *dir_path); // Forward declaration for ensuring the log directory exists before writing.
 static bool inference_logger_open_today_file(const char *date_yyyy_mm_dd); // Forward declaration for opening the daily log file based on the current date.
@@ -46,7 +46,7 @@ static size_t inference_logger_format_csv_line(const char *timestamp_iso8601, //
                                                float predicted_temperature_c, // Parameter describing the predicted temperature we want to store.
                                                char *out_line, // Pointer to the destination buffer where the formatted line will be written.
                                                size_t out_capacity); // Capacity of the destination buffer to prevent overruns.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
 static TaskHandle_t g_inference_logger_task_handle = NULL; // Store the created task handle so we can detect if the task already exists.
 static FIL g_active_file; // FatFS file object representing the currently open log file.
 static bool g_file_open = false; // Track whether the active file is currently open to avoid redundant opens.
@@ -58,7 +58,7 @@ __attribute__((aligned(32))) // Align the buffer to 32 bytes to keep cache lines
 __attribute__((section(".sram1"), aligned(32))) // Place the buffer in SRAM1 with alignment suitable for peripheral access reliability.
 static char g_write_buffer[INFERENCE_LOGGER_BUFFER_BYTES]; // Allocate the write buffer that batches log lines before flushing.
 static size_t g_write_used = 0u; // Track how much of the write buffer is currently filled so we know when to flush.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
 typedef enum { // Enumerate the possible states of the logger state machine for clarity and maintainability.
     INFERENCE_LOGGER_STATE_STARTUP = 0, // Initial state where we attempt to mount the SD card.
     INFERENCE_LOGGER_STATE_ENSURE_DIR, // State that verifies the log directory exists before writing.
@@ -68,12 +68,12 @@ typedef enum { // Enumerate the possible states of the logger state machine for 
     INFERENCE_LOGGER_STATE_ROTATE, // State that closes the current file and opens a new one when the date changes.
     INFERENCE_LOGGER_STATE_ERROR_BACKOFF // State that delays after encountering an error before retrying.
 } inference_logger_state_t; // Typedef for convenient use of the logger state enumeration.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
 bool inference_logger_task_create(void) { // Public API used to start the inference logger task.
     if (g_inference_logger_task_handle != NULL) { // Check if the task is already running to avoid creating duplicates.
         return true; // Task already exists, so treat creation as successful.
     } // End check for existing task.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
     const osThreadAttr_t attr = { // Define the thread attributes used when creating the logger task.
         .name = "inference_logger_task", // Give the task a descriptive name for debugging and tracing.
         .priority = (osPriority_t) INFERENCE_LOGGER_TASK_PRIORITY, // Assign the configured priority to control scheduling.
@@ -83,14 +83,14 @@ bool inference_logger_task_create(void) { // Public API used to start the infere
         osThreadNew(inference_logger_task_entry, NULL, &attr); // Create the task with no arguments using the defined attributes.
     return (g_inference_logger_task_handle != NULL); // Return whether task creation succeeded so callers can react accordingly.
 } // End of inference_logger_task_create.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
 static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task function that manages the logging state machine.
     (void)argument; // Explicitly ignore the unused argument to avoid compiler warnings.
     inference_logger_state_t state = INFERENCE_LOGGER_STATE_STARTUP; // Begin in the startup state so we mount the SD card first.
     static TickType_t s_next_poll_tick = 0; // Track the next tick count when we should poll for new data to maintain consistent intervals.
     static bool s_poll_initialized = false; // Remember whether the periodic delay scheduler has been initialized to avoid invalid delays.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
-    for (;;) { // Run indefinitely so logging continues throughout device operation.
+// -----------------------------------------------------------------------------
+    while(1) { // Run indefinitely so logging continues throughout device operation.
         switch (state) { // Execute behavior based on the current state of the logger state machine.
         case INFERENCE_LOGGER_STATE_STARTUP: // Handle the initial attempt to mount storage.
             if (SD_Mount() == FR_OK) { // Try to mount the SD card and proceed if successful.
@@ -99,7 +99,7 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
                 state = INFERENCE_LOGGER_STATE_ERROR_BACKOFF; // Transition to error handling to delay and retry later.
             } // End mount check.
             break; // Exit the switch case to process the new state.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
         case INFERENCE_LOGGER_STATE_ENSURE_DIR: // Ensure the log directory exists before we attempt to open files.
             if (inference_logger_ensure_directory_exists(INFERENCE_LOGGER_BASE_DIR)) { // Attempt to create or validate the base log directory.
                 state = INFERENCE_LOGGER_STATE_OPEN_TODAY; // Proceed to open today's log once the directory is ready.
@@ -107,7 +107,7 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
                 state = INFERENCE_LOGGER_STATE_ERROR_BACKOFF; // Retry later after a backoff to handle transient filesystem issues.
             } // End directory check.
             break; // Exit the switch case after handling the directory state.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
         case INFERENCE_LOGGER_STATE_OPEN_TODAY: { // Open or create the log file corresponding to the current date.
             char ts[24]; // Buffer to hold the current timestamp in ISO-8601 format.
             if (ds3231_read_time_iso8601_utc_i2c1(ts, sizeof ts) != HAL_OK) { // Attempt to read the current time from the RTC.
@@ -116,7 +116,7 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
             char date[11]; // Buffer to hold just the date component extracted from the timestamp.
             memcpy(date, ts, 10); // Copy the YYYY-MM-DD characters from the timestamp into the date buffer.
             date[10] = '\0'; // Null-terminate the date string so standard string functions can use it.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
             if (inference_logger_open_today_file(date)) { // Try to open or create the day's log file using the formatted date.
                 s_poll_initialized = false; // Reset the polling scheduler so we start a fresh interval after opening the file.
                 state = INFERENCE_LOGGER_STATE_RUNNING; // Move into the running state to begin periodic logging.
@@ -125,7 +125,7 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
             } // End file open check.
             break; // Exit the block scope for the OPEN_TODAY state.
         } // Close scoped variables for OPEN_TODAY.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
         case INFERENCE_LOGGER_STATE_RUNNING: { // Normal operation where we periodically record predictions.
             if (!s_poll_initialized) { // If we have not yet set the initial poll time since entering running state.
                 s_next_poll_tick = xTaskGetTickCount(); // Initialize the next poll tick to the current tick count.
@@ -134,7 +134,7 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
                 vTaskDelayUntil(&s_next_poll_tick, // Delay until the next scheduled poll tick to maintain consistent intervals.
                                 pdMS_TO_TICKS(INFERENCE_LOGGER_PERIOD_MS)); // Convert the configured period to ticks for the delay call.
             } // End polling initialization check.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
             char ts_now[24]; // Buffer for the current timestamp string to accompany the logged data.
             if (ds3231_read_time_iso8601_utc_i2c1(ts_now, sizeof ts_now) != HAL_OK) { // Attempt to read the current time for the log entry.
                 (void)snprintf(ts_now, sizeof ts_now, "2000-01-01T00:00:00Z"); // Use a fallback timestamp if we cannot read the RTC.
@@ -142,14 +142,15 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
             char date_now[11]; // Buffer to store the current date extracted from the timestamp.
             memcpy(date_now, ts_now, 10); // Copy the date portion from the timestamp for comparison with the active file date.
             date_now[10] = '\0'; // Null-terminate the date string for safe string operations.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
             if (strncmp(date_now, g_last_date_yyyy_mm_dd, 10) != 0) { // Check if the date has changed since we opened the file.
                 state = INFERENCE_LOGGER_STATE_ROTATE; // If the date changed, rotate to a new file for the new day.
                 break; // Leave the RUNNING case so the state machine processes the rotation.
             } // End date change check.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
             float predicted_temperature_c = 0.0f; // Variable to hold the latest predicted temperature value.
             if (forecast_temp_get_latest_prediction(&predicted_temperature_c)) { // Attempt to retrieve a new prediction from the forecasting module.
+            	printf("We successfully got a prediction! %f \n",predicted_temperature_c);
                 char line[96]; // Buffer to store the formatted CSV line before writing to the main buffer.
                 size_t len = // Variable capturing the number of bytes in the formatted log entry.
                     inference_logger_format_csv_line(ts_now, predicted_temperature_c, // Format the timestamp and temperature into CSV format.
@@ -165,16 +166,19 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
                     break; // Exit the RUNNING state to allow the flush to occur immediately.
                 } // End formatted line validity check.
             } // End prediction availability check.
+            else{
+            	printf("We couldn't get a prediction. \n");
+            }
             break; // Continue looping in RUNNING state when no flush is triggered.
         } // Close scoped variables for RUNNING state.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
         case INFERENCE_LOGGER_STATE_FLUSH: { // Handle writing buffered data to the SD card.
             const size_t before = g_write_used; // Snapshot how much data is currently queued to decide whether we need to write.
             if (before == 0u) { // If there is nothing buffered, no flush is required.
                 state = INFERENCE_LOGGER_STATE_RUNNING; // Return to the running state to continue polling for data.
                 break; // Exit the FLUSH state early because there is nothing to do.
             } // End check for empty buffer.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
             if (inference_logger_flush_buffer_to_file()) { // Attempt to write the buffered data out to the SD card.
                 state = INFERENCE_LOGGER_STATE_RUNNING; // On success, return to running so we can gather more data.
             } else { // Flush failed.
@@ -182,7 +186,7 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
             } // End flush result check.
             break; // Finish handling the FLUSH state.
         } // Close scoped variables for FLUSH state.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
         case INFERENCE_LOGGER_STATE_ROTATE: // Handle closing the current log and preparing for a new day's file.
             if (g_file_open) { // Only attempt to close the file if it is currently open.
                 (void)inference_logger_flush_buffer_to_file(); // Flush any remaining data before closing to avoid data loss.
@@ -193,7 +197,7 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
             } // End file open check during rotation.
             state = INFERENCE_LOGGER_STATE_OPEN_TODAY; // Transition back to opening today's file (which will now be the new date).
             break; // Exit the ROTATE state after scheduling the reopen.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
         case INFERENCE_LOGGER_STATE_ERROR_BACKOFF: // Handle any errors by tearing down state and retrying later.
             if (g_file_open) { // If a file is open when an error occurs, close it to avoid corruption.
                 FS_LOCK(); // Acquire the filesystem mutex before closing the file.
@@ -207,14 +211,14 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
         } // End switch cases for the state machine.
     } // End infinite loop.
 } // End of inference_logger_task_entry implementation.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
 static bool inference_logger_flush_buffer_to_file(void) { // Helper that writes the buffered log data to disk and resets the buffer.
     const size_t bytes_to_write = g_write_used; // Capture how many bytes are pending so we write exactly that amount.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
     if (bytes_to_write == 0u) { // If no data is queued, we consider the flush successful without performing I/O.
         return true; // Nothing to do, so report success.
     } // End empty buffer check.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
     if (!g_file_open) { // If the file is not currently open, open it before writing.
         FS_LOCK(); // Acquire the filesystem mutex to protect the FatFS calls.
         FRESULT fr = f_open(&g_active_file, g_active_path, FA_OPEN_ALWAYS | FA_WRITE); // Try opening the active file, creating it if necessary.
@@ -232,12 +236,12 @@ static bool inference_logger_flush_buffer_to_file(void) { // Helper that writes 
             g_file_open = true; // Record that the file is now open for future flushes.
         } // End open success check.
         FS_UNLOCK(); // Release the filesystem lock regardless of success so others are not blocked.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
         if (!g_file_open) { // If the open operation failed, we cannot flush data.
             return false; // Signal failure so the caller can enter backoff.
         } // End open failure handling.
     } // End check for unopened file.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
     UINT bw = 0u; // Prepare a variable to capture the number of bytes written by FatFS.
     FS_LOCK(); // Acquire the filesystem mutex before writing to the file.
     FRESULT wr = f_write(&g_active_file, g_write_buffer, (UINT)bytes_to_write, &bw); // Write the buffered data to the file.
@@ -245,50 +249,50 @@ static bool inference_logger_flush_buffer_to_file(void) { // Helper that writes 
         wr = f_sync(&g_active_file); // Flush the file to ensure the data reaches non-volatile storage.
     } // End successful write check.
     FS_UNLOCK(); // Release the filesystem lock so other tasks may access the SD card.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
     if (wr != FR_OK || bw != bytes_to_write) { // Verify the write and sync both succeeded.
         return false; // On failure, report back so the caller can handle the error.
     } // End write verification.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
     led_service_activity_bump(1000); // Trigger LED activity feedback for one second to indicate a successful log flush.
     g_write_used = 0u; // Reset the buffered byte count so we can accumulate new data.
     return true; // Indicate that flushing succeeded.
 } // End of inference_logger_flush_buffer_to_file helper.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
 static bool inference_logger_ensure_directory_exists(const char *dir_path) { // Ensure the specified logging directory is present on the filesystem.
     FILINFO fi; // Structure used by FatFS to receive file/directory information.
     FRESULT fr; // Variable to capture FatFS return codes for error handling.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
     FS_LOCK(); // Acquire the filesystem mutex so the directory check is thread safe.
     fr = f_stat(dir_path, &fi); // Query the filesystem to see if the directory already exists.
     FS_UNLOCK(); // Release the mutex once the check is complete.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
     if (fr == FR_OK) { // If f_stat succeeded, the path exists.
         return ((fi.fattrib & AM_DIR) != 0); // Return true only if the existing path is a directory rather than a file.
     } // End existing path handling.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
     if (fr == FR_NO_FILE) { // If the path does not exist, we need to create it.
         FS_LOCK(); // Acquire the filesystem mutex before creating the directory.
         fr = f_mkdir(dir_path); // Attempt to create the directory on the SD card.
         FS_UNLOCK(); // Release the mutex after the mkdir attempt.
         return (fr == FR_OK || fr == FR_EXIST); // Treat both successful creation and "already exists" as success to handle race conditions.
     } // End missing directory handling.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
     return false; // For any other error, report failure so the caller can back off and retry.
 } // End of inference_logger_ensure_directory_exists helper.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
 static bool inference_logger_open_today_file(const char *date_yyyy_mm_dd) { // Open (or create) the log file for the provided date string.
     char path[128]; // Buffer to build the fully qualified file path.
     (void)snprintf(path, sizeof path, // Format the path string safely using snprintf to avoid buffer overflows.
-                   INFERENCE_LOGGER_BASE_DIR "/inference__%s.csv", date_yyyy_mm_dd); // Combine the base directory and date into the file name.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+                   INFERENCE_LOGGER_BASE_DIR "/inference_%s.csv", date_yyyy_mm_dd); // Combine the base directory and date into the file name.
+// -----------------------------------------------------------------------------
     FILINFO fi; // Structure to hold file information when checking if the file already exists.
     FRESULT fr; // Variable to store FatFS return codes for control flow decisions.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
     FS_LOCK(); // Acquire the filesystem mutex before interacting with FatFS.
     fr = f_stat(path, &fi); // Check whether the file already exists so we can decide whether to append or create.
     FS_UNLOCK(); // Release the filesystem mutex after the status check.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
     if (fr == FR_OK) { // File already exists, so open it for appending.
         FS_LOCK(); // Acquire the filesystem mutex before opening the file.
         fr = f_open(&g_active_file, path, FA_OPEN_EXISTING | FA_WRITE); // Open the existing file with write access to append data.
@@ -316,7 +320,7 @@ static bool inference_logger_open_today_file(const char *date_yyyy_mm_dd) { // O
         if (fr != FR_OK) { // If creation or header write failed, indicate failure.
             return false; // Abort opening so the caller can handle the error.
         } // End failure handling after creation.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
         FS_LOCK(); // Reacquire the filesystem mutex to reopen the newly created file for appending.
         fr = f_open(&g_active_file, path, FA_OPEN_EXISTING | FA_WRITE); // Open the file we just created so we can append new entries.
         if (fr == FR_OK) { // If opening succeeded, seek to the end to append data.
@@ -329,7 +333,7 @@ static bool inference_logger_open_today_file(const char *date_yyyy_mm_dd) { // O
     } else { // Some other error occurred while checking the file status.
         return false; // Propagate failure so the caller can enter the error state.
     } // End file existence handling.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
     g_file_open = true; // Record that the file is currently open for subsequent operations.
     strncpy(g_last_date_yyyy_mm_dd, date_yyyy_mm_dd, // Update the cached date string so we know when to rotate files.
             sizeof g_last_date_yyyy_mm_dd); // Limit the copy to the buffer size to avoid overflow.
@@ -339,7 +343,7 @@ static bool inference_logger_open_today_file(const char *date_yyyy_mm_dd) { // O
     g_write_used = 0u; // Reset the buffered data count since we start fresh after opening a file.
     return true; // Indicate that the file is ready for logging.
 } // End of inference_logger_open_today_file helper.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------
 static size_t inference_logger_format_csv_line(const char *timestamp_iso8601, // Format a log line from the provided timestamp and prediction.
                                                float predicted_temperature_c, // Temperature prediction to include in the log line.
                                                char *out_line, // Buffer where the formatted CSV line should be placed.
@@ -352,4 +356,4 @@ static size_t inference_logger_format_csv_line(const char *timestamp_iso8601, //
     } // End validation of formatted length.
     return (size_t)n; // Return the actual number of bytes written so the caller knows how much data to buffer.
 } // End of inference_logger_format_csv_line helper.
-// ----------------------------------------------------------------------------- // Spacer line for readability between logical blocks.
+// -----------------------------------------------------------------------------

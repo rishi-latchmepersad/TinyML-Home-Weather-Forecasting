@@ -156,7 +156,7 @@ int main(void)
   MX_I2C4_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-	//(void)ds3231_set_time_from_components_utc_i2c1(2025, 8, 23, 19,03 , 00); // set the time for the DS3231
+  //(void)ds3231_set_time_from_components_utc_i2c1(2025, 11, 6, 20,11 , 00); // set the time for the DS3231
   led_service_rgb_board_init(&htim1, TIM_CHANNEL_1, TIM_CHANNEL_2, TIM_CHANNEL_3, false /* HW-479 = common-cathode */);
   /* USER CODE END 2 */
 

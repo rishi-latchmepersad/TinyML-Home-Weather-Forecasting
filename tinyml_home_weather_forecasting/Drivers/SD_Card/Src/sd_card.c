@@ -146,13 +146,13 @@ FRESULT SD_Mount(void) {
 		// Always start at slow speed for init and give the card dummy clocks
 		sd_bus_slow();
 		sd_spi_power_on_sequence();   /* clocks with CS high, then quick probe */
-		sd_sleep(1000);
+		sd_sleep(2000);
 
 		// Force a fresh low-level init on drive 0
 		DSTATUS st = disk_initialize(0);
 		if (st & STA_NOINIT) {
 			// Card not ready yet — small backoff and retry
-			sd_sleep(500U * attempt);
+			sd_sleep(1000U * attempt);
 			continue;
 		}
 
