@@ -12,6 +12,8 @@
 #include <stdio.h>
 // Pull in ctype so we can validate digits when parsing the RTC timestamp.
 #include <ctype.h>
+// Pull in stdint so we can handle quantization zero-points with explicit widths.
+#include <stdint.h>
 // Pull in our BME280 task interface to read the latest environmental sample.
 #include "../Sensors/bme280_task.h"
 // Pull in our VEML7700 interface to grab illuminance readings.
@@ -930,10 +932,12 @@ static void forecast_temp_extract_quantization(const ai_buffer *buffer, float *s
         if (info->scale != NULL) {
                 *scale_out = info->scale[0];
         }
-        // Copy the zero-point when the runtime reports one.
+        // Copy the zero-point when the runtime reports one. The metadata stores the value
+        // in an int8 array for signed tensors, so read the first element with the correct width
+        // and promote it to an int32_t to match the caller's expectations.
         if (info->zeropoint != NULL) {
-                const ai_i32 *zero_point_array = (const ai_i32 *) info->zeropoint;
-                *zero_point_out = zero_point_array[0];
+                const int8_t *zero_point_array = (const int8_t *) info->zeropoint;
+                *zero_point_out = (int32_t) zero_point_array[0];
         }
 }
 
