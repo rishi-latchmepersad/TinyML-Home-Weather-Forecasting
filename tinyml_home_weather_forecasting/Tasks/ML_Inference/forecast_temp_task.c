@@ -813,6 +813,7 @@ static void forecast_temp_task_entry(void *argument) {
                         // Determine if the accumulator has enough data to emit an hourly average.
                         const bool have_full_hour = forecast_temp_finalize_hour_sample(&context.hourly_temperature_c, &context.hourly_humidity_pct, &context.hourly_pressure_pa, &context.hourly_illuminance_lux);
                         if (!have_full_hour) {
+                        		printf("We don't have a full hour of sensor data yet.\n");
                                 // Wait for additional minute samples when an hour has not elapsed.
                                 state = FORECAST_TEMP_STATE_WAIT_MINUTE;
                                 break;
