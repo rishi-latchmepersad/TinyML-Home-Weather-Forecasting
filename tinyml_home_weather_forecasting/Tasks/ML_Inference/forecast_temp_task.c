@@ -51,7 +51,7 @@ extern osMutexId_t g_fs_mutex;
 // Declare how often (in milliseconds) we poll the sensors for a new reading.
 #define FORECAST_TEMP_TASK_PERIOD_MS        (60000u)
 // Declare how many hourly samples we keep inside the sliding input window.
-#define FORECAST_TEMP_WINDOW_LENGTH         (6u)
+#define FORECAST_TEMP_WINDOW_LENGTH         (1u)
 // Declare how many minute samples we fold into a single hourly aggregate.
 #define FORECAST_TEMP_MINUTES_PER_HOUR      (60u)
 // Declare how many hours back we look when computing the temperature delta.
@@ -60,12 +60,24 @@ extern osMutexId_t g_fs_mutex;
 #define FORECAST_TEMP_DELTA_P_LAG_HOURS     (6u)
 // Declare how many engineered plus raw features the model expects per time step.
 #define FORECAST_TEMP_FEATURE_COUNT         (7u)
+// Declare how many chronological slots the compiled model encodes per inference.
+#define FORECAST_TEMP_NETWORK_WINDOW_SLOTS  (AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE / FORECAST_TEMP_FEATURE_COUNT)
 // Declare the capacity of our raw history ring so pressure deltas have room.
 #define FORECAST_TEMP_HISTORY_CAPACITY      (FORECAST_TEMP_WINDOW_LENGTH + FORECAST_TEMP_DELTA_P_LAG_HOURS)
 // Declare how many daily log files we will scan when replaying persisted data.
 #define FORECAST_TEMP_BOOTSTRAP_MAX_FILES   (32u)
 // Declare the FatFs directory where the measurement logger writes CSV files.
 #define FORECAST_TEMP_LOG_DIRECTORY         "0:/logs"
+
+// Sanity-check that our feature count divides cleanly into the network input
+// tensor so we can stride through the flattened buffer without overruns.
+#if ((AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE % FORECAST_TEMP_FEATURE_COUNT) != 0u)
+#error "AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE must be divisible by FORECAST_TEMP_FEATURE_COUNT"
+#endif
+
+#if (FORECAST_TEMP_NETWORK_WINDOW_SLOTS < FORECAST_TEMP_WINDOW_LENGTH)
+#error "FORECAST_TEMP_WINDOW_LENGTH cannot exceed the number of time slots encoded in the model input tensor"
+#endif
 
 // Define a small struct that records a measurement log filename and its date key.
 typedef struct {
@@ -814,6 +826,9 @@ static void forecast_temp_task_entry(void *argument) {
                         const bool have_full_hour = forecast_temp_finalize_hour_sample(&context.hourly_temperature_c, &context.hourly_humidity_pct, &context.hourly_pressure_pa, &context.hourly_illuminance_lux);
                         if (!have_full_hour) {
                                 // Wait for additional minute samples when an hour has not elapsed.
+                                printf("[forecast] waiting for full hour (%lu/%lu minute samples)\r\n",
+                                       (unsigned long) g_hour_accumulator.sample_count,
+                                       (unsigned long) FORECAST_TEMP_MINUTES_PER_HOUR);
                                 state = FORECAST_TEMP_STATE_WAIT_MINUTE;
                                 break;
                         }
@@ -1105,8 +1120,16 @@ static bool forecast_temp_export_window_to_network(int8_t *destination_buffer) {
         }
         // Walk the window in chronological order and quantize each feature.
         size_t out_index = 0u;
-        for (size_t time_index = 0u; time_index < FORECAST_TEMP_WINDOW_LENGTH; ++time_index) {
-                const size_t source_index = (g_feature_window_head + time_index) % FORECAST_TEMP_WINDOW_LENGTH;
+        for (size_t time_index = 0u; time_index < FORECAST_TEMP_NETWORK_WINDOW_SLOTS; ++time_index) {
+                size_t source_index;
+                if (time_index < FORECAST_TEMP_WINDOW_LENGTH) {
+                        source_index = (g_feature_window_head + time_index) % FORECAST_TEMP_WINDOW_LENGTH;
+                } else {
+                        // When the trained model encodes more time slots than the live window tracks,
+                        // reuse the most recent feature vector so inference can still proceed.
+                        const size_t last_valid_index = (g_feature_window_head + FORECAST_TEMP_WINDOW_LENGTH - 1u) % FORECAST_TEMP_WINDOW_LENGTH;
+                        source_index = last_valid_index;
+                }
                 for (size_t feature_index = 0u; feature_index < FORECAST_TEMP_FEATURE_COUNT; ++feature_index) {
                         const float normalized_value = g_feature_window[source_index][feature_index];
                         float scaled_value = normalized_value / g_input_scale;
@@ -1150,6 +1173,7 @@ static bool forecast_temp_run_inference(float *prediction_out) {
         const float dequantized = ((float) g_network_output_buffer[0] - (float) g_output_zero_point) * g_output_scale;
         // Return the decoded prediction to the caller.
         *prediction_out = dequantized;
+        printf("[forecast] inference predicted %.2f C\r\n", (double) dequantized);
         // Signal success to the caller.
         return true;
 }
