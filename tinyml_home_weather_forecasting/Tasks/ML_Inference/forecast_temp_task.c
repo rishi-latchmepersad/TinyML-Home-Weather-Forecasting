@@ -50,7 +50,6 @@ extern osMutexId_t g_fs_mutex;
 #define FORECAST_TEMP_TASK_PRIORITY         (osPriorityLow)
 // Declare how often (in milliseconds) we poll the sensors for a new reading.
 #define FORECAST_TEMP_TASK_PERIOD_MS        (60000u)
-<<<<<<< Updated upstream
 // Declare how many 15-minute samples we keep inside the sliding input window.
 #define FORECAST_TEMP_WINDOW_LENGTH         (1u)
 // Declare how many minute samples we fold into a single 15-minute aggregate.
@@ -59,16 +58,6 @@ extern osMutexId_t g_fs_mutex;
 #define FORECAST_TEMP_DELTA_T_LAG_SLOTS     (1u)
 // Declare how many 15-minute slots back we look when computing the pressure delta (6 hours).
 #define FORECAST_TEMP_DELTA_P_LAG_SLOTS     (24u)
-=======
-// Declare how many hourly samples we keep inside the sliding input window.
-#define FORECAST_TEMP_WINDOW_LENGTH         (2u)
-// Declare how many minute samples we fold into a single hourly aggregate.
-#define FORECAST_TEMP_MINUTES_PER_HOUR      (60u)
-// Declare how many hours back we look when computing the temperature delta.
-#define FORECAST_TEMP_DELTA_T_LAG_HOURS     (1u)
-// Declare how many hours back we look when computing the pressure delta.
-#define FORECAST_TEMP_DELTA_P_LAG_HOURS     (6u)
->>>>>>> Stashed changes
 // Declare how many engineered plus raw features the model expects per time step.
 #define FORECAST_TEMP_FEATURE_COUNT         (7u)
 // Declare how many chronological slots the compiled model encodes per inference.
@@ -832,26 +821,14 @@ static void forecast_temp_task_entry(void *argument) {
                         // Check whether a full 15-minute slot boundary has been reached yet.
                         state = FORECAST_TEMP_STATE_CHECK_SLOT;
                         break;
-<<<<<<< Updated upstream
                 case FORECAST_TEMP_STATE_CHECK_SLOT: {
                         // Determine if the accumulator has enough data to emit a 15-minute average.
                         const bool have_full_slot = forecast_temp_finalize_slot_sample(&context.slot_temperature_c, &context.slot_humidity_pct, &context.slot_pressure_pa, &context.slot_illuminance_lux);
                         if (!have_full_slot) {
-                        		printf("We don't have a full 15-minute slot of sensor data yet.\n");
                                 // Wait for additional minute samples when a slot has not elapsed.
                                 printf("[forecast] waiting for full 15-minute slot (%lu/%lu minute samples)\r\n",
                                        (unsigned long) g_slot_accumulator.sample_count,
                                        (unsigned long) FORECAST_TEMP_MINUTES_PER_SLOT);
-=======
-                case FORECAST_TEMP_STATE_CHECK_HOUR: {
-                        // Determine if the accumulator has enough data to emit an hourly average.
-                        const bool have_full_hour = forecast_temp_finalize_hour_sample(&context.hourly_temperature_c, &context.hourly_humidity_pct, &context.hourly_pressure_pa, &context.hourly_illuminance_lux);
-                        if (!have_full_hour) {
-                                // Wait for additional minute samples when an hour has not elapsed.
-                                printf("[forecast] waiting for full hour (%lu/%lu minute samples)\r\n",
-                                       (unsigned long) g_hour_accumulator.sample_count,
-                                       (unsigned long) FORECAST_TEMP_MINUTES_PER_HOUR);
->>>>>>> Stashed changes
                                 state = FORECAST_TEMP_STATE_WAIT_MINUTE;
                                 break;
                         }
