@@ -1,6 +1,6 @@
 ST Edge AI Core v2.2.0-20266 2adc00962
-Created date          : 2025-11-09 10:25:17
-Parameters            : generate --target stm32f7 --name forecast_temp_ml_model -m C:/Users/rishi_latchmepersad/Downloads/pruned_int8.tflite --compression none --verbosity 1 --workspace C:/Users/RISHI_~1/AppData/Local/Temp/mxAI_workspace294974186241000804444450013863315 --output C:/Users/rishi_latchmepersad/.stm32cubemx/network_output
+Created date          : 2025-11-09 10:47:35
+Parameters            : generate --target stm32f7 --name forecast_temp_ml_model -m C:/Users/rishi_latchmepersad/Downloads/pruned_int8.tflite --compression none --verbosity 1 --workspace C:/Users/RISHI_~1/AppData/Local/Temp/mxAI_workspace2963098256827009744769760226229954 --output C:/Users/rishi_latchmepersad/.stm32cubemx/network_output
 
 Exec/report summary (generate)
 ---------------------------------------------------------------------------------------------------------------------------
@@ -11,7 +11,7 @@ compression        :   none
 options            :   allocate-inputs, allocate-outputs                                                                   
 optimization       :   balanced                                                                                            
 target/series      :   stm32f7                                                                                             
-workspace dir      :   C:\Users\RISHI_~1\AppData\Local\Temp\mxAI_workspace294974186241000804444450013863315                
+workspace dir      :   C:\Users\RISHI_~1\AppData\Local\Temp\mxAI_workspace2963098256827009744769760226229954               
 output dir         :   C:\Users\rishi_latchmepersad\.stm32cubemx\network_output                                            
 model_fmt          :   ss/sa per channel                                                                                   
 model_name         :   pruned_int8                                                                                         
