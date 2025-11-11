@@ -16,7 +16,7 @@
 #define RAIN_DO_TASK_PERIOD_MS                (500U)
 
 /* Enable periodic heartbeat printf (0 = off, 1 = on). */
-#define RAIN_DO_ENABLE_HEARTBEAT_PRINTF       (1)
+#define RAIN_DO_ENABLE_HEARTBEAT_PRINTF       (0)
 
 /* Heartbeat period (ms) – used only if heartbeat is enabled. */
 #define RAIN_DO_HEARTBEAT_PERIOD_MS           (10000U)
