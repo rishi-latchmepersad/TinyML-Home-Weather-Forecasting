@@ -1,4 +1,4 @@
-<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.1.2 Chrome/138.0.7204.243 Electron/37.4.0 Safari/537.36" version="28.1.2" pages="6">
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.1.2 Chrome/138.0.7204.243 Electron/37.4.0 Safari/537.36" version="28.1.2" pages="5">
   <diagram id="vM8fxDD7liS2lbMWXIOC" name="Block Diagram">
     <mxGraphModel dx="2786" dy="1257" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="1">
       <root>
@@ -489,18 +489,18 @@
     </mxGraphModel>
   </diagram>
   <diagram id="XYtiEd82QoEACPT4lfql" name="MicroSD Card State Machine Diagram">
-    <mxGraphModel dx="2258" dy="2567" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="971" dy="1774" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-8" value="SD_Mount()==FR_OK" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-8" value="SD_Mount()==FR_OK" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" edge="1">
           <mxGeometry y="20" relative="1" as="geometry">
             <mxPoint x="340" y="120" as="sourcePoint" />
             <mxPoint x="480" y="120" as="targetPoint" />
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-10" value="dir exists or created" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-10" value="dir exists or created" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" edge="1">
           <mxGeometry x="-0.0769" y="10" relative="1" as="geometry">
             <mxPoint x="870" y="110" as="sourcePoint" />
             <mxPoint x="1000" y="109.99999999999989" as="targetPoint" />
@@ -510,7 +510,7 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-13" value="open_today_file failed" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.999;entryY=0.128;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="c8hhkLnITtMNqcgPd7OP-7">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-13" value="open_today_file failed" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.999;entryY=0.128;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" target="c8hhkLnITtMNqcgPd7OP-7" edge="1">
           <mxGeometry x="-0.1898" y="23" relative="1" as="geometry">
             <mxPoint x="997" y="190" as="sourcePoint" />
             <Array as="points">
@@ -519,7 +519,7 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-19" value="after delay(LOGGER_BACKOFF_MS)" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" target="c8hhkLnITtMNqcgPd7OP-1">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-19" value="after delay(LOGGER_BACKOFF_MS)" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" target="c8hhkLnITtMNqcgPd7OP-1" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="310" y="270" as="sourcePoint" />
             <Array as="points">
@@ -527,37 +527,37 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="i6j0sN7oWItsoMl_Pv2v-1" value="" style="group" vertex="1" connectable="0" parent="1">
+        <mxCell id="i6j0sN7oWItsoMl_Pv2v-1" value="" style="group" parent="1" vertex="1" connectable="0">
           <mxGeometry x="140" y="-80" width="1610" height="520" as="geometry" />
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-1" value="STARTUP&#xa;entry: SD_Mount(); SD_TestFatFs()&#xa;on success: proceed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="i6j0sN7oWItsoMl_Pv2v-1">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-1" value="STARTUP&#xa;entry: SD_Mount(); SD_TestFatFs()&#xa;on success: proceed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="i6j0sN7oWItsoMl_Pv2v-1" vertex="1">
           <mxGeometry y="170" width="200" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-2" value="ENSURE_DIR&#xa;action: measurement_logger_ensure_directory_exists(LOGGER_BASE_DIR)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="i6j0sN7oWItsoMl_Pv2v-1">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-2" value="ENSURE_DIR&#xa;action: measurement_logger_ensure_directory_exists(LOGGER_BASE_DIR)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="i6j0sN7oWItsoMl_Pv2v-1" vertex="1">
           <mxGeometry x="340" y="175" width="390" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-3" value="OPEN_TODAY&#xa;actions:&#xa;- read DS3231 ISO-8601 UTC (fallback &quot;2000-01-01&quot;)&#xa;- measurement_logger_open_today_file(date)&#xa;  • if exists: open + seek EOF&#xa;  • else: CREATE_NEW → write header → sync + close → reopen append" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="i6j0sN7oWItsoMl_Pv2v-1">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-3" value="OPEN_TODAY&#xa;actions:&#xa;- read DS3231 ISO-8601 UTC (fallback &quot;2000-01-01&quot;)&#xa;- measurement_logger_open_today_file(date)&#xa;  • if exists: open + seek EOF&#xa;  • else: CREATE_NEW → write header → sync + close → reopen append" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="i6j0sN7oWItsoMl_Pv2v-1" vertex="1">
           <mxGeometry x="860" y="160" width="420" height="120" as="geometry" />
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-4" value="RUNNING&#xa;loop:&#xa;- queue receive → format CSV → buffer&#xa;- if buffer would overflow → FLUSH&#xa;- periodic: if g_sync_requested or (now - last_flush) ≥ LOGGER_FLUSH_PERIOD_MS → FLUSH&#xa;- if date_now != g_last_date → ROTATE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="i6j0sN7oWItsoMl_Pv2v-1">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-4" value="RUNNING&#xa;loop:&#xa;- queue receive → format CSV → buffer&#xa;- if buffer would overflow → FLUSH&#xa;- periodic: if g_sync_requested or (now - last_flush) ≥ LOGGER_FLUSH_PERIOD_MS → FLUSH&#xa;- if date_now != g_last_date → ROTATE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="i6j0sN7oWItsoMl_Pv2v-1" vertex="1">
           <mxGeometry x="880" y="370" width="310" height="120" as="geometry" />
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-5" value="FLUSH&#xa;action: measurement_logger_flush_buffer_to_file()&#xa;on first success:&#xa;  • measurement_logger_force_commit_and_reopen() (once)&#xa;  • measurement_logger_checkpoint_close() (periodic durability)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="i6j0sN7oWItsoMl_Pv2v-1">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-5" value="FLUSH&#xa;action: measurement_logger_flush_buffer_to_file()&#xa;on first success:&#xa;  • measurement_logger_force_commit_and_reopen() (once)&#xa;  • measurement_logger_checkpoint_close() (periodic durability)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="i6j0sN7oWItsoMl_Pv2v-1" vertex="1">
           <mxGeometry x="360" y="380" width="300" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-6" value="ROTATE&#xa;actions: flush if needed; close file; g_file_open=false" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cce5ff;strokeColor=#4d7ea8;" vertex="1" parent="i6j0sN7oWItsoMl_Pv2v-1">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-6" value="ROTATE&#xa;actions: flush if needed; close file; g_file_open=false" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cce5ff;strokeColor=#4d7ea8;" parent="i6j0sN7oWItsoMl_Pv2v-1" vertex="1">
           <mxGeometry x="1350" y="375" width="260" height="120" as="geometry" />
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-7" value="ERROR_BACKOFF&#xa;actions: close file if open; set error LED (2 blinks = storage); vTaskDelay(LOGGER_BACKOFF_MS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffd5d5;strokeColor=#d79b00;" vertex="1" parent="i6j0sN7oWItsoMl_Pv2v-1">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-7" value="ERROR_BACKOFF&#xa;actions: close file if open; set error LED (2 blinks = storage); vTaskDelay(LOGGER_BACKOFF_MS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffd5d5;strokeColor=#d79b00;" parent="i6j0sN7oWItsoMl_Pv2v-1" vertex="1">
           <mxGeometry y="350" width="280" height="170" as="geometry" />
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-21" value="Legend / Notes&#xa;- LOGGER_FLUSH_PERIOD_MS: periodic flush cadence&#xa;- LOGGER_BACKOFF_MS: retry delay on errors&#xa;- Files stored under LOGGER_BASE_DIR (default: 0:/logs)&#xa;- On first create: header written, file closed &amp; synced, then reopened for append&#xa;- Periodic checkpoint close keeps directory entry durable and visible to PCs" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;glass=0;sketch=1;curveFitting=1;jiggle=2;" vertex="1" parent="i6j0sN7oWItsoMl_Pv2v-1">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-21" value="Legend / Notes&#xa;- LOGGER_FLUSH_PERIOD_MS: periodic flush cadence&#xa;- LOGGER_BACKOFF_MS: retry delay on errors&#xa;- Files stored under LOGGER_BASE_DIR (default: 0:/logs)&#xa;- On first create: header written, file closed &amp; synced, then reopened for append&#xa;- Periodic checkpoint close keeps directory entry durable and visible to PCs" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;glass=0;sketch=1;curveFitting=1;jiggle=2;" parent="i6j0sN7oWItsoMl_Pv2v-1" vertex="1">
           <mxGeometry x="430" width="390" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-12" value="open_today_file(date) success&#xa;→ last_flush=now; request_sync()" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-3" target="c8hhkLnITtMNqcgPd7OP-4">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-12" value="open_today_file(date) success&#xa;→ last_flush=now; request_sync()" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-3" target="c8hhkLnITtMNqcgPd7OP-4" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-20" value="queue empty / continue buffering" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;curved=1;rounded=0;entryX=0.863;entryY=1.023;entryDx=0;entryDy=0;entryPerimeter=0;exitX=1.002;exitY=0.861;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-4" target="c8hhkLnITtMNqcgPd7OP-4">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-20" value="queue empty / continue buffering" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;curved=1;rounded=0;entryX=0.863;entryY=1.023;entryDx=0;entryDy=0;entryPerimeter=0;exitX=1.002;exitY=0.861;exitDx=0;exitDy=0;exitPerimeter=0;" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-4" target="c8hhkLnITtMNqcgPd7OP-4" edge="1">
           <mxGeometry x="-0.3188" y="24" relative="1" as="geometry">
             <mxPoint x="890" y="330" as="targetPoint" />
             <mxPoint x="1130" y="470" as="sourcePoint" />
@@ -567,28 +567,28 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-14" value="buffer full OR g_sync_requested&amp;nbsp;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;OR&amp;nbsp;&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;timer≥LOGGER_FLUSH_PERIOD_MS&lt;/span&gt;&lt;/div&gt;" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.25;entryDx=0;entryDy=0;exitX=-0.009;exitY=0.371;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-4" target="c8hhkLnITtMNqcgPd7OP-5">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-14" value="buffer full OR g_sync_requested&amp;nbsp;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;OR&amp;nbsp;&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;timer≥LOGGER_FLUSH_PERIOD_MS&lt;/span&gt;&lt;/div&gt;" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.25;entryDx=0;entryDy=0;exitX=-0.009;exitY=0.371;exitDx=0;exitDy=0;exitPerimeter=0;" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-4" target="c8hhkLnITtMNqcgPd7OP-5" edge="1">
           <mxGeometry x="-0.0165" y="-25" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-16" value="flush success (or nothing to flush)" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.99;exitY=0.584;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" edge="1" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-5" target="c8hhkLnITtMNqcgPd7OP-4">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-16" value="flush success (or nothing to flush)" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.99;exitY=0.584;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-5" target="c8hhkLnITtMNqcgPd7OP-4" edge="1">
           <mxGeometry x="-0.0042" y="-8" relative="1" as="geometry">
             <mxPoint x="800" y="570" as="targetPoint" />
             <mxPoint x="-7" y="8" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-15" value="date roll detected&amp;nbsp;&lt;div&gt;(date_now != g_last_date)&lt;/div&gt;" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-4" target="c8hhkLnITtMNqcgPd7OP-6">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-15" value="date roll detected&amp;nbsp;&lt;div&gt;(date_now != g_last_date)&lt;/div&gt;" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-4" target="c8hhkLnITtMNqcgPd7OP-6" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-18" value="after close()" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-6" target="c8hhkLnITtMNqcgPd7OP-3">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-18" value="after close()" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=0;exitDx=0;exitDy=0;" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-6" target="c8hhkLnITtMNqcgPd7OP-3" edge="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="1415" y="300" />
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-9" value="SD_Mount() != FR_OK" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-1" target="c8hhkLnITtMNqcgPd7OP-7">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-9" value="SD_Mount() != FR_OK" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-1" target="c8hhkLnITtMNqcgPd7OP-7" edge="1">
           <mxGeometry x="-0.4" y="-30" relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="30" y="300" />
@@ -596,12 +596,12 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-17" value="flush failed" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.393;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-5" target="c8hhkLnITtMNqcgPd7OP-7">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-17" value="flush failed" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.393;exitDx=0;exitDy=0;exitPerimeter=0;" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-5" target="c8hhkLnITtMNqcgPd7OP-7" edge="1">
           <mxGeometry x="0.0043" y="-15" relative="1" as="geometry">
             <mxPoint y="30" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c8hhkLnITtMNqcgPd7OP-11" value="mkdir/stat failed" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.99;entryY=0.075;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-2" target="c8hhkLnITtMNqcgPd7OP-7">
+        <mxCell id="c8hhkLnITtMNqcgPd7OP-11" value="mkdir/stat failed" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.99;entryY=0.075;entryDx=0;entryDy=0;entryPerimeter=0;" parent="i6j0sN7oWItsoMl_Pv2v-1" source="c8hhkLnITtMNqcgPd7OP-2" target="c8hhkLnITtMNqcgPd7OP-7" edge="1">
           <mxGeometry x="-0.2912" relative="1" as="geometry">
             <mxPoint x="220" y="330" as="targetPoint" />
             <Array as="points">
@@ -728,113 +728,6 @@
         <mxCell id="IYeBsUBrOGlZI4jzyIrh-16" value="elapsed ≥ RAIN_DO_DEBOUNCE_MS" style="endArrow=classic;html=1;" parent="1" source="IYeBsUBrOGlZI4jzyIrh-5" target="IYeBsUBrOGlZI4jzyIrh-2" edge="1">
           <mxGeometry x="-0.0309" y="15" relative="1" as="geometry">
             <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-      </root>
-    </mxGraphModel>
-  </diagram>
-  <diagram id="OReTBVWUTjcXIEJyciup" name="Page-6">
-    <mxGraphModel dx="1129" dy="1841" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
-      <root>
-        <mxCell id="0" />
-        <mxCell id="1" parent="0" />
-        <mxCell id="hR0-UjBGf973WH6R2K5p-68" value="STARTUP" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="30" y="50" width="140" height="70" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-69" value="SD_Mount()&lt;br&gt;set LED status (red for error, blue for success)" style="text;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=4;strokeColor=none;fillColor=none" vertex="1" parent="1">
-          <mxGeometry x="30" y="-10" width="160" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-70" value="ENSURE_DIR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="250" y="50" width="140" height="70" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-71" value="ensure 0:/logs exists&#xa;f_stat / f_mkdir" style="text;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=4;strokeColor=none;fillColor=none" vertex="1" parent="1">
-          <mxGeometry x="260" width="120" height="40" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-72" value="OPEN_TODAY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="470" y="50" width="160" height="70" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-73" value="read date from RTC&#xa;build measurements_YYYY-MM-DD.csv&#xa;create header if new; seek EOF" style="text;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=4;strokeColor=none;fillColor=none" vertex="1" parent="1">
-          <mxGeometry x="460" y="-10" width="220" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-74" value="RUNNING" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="720" y="50" width="160" height="70" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-75" value="xQueueReceive loop&#xa;format CSV line&#xa;append to RAM buffer&#xa;periodic flush; on-demand sync&#xa;detect date roll" style="text;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=4;strokeColor=none;fillColor=none" vertex="1" parent="1">
-          <mxGeometry x="720" y="-50" width="190" height="100" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-76" value="FLUSH" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="930" y="280" width="140" height="70" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-77" value="f_write(); f_sync()&lt;br&gt;clear buffer/queue on success" style="text;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=4;strokeColor=none;fillColor=none" vertex="1" parent="1">
-          <mxGeometry x="930" y="350" width="170" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-78" value="ROTATE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cce5ff;strokeColor=#6d9eeb;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="730" y="170" width="140" height="70" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-79" value="flush; close current file&#xa;open today&#39;s file" style="text;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=4;strokeColor=none;fillColor=none" vertex="1" parent="1">
-          <mxGeometry x="735" y="240" width="130" height="40" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-80" value="ERROR_BACKOFF" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f4cccc;strokeColor=#cc0000;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="250" y="290" width="160" height="70" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-81" value="LED error pattern (flash red)&lt;br&gt;vTaskDelay(LOGGER_BACKOFF_MS)" style="text;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=4;strokeColor=none;fillColor=none" vertex="1" parent="1">
-          <mxGeometry x="250" y="370" width="240" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-82" value="mount OK" style="edgeStyle=elbowEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6c8ebf;" edge="1" parent="1" source="hR0-UjBGf973WH6R2K5p-68" target="hR0-UjBGf973WH6R2K5p-70">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-83" value="mount failed" style="edgeStyle=elbowEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#cc0000;exitX=0.669;exitY=0.965;exitDx=0;exitDy=0;exitPerimeter=0;entryX=-0.007;entryY=0.167;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="hR0-UjBGf973WH6R2K5p-68" target="hR0-UjBGf973WH6R2K5p-80">
-          <mxGeometry x="-0.2139" y="20" relative="1" as="geometry">
-            <mxPoint x="210" y="290" as="targetPoint" />
-            <Array as="points">
-              <mxPoint x="140" y="210" />
-            </Array>
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-84" value="ok" style="edgeStyle=elbowEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#d6b656;" edge="1" parent="1" source="hR0-UjBGf973WH6R2K5p-70" target="hR0-UjBGf973WH6R2K5p-72">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-85" value="fail" style="edgeStyle=elbowEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#cc0000;" edge="1" parent="1" source="hR0-UjBGf973WH6R2K5p-70" target="hR0-UjBGf973WH6R2K5p-80">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-86" value="ok" style="edgeStyle=elbowEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#b85450;" edge="1" parent="1" source="hR0-UjBGf973WH6R2K5p-72" target="hR0-UjBGf973WH6R2K5p-74">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-87" value="fail" style="edgeStyle=elbowEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#cc0000;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="hR0-UjBGf973WH6R2K5p-72" target="hR0-UjBGf973WH6R2K5p-80">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-88" value="buffer full / timer / sync" style="edgeStyle=elbowEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#82b366;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="hR0-UjBGf973WH6R2K5p-74" target="hR0-UjBGf973WH6R2K5p-76">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="1000" y="180" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-89" value="success" style="edgeStyle=elbowEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#9673a6;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="hR0-UjBGf973WH6R2K5p-76">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="880" y="60" as="targetPoint" />
-            <Array as="points">
-              <mxPoint x="1070" y="180" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-90" value="failure" style="edgeStyle=elbowEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#cc0000;exitX=0;exitY=0.75;exitDx=0;exitDy=0;" edge="1" parent="1" source="hR0-UjBGf973WH6R2K5p-76" target="hR0-UjBGf973WH6R2K5p-80">
-          <mxGeometry x="0.0142" y="-10" relative="1" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-91" value="date rolled (changed to following day)" style="edgeStyle=elbowEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6d9eeb;" edge="1" parent="1" source="hR0-UjBGf973WH6R2K5p-74" target="hR0-UjBGf973WH6R2K5p-78">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-92" value="" style="edgeStyle=elbowEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6d9eeb;entryX=0.985;entryY=0.902;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="hR0-UjBGf973WH6R2K5p-78" target="hR0-UjBGf973WH6R2K5p-72">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="hR0-UjBGf973WH6R2K5p-93" value="after delay" style="edgeStyle=elbowEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#cc0000;" edge="1" parent="1" source="hR0-UjBGf973WH6R2K5p-80" target="hR0-UjBGf973WH6R2K5p-68">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="110" y="210" />
-            </Array>
           </mxGeometry>
         </mxCell>
       </root>

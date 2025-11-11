@@ -1,0 +1,46 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0" version="28.1.2">
+  <diagram name="Page-1" id="_DwW8AdWyevrzTRoB-S2">
+    <mxGraphModel dx="2553" dy="2102" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="CTOoQPAqr4BoT_6rQmBS-1" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="-784" y="-597" width="1331" height="1331" as="geometry" />
+        </mxCell>
+        <mxCell id="CTOoQPAqr4BoT_6rQmBS-2" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#C9E8FC;strokeColor=#6c8ebf;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="-727.5" y="-484" width="1218" height="1218" as="geometry" />
+        </mxCell>
+        <mxCell id="CTOoQPAqr4BoT_6rQmBS-3" value="Machine Learning (ML)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=30;fontStyle=0;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="-277" y="-574" width="317" height="98" as="geometry" />
+        </mxCell>
+        <mxCell id="CTOoQPAqr4BoT_6rQmBS-4" value="Neural Networks (NNs)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=30;fontStyle=0;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+          <mxGeometry x="-277" y="-458" width="317" height="98" as="geometry" />
+        </mxCell>
+        <mxCell id="CTOoQPAqr4BoT_6rQmBS-5" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#DBF9FC;strokeColor=#6c8ebf;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="-668.5" y="-366" width="1100" height="1100" as="geometry" />
+        </mxCell>
+        <mxCell id="CTOoQPAqr4BoT_6rQmBS-6" value="Deep Neural Networks (DNNs)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=30;fontStyle=0;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="-277" y="-333" width="317" height="98" as="geometry" />
+        </mxCell>
+        <mxCell id="CTOoQPAqr4BoT_6rQmBS-7" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=light-dark(#bbf5fc, #032124);strokeColor=#82b366;gradientColor=none;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="-632" y="-25.5" width="419" height="419" as="geometry" />
+        </mxCell>
+        <mxCell id="CTOoQPAqr4BoT_6rQmBS-8" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#B0FCF0;strokeColor=#6c8ebf;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="-189" y="-118" width="587" height="587" as="geometry" />
+        </mxCell>
+        <mxCell id="CTOoQPAqr4BoT_6rQmBS-9" value="Convolution Neural Networks (CNNs)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=30;fontStyle=0;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="-581" y="19.5" width="317" height="98" as="geometry" />
+        </mxCell>
+        <mxCell id="CTOoQPAqr4BoT_6rQmBS-10" value="Recurrent Neural Networks (RNNs)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=30;fontStyle=0;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="-54" y="-61" width="317" height="98" as="geometry" />
+        </mxCell>
+        <mxCell id="CTOoQPAqr4BoT_6rQmBS-11" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#C7FCC7;strokeColor=#6c8ebf;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="-93.5" y="73" width="396" height="396" as="geometry" />
+        </mxCell>
+        <mxCell id="CTOoQPAqr4BoT_6rQmBS-12" value="Long Short Term Model (LSTM)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=30;fontStyle=0;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="-54" y="150" width="317" height="98" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,76 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.1.2 Chrome/138.0.7204.243 Electron/37.4.0 Safari/537.36" version="28.1.2">
+  <diagram name="DNN with Dog Input and 3 Hidden Layers" id="0">
+    <mxGraphModel dx="971" dy="674" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="inputDog" value="" style="shape=image;imageAspect=0;image=https://images.unsplash.com/photo-1518717758536-85ae29035b6d;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="60" y="280" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="hl1" value="Hidden Layer 1" style="shape=rectangle;rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+          <mxGeometry x="260" y="160" width="160" height="320" as="geometry" />
+        </mxCell>
+        <mxCell id="n1" value="Neuron 1" style="ellipse;fillColor=#ffffff;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="310" y="180" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" value="Neuron 2" style="ellipse;fillColor=#ffffff;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="310" y="250" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" value="Neuron 3" style="ellipse;fillColor=#ffffff;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="310" y="360" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" value="Neuron 4" style="ellipse;fillColor=#ffffff;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="310" y="430" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="hl2" value="Hidden Layer 2" style="shape=rectangle;rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+          <mxGeometry x="480" y="160" width="160" height="320" as="geometry" />
+        </mxCell>
+        <mxCell id="m1" value="Neuron 1" style="ellipse;fillColor=#ffffff;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="530" y="180" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="m2" value="Neuron 2" style="ellipse;fillColor=#ffffff;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="530" y="250" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="m3" value="Neuron 3" style="ellipse;fillColor=#ffffff;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="530" y="360" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="m4" value="Neuron 4" style="ellipse;fillColor=#ffffff;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="530" y="430" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="hl3" value="Hidden Layer 3" style="shape=rectangle;rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
+          <mxGeometry x="700" y="160" width="160" height="320" as="geometry" />
+        </mxCell>
+        <mxCell id="p1" value="Neuron 1" style="ellipse;fillColor=#ffffff;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="750" y="180" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="Neuron 2" style="ellipse;fillColor=#ffffff;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="750" y="250" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="Neuron 3" style="ellipse;fillColor=#ffffff;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="750" y="360" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p4" value="Neuron 4" style="ellipse;fillColor=#ffffff;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="750" y="430" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="output" value="Most probable output class: Dog" style="shape=rectangle;rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="920" y="270" width="160" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" style="endArrow=block;strokeColor=#000000;" parent="1" source="inputDog" target="hl1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="endArrow=block;strokeColor=#000000;" parent="1" source="hl1" target="hl2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="endArrow=block;strokeColor=#000000;" parent="1" source="hl2" target="hl3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" style="endArrow=block;strokeColor=#000000;" parent="1" source="hl3" target="output" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="djXRtkenUM5u4Jn1f-NP-1" value="Input Image" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="90" y="370" width="60" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
