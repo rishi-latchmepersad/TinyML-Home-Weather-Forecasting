@@ -50,10 +50,10 @@ extern osMutexId_t g_fs_mutex;
 #define FORECAST_TEMP_TASK_PRIORITY         (osPriorityLow)
 // Declare how often (in milliseconds) we poll the sensors for a new reading.
 #define FORECAST_TEMP_TASK_PERIOD_MS        (60000u)
-// Declare how many 15-minute samples we keep inside the sliding input window.
-#define FORECAST_TEMP_WINDOW_LENGTH         (1u)
-// Declare how many minute samples we fold into a single 15-minute aggregate.
-#define FORECAST_TEMP_MINUTES_PER_SLOT      (15u)
+// Declare how many 30-minute samples we keep inside the sliding input window.
+#define FORECAST_TEMP_WINDOW_LENGTH         (48u)
+// Declare how many minute samples we fold into a single 30-minute aggregate.
+#define FORECAST_TEMP_MINUTES_PER_SLOT      (30u)
 // Declare how many 15-minute slots back we look when computing the temperature delta.
 #define FORECAST_TEMP_DELTA_T_LAG_SLOTS     (1u)
 // Declare how many 15-minute slots back we look when computing the pressure delta (6 hours).

@@ -285,7 +285,6 @@ static bool veml7700_configure_device_(void) {
  *                 with other threads via veml7700_get_latest().
  * Timing:         Periodic sampling per VEML7700_SAMPLE_PERIOD_MS.
  * Errors:         On repeated failures transitions to fatal state.
- * Notes:          Replace printf with your logging layer in production.
  * =======================================================================
  */
 static void veml7700_thread_entry_function_(void *thread_argument_ptr) {
