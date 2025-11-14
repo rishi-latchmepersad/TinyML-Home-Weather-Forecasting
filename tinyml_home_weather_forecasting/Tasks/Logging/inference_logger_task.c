@@ -20,7 +20,7 @@
 #define INFERENCE_LOGGER_TASK_PRIORITY      (osPriorityLow) // Run the logger at low priority so it does not block critical work.
 #endif // End of default priority guard.
 #ifndef INFERENCE_LOGGER_BUFFER_BYTES // Permit build-time customization of the write buffer size.
-#define INFERENCE_LOGGER_BUFFER_BYTES       (192u) // Buffer writes to limit SD card access frequency while staying memory conscious.
+#define INFERENCE_LOGGER_BUFFER_BYTES       (1024u) // Buffer writes to limit SD card access frequency while staying memory conscious.
 #endif // End of default buffer size guard.
 #ifndef INFERENCE_LOGGER_BASE_DIR // Let integrators change the log directory without modifying code.
 #define INFERENCE_LOGGER_BASE_DIR           "0:/logs" // Store logs on the SD card in the /logs directory for organization.
@@ -42,8 +42,10 @@ static void inference_logger_task_entry(void *argument); // Forward declaration 
 static bool inference_logger_ensure_directory_exists(const char *dir_path); // Forward declaration for ensuring the log directory exists before writing.
 static bool inference_logger_open_today_file(const char *date_yyyy_mm_dd); // Forward declaration for opening the daily log file based on the current date.
 static bool inference_logger_flush_buffer_to_file(void); // Forward declaration for writing the buffered log data out to the SD card.
+static bool inference_logger_write_header(FIL *file); // Forward declaration for emitting the CSV header with lead-time columns.
 static size_t inference_logger_format_csv_line(const char *timestamp_iso8601, // Forward declaration for formatting an individual CSV log line.
-                                               float predicted_temperature_c, // Parameter describing the predicted temperature we want to store.
+                                               const float *predicted_temperatures_c, // Parameter describing the predicted temperature vector we want to store.
+                                               size_t prediction_count, // Number of forecast slots carried in the vector.
                                                char *out_line, // Pointer to the destination buffer where the formatted line will be written.
                                                size_t out_capacity); // Capacity of the destination buffer to prevent overruns.
 // -----------------------------------------------------------------------------
@@ -148,12 +150,16 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
                 break; // Leave the RUNNING case so the state machine processes the rotation.
             } // End date change check.
 // -----------------------------------------------------------------------------
-            float predicted_temperature_c = 0.0f; // Variable to hold the latest predicted temperature value.
-            if (forecast_temp_get_latest_prediction(&predicted_temperature_c)) { // Attempt to retrieve a new prediction from the forecasting module.
-            	printf("We successfully got a prediction! %f \n",predicted_temperature_c);
-                char line[96]; // Buffer to store the formatted CSV line before writing to the main buffer.
+            float predicted_temperatures_c[FORECAST_TEMP_FORECAST_HORIZON_SLOTS] = {0.0f}; // Buffer to hold the latest predicted temperature vector.
+            if (forecast_temp_get_latest_prediction(predicted_temperatures_c, FORECAST_TEMP_FORECAST_HORIZON_SLOTS)) { // Attempt to retrieve a new prediction from the forecasting module.
+                const double first_slot = (FORECAST_TEMP_FORECAST_HORIZON_SLOTS > 0u) ? (double)predicted_temperatures_c[0] : 0.0;
+                printf("We successfully got a %lu-slot prediction vector. First slot: %.2f C\n",
+                       (unsigned long)FORECAST_TEMP_FORECAST_HORIZON_SLOTS,
+                       first_slot);
+                char line[512]; // Buffer to store the formatted CSV line before writing to the main buffer.
                 size_t len = // Variable capturing the number of bytes in the formatted log entry.
-                    inference_logger_format_csv_line(ts_now, predicted_temperature_c, // Format the timestamp and temperature into CSV format.
+                    inference_logger_format_csv_line(ts_now, predicted_temperatures_c,
+                                                      FORECAST_TEMP_FORECAST_HORIZON_SLOTS,
                                                       line, sizeof line); // Provide the destination buffer and its capacity to prevent overflow.
                 if (len > 0u) { // Ensure the formatted line is valid before attempting to buffer it.
                     if ((g_write_used + len) > sizeof g_write_buffer) { // Check if adding the line would exceed the buffer capacity.
@@ -222,18 +228,23 @@ static bool inference_logger_flush_buffer_to_file(void) { // Helper that writes 
     if (!g_file_open) { // If the file is not currently open, open it before writing.
         FS_LOCK(); // Acquire the filesystem mutex to protect the FatFS calls.
         FRESULT fr = f_open(&g_active_file, g_active_path, FA_OPEN_ALWAYS | FA_WRITE); // Try opening the active file, creating it if necessary.
+        bool header_ok = true; // Track whether header emission succeeded when needed.
         if (fr == FR_OK) { // Only proceed if the file opened successfully.
             if (f_size(&g_active_file) == 0) { // If the file is new and empty, we need to add a header row.
-                const char *hdr = "timestamp_iso8601,predicted_temperature_c\r\n"; // Define the CSV header to label the columns.
-                UINT bw = 0; // Track how many bytes FatFS reports as written.
-                (void)f_write(&g_active_file, hdr, (UINT)strlen(hdr), &bw); // Write the header to the file.
-                if (bw == (UINT)strlen(hdr)) { // Confirm the entire header was written successfully.
-                    (void)f_sync(&g_active_file); // Flush the file system buffers to ensure the header reaches storage.
-                } // End header write verification.
-                (void)disk_ioctl(0, CTRL_SYNC, NULL); // Force the physical disk to commit data to reduce risk of loss on power failure.
+                header_ok = inference_logger_write_header(&g_active_file); // Emit the header that labels each forecast horizon.
+                if (header_ok) { // When successful, push the header to the storage media.
+                    (void)disk_ioctl(0, CTRL_SYNC, NULL); // Force the physical disk to commit data to reduce risk of loss on power failure.
+                }
             } // End check for empty file requiring header.
-            (void)f_lseek(&g_active_file, f_size(&g_active_file)); // Seek to the end of the file so new entries append correctly.
-            g_file_open = true; // Record that the file is now open for future flushes.
+            if (header_ok) { // Only seek when the header operation succeeded.
+                fr = f_lseek(&g_active_file, f_size(&g_active_file)); // Seek to the end of the file so new entries append correctly.
+                if (fr == FR_OK) {
+                    g_file_open = true; // Record that the file is now open for future flushes.
+                }
+            } else {
+                (void)f_close(&g_active_file); // Close the file so the caller can retry later.
+                fr = FR_INT_ERR; // Force an error so the caller enters the backoff path.
+            }
         } // End open success check.
         FS_UNLOCK(); // Release the filesystem lock regardless of success so others are not blocked.
 // -----------------------------------------------------------------------------
@@ -258,6 +269,45 @@ static bool inference_logger_flush_buffer_to_file(void) { // Helper that writes 
     g_write_used = 0u; // Reset the buffered byte count so we can accumulate new data.
     return true; // Indicate that flushing succeeded.
 } // End of inference_logger_flush_buffer_to_file helper.
+// -----------------------------------------------------------------------------
+static bool inference_logger_write_header(FIL *file) { // Helper that writes the CSV header with all forecast lead times.
+    if (file == NULL) { // Guard against a NULL file pointer.
+        return false;
+    }
+    char header[1024]; // Buffer to assemble the header line with all horizon columns.
+    size_t used = 0u; // Track how many bytes of the buffer have been populated so far.
+    int written = snprintf(header, sizeof header, "timestamp_iso8601"); // Seed the header with the timestamp column.
+    if (written <= 0 || (size_t)written >= sizeof header) { // Validate the snprintf result for errors or truncation.
+        return false;
+    }
+    used = (size_t)written; // Update the number of bytes consumed.
+    for (size_t i = 0u; i < FORECAST_TEMP_FORECAST_HORIZON_SLOTS; ++i) { // Append one column per forecast slot.
+        const uint32_t lead_minutes_total = (uint32_t)((i + 1u) * FORECAST_TEMP_MINUTES_PER_SLOT); // Convert slot index to minutes ahead.
+        const uint32_t lead_hours = lead_minutes_total / 60u; // Derive the hour portion of the lead time.
+        const uint32_t lead_minutes = lead_minutes_total % 60u; // Derive the remaining minutes beyond whole hours.
+        written = snprintf(&header[used], sizeof header - used,
+                           ",predicted_temperature_c_plus_%02luh%02lum",
+                           (unsigned long)lead_hours,
+                           (unsigned long)lead_minutes); // Append the column label with the corresponding lead time.
+        if (written <= 0 || (size_t)written >= (sizeof header - used)) { // Abort on formatting errors or truncation.
+            return false;
+        }
+        used += (size_t)written; // Consume the newly written bytes.
+    }
+    if ((used + 2u) >= sizeof header) { // Ensure there is room for CRLF terminator.
+        return false;
+    }
+    header[used++] = '\r'; // Append carriage return to terminate the CSV header line.
+    header[used++] = '\n'; // Append newline to complete the header line.
+    header[used] = '\0'; // Null-terminate for safety when debugging.
+    UINT bw = 0u; // Capture the number of bytes written by FatFS.
+    FRESULT fr = f_write(file, header, (UINT)used, &bw); // Emit the header to the file.
+    if ((fr != FR_OK) || (bw != (UINT)used)) { // Validate the write operation.
+        return false;
+    }
+    fr = f_sync(file); // Flush the header so it is not lost on power failure.
+    return (fr == FR_OK); // Report whether flushing succeeded.
+} // End of inference_logger_write_header helper.
 // -----------------------------------------------------------------------------
 static bool inference_logger_ensure_directory_exists(const char *dir_path) { // Ensure the specified logging directory is present on the filesystem.
     FILINFO fi; // Structure used by FatFS to receive file/directory information.
@@ -307,15 +357,14 @@ static bool inference_logger_open_today_file(const char *date_yyyy_mm_dd) { // O
         FS_LOCK(); // Acquire the filesystem mutex before creating the file.
         fr = f_open(&g_active_file, path, FA_CREATE_NEW | FA_WRITE); // Create a new file ready for writing.
         if (fr == FR_OK) { // If creation succeeded, write the CSV header.
-            const char *hdr = "timestamp_iso8601,predicted_temperature_c\r\n"; // Header describing the columns stored in the log.
-            UINT bw = 0U; // Track how many bytes were written to validate the write.
-            fr = f_write(&g_active_file, hdr, (UINT)strlen(hdr), &bw); // Write the header to the new file.
-            if (fr == FR_OK && bw == (UINT)strlen(hdr)) { // Confirm the header was written successfully.
-                (void)f_sync(&g_active_file); // Flush the header to storage to avoid losing it if power fails.
-            } // End header write verification for new file.
+            const bool header_ok = inference_logger_write_header(&g_active_file); // Emit the header row with lead-time columns.
             (void)f_close(&g_active_file); // Close the file to finalize creation before reopening for appending.
+            if (!header_ok) { // Abort when header generation fails.
+                FS_UNLOCK(); // Release the mutex before returning so callers can retry later.
+                return false;
+            }
             (void)disk_ioctl(0, CTRL_SYNC, NULL); // Issue a disk sync command to push the header to the SD card.
-        } // End new file creation handling.
+        }
         FS_UNLOCK(); // Release the filesystem mutex after file creation.
         if (fr != FR_OK) { // If creation or header write failed, indicate failure.
             return false; // Abort opening so the caller can handle the error.
@@ -344,16 +393,36 @@ static bool inference_logger_open_today_file(const char *date_yyyy_mm_dd) { // O
     return true; // Indicate that the file is ready for logging.
 } // End of inference_logger_open_today_file helper.
 // -----------------------------------------------------------------------------
-static size_t inference_logger_format_csv_line(const char *timestamp_iso8601, // Format a log line from the provided timestamp and prediction.
-                                               float predicted_temperature_c, // Temperature prediction to include in the log line.
+static size_t inference_logger_format_csv_line(const char *timestamp_iso8601, // Format a log line from the provided timestamp and prediction vector.
+                                               const float *predicted_temperatures_c, // Temperature predictions to include in the log line.
+                                               size_t prediction_count, // Number of predictions contained in the vector.
                                                char *out_line, // Buffer where the formatted CSV line should be placed.
                                                size_t out_capacity) { // Size of the destination buffer to prevent overruns.
-    int n = snprintf(out_line, out_capacity, "%s,%.6f\r\n", // Format the CSV string with six decimal places for temperature precision.
-                     (timestamp_iso8601 != NULL) ? timestamp_iso8601 : "TIME?", // Use a fallback label if the timestamp pointer is null to avoid crashing.
-                     (double)predicted_temperature_c); // Cast to double for printf compatibility and improved precision.
-    if (n <= 0 || (size_t)n >= out_capacity) { // Check for formatting errors or truncation that would invalidate the line.
-        return 0u; // Return zero length to signal failure so the caller can skip buffering.
-    } // End validation of formatted length.
-    return (size_t)n; // Return the actual number of bytes written so the caller knows how much data to buffer.
+    if ((out_line == NULL) || (out_capacity == 0u) || (predicted_temperatures_c == NULL)) { // Validate inputs before formatting.
+        return 0u;
+    }
+    const char *timestamp = (timestamp_iso8601 != NULL) ? timestamp_iso8601 : "TIME?"; // Provide a fallback label for missing timestamps.
+    int n = snprintf(out_line, out_capacity, "%s", timestamp); // Start the line with the timestamp column.
+    if (n <= 0 || (size_t) n >= out_capacity) { // Abort when snprintf fails or truncates the output.
+        return 0u;
+    }
+    size_t used = (size_t) n; // Track how many bytes were consumed so far.
+    for (size_t i = 0u; i < prediction_count; ++i) { // Append each prediction to the CSV row.
+        if (used >= out_capacity) { // Abort if the buffer is already full.
+            return 0u;
+        }
+        n = snprintf(&out_line[used], out_capacity - used, ",%.6f", (double) predicted_temperatures_c[i]); // Append the prediction with six decimal places.
+        if (n <= 0 || (size_t) n >= (out_capacity - used)) { // Abort on formatting errors or truncation.
+            return 0u;
+        }
+        used += (size_t) n; // Consume the newly written bytes before appending the next value.
+    }
+    if ((used + 2u) >= out_capacity) { // Ensure there is room for CRLF and a terminating null character.
+        return 0u;
+    }
+    out_line[used++] = '\r'; // Append carriage return to terminate the CSV row.
+    out_line[used++] = '\n'; // Append newline to complete the row.
+    out_line[used] = '\0'; // Null-terminate for safety even though the caller uses the returned length.
+    return used; // Return the number of bytes written so the caller can update buffer usage.
 } // End of inference_logger_format_csv_line helper.
 // -----------------------------------------------------------------------------
