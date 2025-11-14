@@ -50,17 +50,19 @@ extern osMutexId_t g_fs_mutex;
 #define FORECAST_TEMP_TASK_PRIORITY         (osPriorityLow)
 // Declare how often (in milliseconds) we poll the sensors for a new reading.
 #define FORECAST_TEMP_TASK_PERIOD_MS        (60000u)
-// Declare how many 30-minute samples we keep inside the sliding input window.
+// Declare how many 30-minute slots we keep inside the sliding input window.
 #define FORECAST_TEMP_WINDOW_LENGTH         (48u)
+#ifndef FORECAST_TEMP_MINUTES_PER_SLOT
 // Declare how many minute samples we fold into a single 30-minute aggregate.
 #define FORECAST_TEMP_MINUTES_PER_SLOT      (30u)
-// Declare how many 15-minute slots back we look when computing the temperature delta.
+#endif
+// Declare how many 30-minute slots back we look when computing the temperature delta.
 #define FORECAST_TEMP_DELTA_T_LAG_SLOTS     (1u)
-// Declare how many 15-minute slots back we look when computing the pressure delta (6 hours).
+// Declare how many 30-minute slots back we look when computing the pressure delta (12 hours).
 #define FORECAST_TEMP_DELTA_P_LAG_SLOTS     (24u)
 // Declare how many engineered plus raw features the model expects per time step.
 #define FORECAST_TEMP_FEATURE_COUNT         (7u)
-// Declare how many chronological slots the compiled model encodes per inference.
+// Declare how many chronological 30-minute slots the compiled model encodes per inference.
 #define FORECAST_TEMP_NETWORK_WINDOW_SLOTS  (AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE / FORECAST_TEMP_FEATURE_COUNT)
 // Declare the capacity of our raw history ring so pressure deltas have room.
 #define FORECAST_TEMP_HISTORY_CAPACITY      (FORECAST_TEMP_WINDOW_LENGTH + FORECAST_TEMP_DELTA_P_LAG_SLOTS)
@@ -75,8 +77,12 @@ extern osMutexId_t g_fs_mutex;
 #error "AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE must be divisible by FORECAST_TEMP_FEATURE_COUNT"
 #endif
 
-#if (FORECAST_TEMP_NETWORK_WINDOW_SLOTS < FORECAST_TEMP_WINDOW_LENGTH)
-#error "FORECAST_TEMP_WINDOW_LENGTH cannot exceed the number of time slots encoded in the model input tensor"
+#if (FORECAST_TEMP_WINDOW_LENGTH != 48u)
+#error "FORECAST_TEMP_WINDOW_LENGTH must remain aligned with 48 30-minute slots"
+#endif
+
+#if (FORECAST_TEMP_NETWORK_WINDOW_SLOTS != FORECAST_TEMP_WINDOW_LENGTH)
+#error "Model input tensor must encode exactly 48 30-minute slots to match the live window"
 #endif
 
 // Define a small struct that records a measurement log filename and its date key.
@@ -111,9 +117,9 @@ typedef struct {
         float illuminance_lux;
 } forecast_temp_measurement_bundle_t;
 
-// Define a struct that aggregates completed bundles into 15-minute averages.
+// Define a struct that aggregates completed bundles into 30-minute averages.
 typedef struct {
-        // Remember which 15-minute slot the current accumulation represents.
+        // Remember which 30-minute slot the current accumulation represents.
         char slot_key[20];
         // Track the running sum of temperature readings inside this slot.
         float temperature_sum;
@@ -152,8 +158,8 @@ static const float g_feature_stds[FORECAST_TEMP_FEATURE_COUNT] = {
 static osThreadId_t g_forecast_thread_id = NULL;
 // Hold a mutex so multiple callers can safely read the latest prediction.
 static osMutexId_t g_prediction_mutex = NULL;
-// Remember the most recent prediction so other modules can use it.
-static float g_latest_prediction_c = 0.0f;
+// Remember the most recent prediction vector so other modules can use it.
+static float g_latest_prediction_c[FORECAST_TEMP_FORECAST_HORIZON_SLOTS] = { 0.0f };
 // Track whether we have produced a prediction yet.
 static bool g_latest_prediction_valid = false;
 
@@ -179,7 +185,7 @@ static float g_output_scale = 1.0f;
 // Cache the zero-point that maps the int8 output back into floating-point units.
 static int32_t g_output_zero_point = 0;
 
-// Define a helper struct that accumulates minute-level readings into a 15-minute slot.
+// Define a helper struct that accumulates minute-level readings into a 30-minute slot.
 typedef struct {
         // Track the running sum of temperature readings.
         float temperature_sum;
@@ -207,9 +213,9 @@ typedef enum {
         FORECAST_TEMP_STATE_FETCH_SENSORS,
         // Fold the freshly fetched minute sample into the slot accumulator.
         FORECAST_TEMP_STATE_ACCUMULATE_MINUTE,
-        // Determine whether a full 15-minute slot has elapsed and averages can be computed.
+        // Determine whether a full 30-minute slot has elapsed and averages can be computed.
         FORECAST_TEMP_STATE_CHECK_SLOT,
-        // Generate normalized features for the completed slot.
+        // Generate normalized features for the completed 30-minute slot.
         FORECAST_TEMP_STATE_PREPARE_FEATURES,
         // Append the normalized feature vector into the sliding window.
         FORECAST_TEMP_STATE_APPEND_FEATURES,
@@ -233,30 +239,30 @@ typedef struct {
         float pressure_pa;
         // Cache the most recent minute-level VEML7700 illuminance reading.
         float illuminance_lux;
-        // Cache the averaged 15-minute temperature during the CHECK_SLOT step.
+        // Cache the averaged 30-minute temperature during the CHECK_SLOT step.
         float slot_temperature_c;
-        // Cache the averaged 15-minute humidity during the CHECK_SLOT step.
+        // Cache the averaged 30-minute humidity during the CHECK_SLOT step.
         float slot_humidity_pct;
-        // Cache the averaged 15-minute pressure during the CHECK_SLOT step.
+        // Cache the averaged 30-minute pressure during the CHECK_SLOT step.
         float slot_pressure_pa;
-        // Cache the averaged 15-minute illuminance during the CHECK_SLOT step.
+        // Cache the averaged 30-minute illuminance during the CHECK_SLOT step.
         float slot_illuminance_lux;
         // Hold the normalized features generated for the current slot.
         float normalized_features[FORECAST_TEMP_FEATURE_COUNT];
-        // Hold the most recent neural-network prediction prior to publication.
-        float predicted_temperature_c;
+        // Hold the most recent neural-network prediction vector prior to publication.
+        float predicted_temperatures_c[FORECAST_TEMP_FORECAST_HORIZON_SLOTS];
 } forecast_temp_task_context_t;
 
-// Store the raw 15-minute temperature history so delta computations are easy.
+// Store the raw 30-minute temperature history so delta computations are easy.
 static float g_slot_temperature_history[FORECAST_TEMP_HISTORY_CAPACITY] = { 0.0f };
-// Store the raw 15-minute pressure history so delta computations are easy.
+// Store the raw 30-minute pressure history so delta computations are easy.
 static float g_slot_pressure_history[FORECAST_TEMP_HISTORY_CAPACITY] = { 0.0f };
 // Track the index of the oldest element in the raw history ring buffer.
 static size_t g_slot_history_head = 0u;
 // Track how many elements are currently stored in the raw history ring buffer.
 static size_t g_slot_history_count = 0u;
 
-// Store the normalized feature vectors for each 15-minute step in a ring buffer.
+// Store the normalized feature vectors for each 30-minute step in a ring buffer.
 static float g_feature_window[FORECAST_TEMP_WINDOW_LENGTH][FORECAST_TEMP_FEATURE_COUNT] = { 0.0f };
 // Track the index of the oldest feature vector in the sliding window.
 static size_t g_feature_window_head = 0u;
@@ -271,9 +277,9 @@ static bool forecast_temp_initialize_network(void);
 static void forecast_temp_extract_quantization(const ai_buffer *buffer, float *scale_out, int32_t *zero_point_out);
 // Forward declare a helper that reads the RTC and converts to local hour-of-day.
 static bool forecast_temp_read_local_hour(uint8_t *hour_out);
-// Forward declare a helper that drops minute samples into the 15-minute accumulator.
+// Forward declare a helper that drops minute samples into the 30-minute accumulator.
 static void forecast_temp_accumulate_minute_sample(float temperature_c, float humidity_pct, float pressure_pa, float illuminance_lux);
-// Forward declare a helper that reports when the accumulator has a full 15-minute slot ready.
+// Forward declare a helper that reports when the accumulator has a full 30-minute slot ready.
 static bool forecast_temp_finalize_slot_sample(float *temperature_c_out, float *humidity_pct_out, float *pressure_pa_out, float *illuminance_lux_out);
 // Forward declare a helper that updates the raw history ring buffer.
 static void forecast_temp_store_slot_history(float temperature_c, float pressure_pa);
@@ -284,12 +290,12 @@ static void forecast_temp_append_feature_vector(const float normalized_features[
 // Forward declare a helper that exports the sliding window into the int8 input tensor.
 static bool forecast_temp_export_window_to_network(int8_t *destination_buffer);
 // Forward declare a helper that runs the model once the window is full.
-static bool forecast_temp_run_inference(float *prediction_out);
+static bool forecast_temp_run_inference(float predictions_out[FORECAST_TEMP_FORECAST_HORIZON_SLOTS]);
 // Forward declare a helper that replays persisted CSV data into the sliding window.
 static void forecast_temp_bootstrap_from_sd_card(void);
 // Forward declare a helper that resets a measurement bundle back to an empty state.
 static void forecast_temp_bootstrap_reset_bundle(forecast_temp_measurement_bundle_t *bundle);
-// Forward declare a helper that feeds a completed bundle into the 15-minute accumulator.
+// Forward declare a helper that feeds a completed bundle into the 30-minute accumulator.
 static void forecast_temp_bootstrap_submit_bundle(forecast_temp_measurement_bundle_t *bundle, forecast_temp_slot_bucket_t *slot_bucket, uint32_t *minute_counter, uint32_t *slot_counter);
 // Forward declare a helper that accumulates a bundle into the current slot bucket.
 static void forecast_temp_bootstrap_accumulate_bundle(const forecast_temp_measurement_bundle_t *bundle, forecast_temp_slot_bucket_t *slot_bucket, uint32_t *minute_counter, uint32_t *slot_counter);
@@ -326,10 +332,10 @@ bool forecast_temp_task_start(void) {
         return (g_forecast_thread_id != NULL);
 }
 
-// Allow other modules to fetch the latest predicted temperature.
-bool forecast_temp_get_latest_prediction(float *temperature_c_out) {
-        // Guard against a NULL pointer from the caller.
-        if (temperature_c_out == NULL) {
+// Allow other modules to fetch the latest predicted temperature vector.
+bool forecast_temp_get_latest_prediction(float *temperatures_c_out, size_t temperatures_capacity) {
+        // Guard against NULL pointers or undersized output buffers from the caller.
+        if ((temperatures_c_out == NULL) || (temperatures_capacity < FORECAST_TEMP_FORECAST_HORIZON_SLOTS)) {
                 return false;
         }
         // Assume the prediction is unavailable until proven otherwise.
@@ -338,9 +344,11 @@ bool forecast_temp_get_latest_prediction(float *temperature_c_out) {
         if (g_prediction_mutex != NULL) {
                 (void) osMutexAcquire(g_prediction_mutex, osWaitForever);
         }
-        // Copy the prediction when we have emitted one already.
+        // Copy the prediction vector when we have emitted one already.
         if (g_latest_prediction_valid) {
-                *temperature_c_out = g_latest_prediction_c;
+                memcpy(temperatures_c_out,
+                       g_latest_prediction_c,
+                       sizeof(float) * FORECAST_TEMP_FORECAST_HORIZON_SLOTS);
                 has_prediction = true;
         }
         // Release the mutex now that we are done.
@@ -379,7 +387,7 @@ static void forecast_temp_bootstrap_reset_bundle(forecast_temp_measurement_bundl
         bundle->illuminance_lux = 0.0f;
 }
 
-// Accumulate a completed measurement bundle into the active 15-minute bucket.
+// Accumulate a completed measurement bundle into the active 30-minute bucket.
 static void forecast_temp_bootstrap_accumulate_bundle(const forecast_temp_measurement_bundle_t *bundle, forecast_temp_slot_bucket_t *slot_bucket, uint32_t *minute_counter, uint32_t *slot_counter) {
         // Guard against NULL arguments before we touch any fields.
         if ((bundle == NULL) || (slot_bucket == NULL)) {
@@ -431,7 +439,7 @@ static void forecast_temp_bootstrap_accumulate_bundle(const forecast_temp_measur
         }
 }
 
-// Finalize a 15-minute bucket by generating features and running inference if possible.
+// Finalize a 30-minute bucket by generating features and running inference if possible.
 static void forecast_temp_bootstrap_finalize_slot(forecast_temp_slot_bucket_t *bucket, uint32_t *slot_counter) {
         // Guard against NULL pointers and empty buckets.
         if ((bucket == NULL) || (bucket->sample_count == 0u)) {
@@ -457,18 +465,20 @@ static void forecast_temp_bootstrap_finalize_slot(forecast_temp_slot_bucket_t *b
         if (g_feature_window_count >= FORECAST_TEMP_WINDOW_LENGTH) {
                 // Attempt to export the normalized window into the quantized network buffer.
                 if (forecast_temp_export_window_to_network(g_network_input_buffer)) {
-                        // Prepare a variable to hold the predicted temperature.
-                        float predicted = 0.0f;
-                        // Invoke the neural network to obtain a prediction.
-                        if (forecast_temp_run_inference(&predicted)) {
-                                // Acquire the mutex before updating the shared prediction state.
-                                if (g_prediction_mutex != NULL) {
-                                        (void) osMutexAcquire(g_prediction_mutex, osWaitForever);
-                                }
-                                // Store the freshly predicted temperature.
-                                g_latest_prediction_c = predicted;
-                                // Flag that a prediction is now available.
-                                g_latest_prediction_valid = true;
+        // Prepare storage to hold the predicted temperature vector.
+        float predicted[FORECAST_TEMP_FORECAST_HORIZON_SLOTS] = { 0.0f };
+        // Invoke the neural network to obtain a prediction vector.
+        if (forecast_temp_run_inference(predicted)) {
+                // Acquire the mutex before updating the shared prediction state.
+                if (g_prediction_mutex != NULL) {
+                        (void) osMutexAcquire(g_prediction_mutex, osWaitForever);
+                }
+                // Store the freshly predicted temperatures.
+                memcpy(g_latest_prediction_c,
+                       predicted,
+                       sizeof(float) * FORECAST_TEMP_FORECAST_HORIZON_SLOTS);
+                // Flag that a prediction is now available.
+                g_latest_prediction_valid = true;
                                 // Release the mutex once the shared state is updated.
                                 if (g_prediction_mutex != NULL) {
                                         (void) osMutexRelease(g_prediction_mutex);
@@ -494,7 +504,7 @@ static void forecast_temp_bootstrap_finalize_slot(forecast_temp_slot_bucket_t *b
         bucket->sample_count = 0u;
 }
 
-// Forward a completed bundle into the 15-minute accumulator and reset it for reuse.
+// Forward a completed bundle into the 30-minute accumulator and reset it for reuse.
 static void forecast_temp_bootstrap_submit_bundle(forecast_temp_measurement_bundle_t *bundle, forecast_temp_slot_bucket_t *slot_bucket, uint32_t *minute_counter, uint32_t *slot_counter) {
         // Guard against NULL pointers before doing any work.
         if ((bundle == NULL) || (slot_bucket == NULL)) {
@@ -736,13 +746,13 @@ static void forecast_temp_bootstrap_from_sd_card(void) {
                         }
                 }
         }
-        // Prepare the slot bucket that will accumulate bundles into 15-minute averages.
+        // Prepare the slot bucket that will accumulate bundles into 30-minute averages.
         forecast_temp_slot_bucket_t slot_bucket;
         // Zero-initialize the slot bucket before it sees any data.
         memset(&slot_bucket, 0, sizeof(slot_bucket));
         // Track how many minute-level bundles we replay from storage.
         uint32_t minute_counter = 0u;
-        // Track how many 15-minute aggregates we reconstruct during replay.
+        // Track how many 30-minute aggregates we reconstruct during replay.
         uint32_t slot_counter = 0u;
         // Iterate over the sorted files so older data feeds the window first.
         for (size_t i = 0u; i < file_count; ++i) {
@@ -756,10 +766,10 @@ static void forecast_temp_bootstrap_from_sd_card(void) {
         forecast_temp_bootstrap_finalize_slot(&slot_bucket, &slot_counter);
         // Emit a summary so we know how much persisted data was consumed.
         if (slot_counter > 0u) {
-                printf("[forecast] bootstrap replayed %lu samples across %lu 15-minute slots\r\n", (unsigned long) minute_counter, (unsigned long) slot_counter);
+                printf("[forecast] bootstrap replayed %lu samples across %lu 30-minute slots\r\n", (unsigned long) minute_counter, (unsigned long) slot_counter);
                 printf("[forecast] bootstrap window_count=%lu history_count=%lu\r\n", (unsigned long) g_feature_window_count, (unsigned long) g_slot_history_count);
         } else {
-                printf("[forecast] bootstrap did not assemble any complete 15-minute slots\r\n");
+                printf("[forecast] bootstrap did not assemble any complete 30-minute slots\r\n");
         }
 }
 
@@ -818,21 +828,21 @@ static void forecast_temp_task_entry(void *argument) {
                 case FORECAST_TEMP_STATE_ACCUMULATE_MINUTE:
                         // Fold this minute into the running slot sums.
                         forecast_temp_accumulate_minute_sample(context.temperature_c, context.humidity_pct, context.pressure_pa, context.illuminance_lux);
-                        // Check whether a full 15-minute slot boundary has been reached yet.
+                        // Check whether a full 30-minute slot boundary has been reached yet.
                         state = FORECAST_TEMP_STATE_CHECK_SLOT;
                         break;
                 case FORECAST_TEMP_STATE_CHECK_SLOT: {
-                        // Determine if the accumulator has enough data to emit a 15-minute average.
+                        // Determine if the accumulator has enough data to emit a 30-minute average.
                         const bool have_full_slot = forecast_temp_finalize_slot_sample(&context.slot_temperature_c, &context.slot_humidity_pct, &context.slot_pressure_pa, &context.slot_illuminance_lux);
                         if (!have_full_slot) {
                                 // Wait for additional minute samples when a slot has not elapsed.
-                                printf("[forecast] waiting for full 15-minute slot (%lu/%lu minute samples)\r\n",
+                                printf("[forecast] waiting for full 30-minute slot (%lu/%lu minute samples)\r\n",
                                        (unsigned long) g_slot_accumulator.sample_count,
                                        (unsigned long) FORECAST_TEMP_MINUTES_PER_SLOT);
                                 state = FORECAST_TEMP_STATE_WAIT_MINUTE;
                                 break;
                         }
-                        // A full 15-minute slot rolled over, so continue with feature preparation.
+                        // A full 30-minute slot rolled over, so continue with feature preparation.
                         state = FORECAST_TEMP_STATE_PREPARE_FEATURES;
                         break;
                 }
@@ -861,8 +871,8 @@ static void forecast_temp_task_entry(void *argument) {
                         }
                         break;
                 case FORECAST_TEMP_STATE_RUN_INFERENCE:
-                        // Run the neural network and capture the predicted value.
-                        if (!forecast_temp_run_inference(&context.predicted_temperature_c)) {
+                        // Run the neural network and capture the predicted vector.
+                        if (!forecast_temp_run_inference(context.predicted_temperatures_c)) {
                                 state = FORECAST_TEMP_STATE_WAIT_MINUTE;
                         } else {
                                 state = FORECAST_TEMP_STATE_PUBLISH_PREDICTION;
@@ -873,7 +883,9 @@ static void forecast_temp_task_entry(void *argument) {
                         if (g_prediction_mutex != NULL) {
                                 (void) osMutexAcquire(g_prediction_mutex, osWaitForever);
                         }
-                        g_latest_prediction_c = context.predicted_temperature_c;
+                        memcpy(g_latest_prediction_c,
+                               context.predicted_temperatures_c,
+                               sizeof(context.predicted_temperatures_c));
                         g_latest_prediction_valid = true;
                         if (g_prediction_mutex != NULL) {
                                 (void) osMutexRelease(g_prediction_mutex);
@@ -994,7 +1006,7 @@ static bool forecast_temp_read_local_hour(uint8_t *hour_out) {
         return true;
 }
 
-// Add a minute-level reading into the 15-minute accumulator.
+// Add a minute-level reading into the 30-minute accumulator.
 static void forecast_temp_accumulate_minute_sample(float temperature_c, float humidity_pct, float pressure_pa, float illuminance_lux) {
         // Add the new temperature sample into the running sum.
         g_slot_accumulator.temperature_sum += temperature_c;
@@ -1004,29 +1016,29 @@ static void forecast_temp_accumulate_minute_sample(float temperature_c, float hu
         g_slot_accumulator.pressure_sum += pressure_pa;
         // Add the new illuminance sample into the running sum.
         g_slot_accumulator.illuminance_sum += illuminance_lux;
-        // Increment the sample counter so we know how many minutes have accumulated.
+        // Increment the sample counter so we know how many minutes have accumulated toward the 30-minute slot.
         g_slot_accumulator.sample_count += 1u;
 }
 
-// Convert the minute accumulator into a 15-minute average when enough data exists.
+// Convert the minute accumulator into a 30-minute average when enough data exists.
 static bool forecast_temp_finalize_slot_sample(float *temperature_c_out, float *humidity_pct_out, float *pressure_pa_out, float *illuminance_lux_out) {
         // Ensure all output pointers are valid.
         if ((temperature_c_out == NULL) || (humidity_pct_out == NULL) || (pressure_pa_out == NULL) || (illuminance_lux_out == NULL)) {
                 return false;
         }
-        // Only compute an average once enough minute samples are available.
+        // Only compute an average once enough minute samples are available for the 30-minute slot.
         if (g_slot_accumulator.sample_count < FORECAST_TEMP_MINUTES_PER_SLOT) {
                 return false;
         }
         // Compute the reciprocal once so we do not divide repeatedly.
         const float reciprocal = 1.0f / (float) g_slot_accumulator.sample_count;
-        // Calculate the 15-minute average temperature.
+        // Calculate the 30-minute average temperature.
         *temperature_c_out = g_slot_accumulator.temperature_sum * reciprocal;
-        // Calculate the 15-minute average humidity.
+        // Calculate the 30-minute average humidity.
         *humidity_pct_out = g_slot_accumulator.humidity_sum * reciprocal;
-        // Calculate the 15-minute average pressure.
+        // Calculate the 30-minute average pressure.
         *pressure_pa_out = g_slot_accumulator.pressure_sum * reciprocal;
-        // Calculate the 15-minute average illuminance.
+        // Calculate the 30-minute average illuminance.
         *illuminance_lux_out = g_slot_accumulator.illuminance_sum * reciprocal;
         // Reset the accumulator so the next slot starts fresh.
         memset(&g_slot_accumulator, 0, sizeof(g_slot_accumulator));
@@ -1034,7 +1046,7 @@ static bool forecast_temp_finalize_slot_sample(float *temperature_c_out, float *
         return true;
 }
 
-// Store the latest 15-minute temperature and pressure so deltas stay accurate.
+// Store the latest 30-minute temperature and pressure so deltas stay accurate.
 static void forecast_temp_store_slot_history(float temperature_c, float pressure_pa) {
         // Drop the oldest sample when the ring buffer is already full.
         if (g_slot_history_count >= FORECAST_TEMP_HISTORY_CAPACITY) {
@@ -1043,19 +1055,19 @@ static void forecast_temp_store_slot_history(float temperature_c, float pressure
         }
         // Compute the index where the new sample should be written.
         const size_t tail_index = (g_slot_history_head + g_slot_history_count) % FORECAST_TEMP_HISTORY_CAPACITY;
-        // Store the new 15-minute temperature sample.
+        // Store the new 30-minute temperature sample.
         g_slot_temperature_history[tail_index] = temperature_c;
-        // Store the new 15-minute pressure sample.
+        // Store the new 30-minute pressure sample.
         g_slot_pressure_history[tail_index] = pressure_pa;
         // Increment the count now that a new sample has been inserted.
         g_slot_history_count += 1u;
 }
 
-// Build the normalized feature vector for the latest 15-minute slot of data.
+// Build the normalized feature vector for the latest 30-minute slot of data.
 static void forecast_temp_prepare_features(float temperature_c, float humidity_pct, float pressure_pa, float illuminance_lux, float out_features[FORECAST_TEMP_FEATURE_COUNT]) {
         // Compute the temperature delta relative to the previous slot when possible.
         float delta_temperature = 0.0f;
-        // Compute the pressure delta relative to six hours prior (24 slots) when possible.
+        // Compute the pressure delta relative to twelve hours prior (24 slots) when possible.
         float delta_pressure = 0.0f;
         // Only compute the temperature delta when at least one previous slot exists.
         if (g_slot_history_count >= FORECAST_TEMP_DELTA_T_LAG_SLOTS) {
@@ -1148,10 +1160,10 @@ static bool forecast_temp_export_window_to_network(int8_t *destination_buffer) {
         return (out_index == AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE);
 }
 
-// Run the neural network and decode the resulting prediction.
-static bool forecast_temp_run_inference(float *prediction_out) {
+// Run the neural network and decode the resulting prediction vector.
+static bool forecast_temp_run_inference(float predictions_out[FORECAST_TEMP_FORECAST_HORIZON_SLOTS]) {
         // Guard against NULL output pointers.
-        if (prediction_out == NULL) {
+        if (predictions_out == NULL) {
                 return false;
         }
         // Abort when the network handle is not valid.
@@ -1169,11 +1181,18 @@ static bool forecast_temp_run_inference(float *prediction_out) {
                 printf("[forecast] inference failed batch_count=%ld\r\n", (long) batch_count);
                 return false;
         }
-        // Decode the int8 output back into floating-point units.
-        const float dequantized = ((float) g_network_output_buffer[0] - (float) g_output_zero_point) * g_output_scale;
-        // Return the decoded prediction to the caller.
-        *prediction_out = dequantized;
-        printf("[forecast] inference predicted %.2f C\r\n", (double) dequantized);
+        // Decode the int8 outputs back into floating-point units and report each lead time.
+        for (size_t i = 0u; i < FORECAST_TEMP_FORECAST_HORIZON_SLOTS; ++i) {
+                const float dequantized = ((float) g_network_output_buffer[i] - (float) g_output_zero_point) * g_output_scale;
+                predictions_out[i] = dequantized;
+                const uint32_t lead_minutes_total = (uint32_t) ((i + 1u) * FORECAST_TEMP_MINUTES_PER_SLOT);
+                const uint32_t lead_hours = lead_minutes_total / 60u;
+                const uint32_t lead_minutes = lead_minutes_total % 60u;
+                printf("[forecast] horizon+%02lu:%02lu %.2f C\r\n",
+                       (unsigned long) lead_hours,
+                       (unsigned long) lead_minutes,
+                       (double) dequantized);
+        }
         // Signal success to the caller.
         return true;
 }
