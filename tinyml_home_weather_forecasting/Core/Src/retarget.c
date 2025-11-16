@@ -7,6 +7,7 @@
 #include "stm32f7xx_hal.h"
 #include <stdio.h>
 #include "cmsis_os.h"
+#include "debug_log.h"
 
 extern UART_HandleTypeDef huart3;
 extern osMutexId_t printfMutexHandle;
@@ -20,11 +21,13 @@ int _write(int fd, char *ptr, int len) {
   // If RTOS not running yet, or mutex not created, transmit directly.
   if (osKernelGetState() != osKernelRunning || printfMutexHandle == NULL) {
     HAL_StatusTypeDef s = HAL_UART_Transmit(&huart3, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+    debug_log_capture(ptr, (size_t)len);
     return (s == HAL_OK) ? len : -1;
   }
 
   if (osMutexAcquire(printfMutexHandle, osWaitForever) == osOK) {
     HAL_StatusTypeDef s = HAL_UART_Transmit(&huart3, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+    debug_log_capture(ptr, (size_t)len);
     osMutexRelease(printfMutexHandle);
     return (s == HAL_OK) ? len : -1;
   }

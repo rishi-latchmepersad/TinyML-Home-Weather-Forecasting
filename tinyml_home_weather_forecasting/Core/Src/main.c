@@ -32,6 +32,7 @@
 #include "app_error.h"
 #include "measurement_logger_task.h"
 #include "inference_logger_task.h"
+#include "debug_log.h"
 #include "led_service.h"
 #include "veml7700_task.h"
 #include "lm393_task.h"
@@ -169,8 +170,12 @@ int main(void)
 	if (printfMutexHandle == NULL) {
 		Error_Handler();
 	}
-	// a filesystem mutex to prevent concurrency issues in the SD card
-	g_fs_mutex = osMutexNew(NULL);
+        // a filesystem mutex to prevent concurrency issues in the SD card
+        g_fs_mutex = osMutexNew(NULL);
+        if (g_fs_mutex == NULL) {
+                Error_Handler();
+        }
+        (void) debug_log_init();
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
