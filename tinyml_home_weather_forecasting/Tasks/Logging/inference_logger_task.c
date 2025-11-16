@@ -14,7 +14,7 @@
 #include "task.h" // Access FreeRTOS task utilities such as vTaskDelayUntil.
 // -----------------------------------------------------------------------------
 #ifndef INFERENCE_LOGGER_TASK_STACK_WORDS // Allow overriding the stack allocation for the logger task at build time.
-#define INFERENCE_LOGGER_TASK_STACK_WORDS   (512u) // Default stack size in words chosen to balance memory use and safety margin.
+#define INFERENCE_LOGGER_TASK_STACK_WORDS   (1024u)
 #endif // End of default stack size guard.
 #ifndef INFERENCE_LOGGER_TASK_PRIORITY // Allow the application to override the logger task priority.
 #define INFERENCE_LOGGER_TASK_PRIORITY      (osPriorityLow) // Run the logger at low priority so it does not block critical work.
