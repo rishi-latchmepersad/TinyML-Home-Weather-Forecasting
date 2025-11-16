@@ -8,6 +8,8 @@
 #include "led_service.h"
 #include "measurement_logger_task.h"
 
+#define LOG_PREFIX "[RAIN_SENSOR] "
+
 /*============================ Module State ================================*/
 
 /* Finite-State Machine states for debouncing transitions. */
@@ -111,7 +113,7 @@ static void RainDigital_Priv_FsmStep(bool raw_is_wet) {
 		if ((now_ms - g_transition_start_ms) >= RAIN_DO_DEBOUNCE_MS) {
 			g_sm_state = RAIN_SM_WET_STABLE;
 			g_public_state = RAIN_DIGITAL_STATE_WET;
-			printf("[RAIN] STARTED (t=%lu ms)\r\n", (unsigned long) now_ms);
+			printf(LOG_PREFIX "[RAIN] STARTED (t=%lu ms)\r\n", (unsigned long) now_ms);
 			//put the sensor data on the queue for the SD card
 			(void) measurement_logger_enqueue(&(measurement_logger_message_t ) {
 							SENSOR, "is_raining", 1, "N/A" }, 10);
@@ -140,7 +142,7 @@ static void RainDigital_Priv_FsmStep(bool raw_is_wet) {
 		if ((now_ms - g_transition_start_ms) >= RAIN_DO_DEBOUNCE_MS) {
 			g_sm_state = RAIN_SM_DRY_STABLE;
 			g_public_state = RAIN_DIGITAL_STATE_DRY;
-			printf("[RAIN] STOPPED (t=%lu ms)\r\n", (unsigned long) now_ms);
+			printf(LOG_PREFIX "[RAIN] STOPPED (t=%lu ms)\r\n", (unsigned long) now_ms);
 			//put the sensor data on the queue for the SD card
 			(void) measurement_logger_enqueue(&(measurement_logger_message_t ) {
 							SENSOR, "is_raining", 0, "N/A" }, 10);
@@ -170,7 +172,7 @@ static void RainDigital_Priv_MaybePrintHeartbeat(void) {
 		g_last_heartbeat_ms = now_ms;
 		const int is_raining_state =
 				(g_public_state == RAIN_DIGITAL_STATE_WET) ? 1 : 0;
-		printf("[RAIN] HEARTBEAT: is_raining=%d (t=%lu ms)\r\n",
+		printf(LOG_PREFIX "[RAIN] HEARTBEAT: is_raining=%d (t=%lu ms)\r\n",
 				is_raining_state, (unsigned long) now_ms);
 		//put the sensor data on the queue for the SD card
 		(void) measurement_logger_enqueue(&(measurement_logger_message_t ) {
@@ -204,7 +206,7 @@ bool RainDigital_Service_Initialize(void) {
 	g_transition_start_ms = RainDigital_Priv_Millis();
 	g_last_heartbeat_ms = g_transition_start_ms;
 
-	printf("[RAIN] INIT: state=%s (t=%lu ms)\r\n", wet_now ? "WET" : "DRY",
+	printf(LOG_PREFIX "[RAIN] INIT: state=%s (t=%lu ms)\r\n", wet_now ? "WET" : "DRY",
 			(unsigned long) g_transition_start_ms);
 
 	return true;
@@ -246,7 +248,7 @@ void RainDigital_Service_Task(void *argument) {
 		RainDigital_Priv_FsmStep(raw_is_wet);
 		RainDigital_Priv_MaybePrintHeartbeat();
 		const rain_digital_state_t s = RainDigital_Service_GetState();
-		//printf("[RAIN] STATUS: %s\r\n", (s == RAIN_DIGITAL_STATE_WET) ? "WET" : "DRY");
+		//printf(LOG_PREFIX "[RAIN] STATUS: %s\r\n", (s == RAIN_DIGITAL_STATE_WET) ? "WET" : "DRY");
 		osDelay(RAIN_DO_TASK_PERIOD_MS);
 	}
 }

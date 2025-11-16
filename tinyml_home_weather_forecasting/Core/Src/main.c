@@ -39,6 +39,8 @@
 #include "forecast_temp_task.h"
 /* USER CODE END Includes */
 
+#define LOG_PREFIX "[MAIN] "
+
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
@@ -630,7 +632,7 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
 	while (1) {
-		printf("The default task is alive.\r\n");
+		printf(LOG_PREFIX "The default task is alive.\r\n");
 		osDelay(10000);
 	}
   /* USER CODE END 5 */
@@ -694,7 +696,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-	printf("\r\n[ERROR] %s\r\n", ERROR_DEFAULT_MSG);
+	printf(LOG_PREFIX "\r\n[ERROR] %s\r\n", ERROR_DEFAULT_MSG);
 	fflush(stdout);
 
 	//light up the LED;
@@ -724,7 +726,7 @@ void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+     ex: printf(LOG_PREFIX "Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

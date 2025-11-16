@@ -16,14 +16,16 @@
 #include "app_error.h"
 #include "cmsis_os.h"
 
+#define LOG_PREFIX "[APP_ERROR] "
+
 
 __attribute__((noreturn)) //help the compiler optimize the no-return path
 void error_handler_with_message(const char *msg) {
 	// if this function is called with a blank message, just show the default
 	const char *text = (msg && msg[0] != '\0') ? msg : ERROR_DEFAULT_MSG;
 	//print the error message
-	printf("\r\n[ERROR] %s \r\n", text);
-	printf("Rebooting in 5s.\r\n");
+	printf(LOG_PREFIX "\r\n[ERROR] %s \r\n", text);
+	printf(LOG_PREFIX "Rebooting in 5s.\r\n");
 	fflush(stdout); //clear the buffer to ensure that the message is printed
 	//light up the LED;
 	error_indicator_red_led_solid_on();

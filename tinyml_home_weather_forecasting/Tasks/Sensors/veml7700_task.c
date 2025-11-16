@@ -10,6 +10,8 @@
 #include "measurement_logger_task.h"
 #include "led_service.h"
 
+#define LOG_PREFIX "[VEML7700_TASK] "
+
 /* ======================== Device Constants (Datasheet) ======================== */
 #define VEML7700_I2C_ADDR7                      (0x10u)  /* 7-bit address */
 
@@ -240,7 +242,7 @@ static bool veml7700_configure_device_(void) {
 	if (HAL_I2C_IsDeviceReady(g_veml7700_context.i2c_handle_ptr,
 			(VEML7700_I2C_ADDR7 << 1),
 			VEML7700_DEVICE_READY_TRIALS, (uint32_t) 10u) != HAL_OK) {
-		printf("[VEML7700] No ACK at 0x%02X on this I2C bus\r\n",
+		printf(LOG_PREFIX "[VEML7700] No ACK at 0x%02X on this I2C bus\r\n",
 		VEML7700_I2C_ADDR7);
 		return false;
 	}
@@ -253,7 +255,7 @@ static bool veml7700_configure_device_(void) {
 
 	if (!i2c_write_register_u16_(VEML7700_REG_ALS_CONF_0,
 			configuration_value)) {
-		printf("[VEML7700] Configuration write failed\r\n");
+		printf(LOG_PREFIX "[VEML7700] Configuration write failed\r\n");
 		return false;
 	}
 
@@ -345,14 +347,14 @@ static void veml7700_thread_entry_function_(void *thread_argument_ptr) {
 				led_service_pulse_activity_rgb(0, 128, 128, 1000);
 				/*
 				 //Optional debug printout
-				 printf("[VEML7700] ALS=%5u WHITE=%5u Lux≈%.2f\r\n",
+				 printf(LOG_PREFIX "[VEML7700] ALS=%5u WHITE=%5u Lux≈%.2f\r\n",
 				 (unsigned) als_counts, (unsigned) white_counts,
 				 (double) lux_estimate);
 				 */
 				g_veml7700_context.consecutive_error_count = 0u;
 				osDelay(VEML7700_SAMPLE_PERIOD_MS);
 			} else {
-				printf("[VEML7700] Read failed (ALS ok=%u, WHITE ok=%u)\r\n",
+				printf(LOG_PREFIX "[VEML7700] Read failed (ALS ok=%u, WHITE ok=%u)\r\n",
 						(unsigned) als_ok, (unsigned) white_ok);
 				current_state = veml7700_fsm_state_handle_read_error;
 			}

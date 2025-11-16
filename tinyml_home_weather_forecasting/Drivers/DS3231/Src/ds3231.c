@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#define LOG_PREFIX "[DS3231] "
+
 #ifndef DS3231_ADDR_7BIT
 #define DS3231_ADDR_7BIT  (0x68u)
 #endif
@@ -89,12 +91,12 @@ HAL_StatusTypeDef ds3231_set_time_from_components_utc_i2c1(uint16_t year_yyyy,
  * Purpose:     Scan I²C1 and print responding 7-bit addresses.
  ****************************************************************************************/
 void i2c1_scan_and_log_devices(void) {
-	printf("I2C1 scan:\r\n");
+	printf(LOG_PREFIX "I2C1 scan:\r\n");
 	for (uint8_t addr7 = 0x08u; addr7 < 0x78u; ++addr7) {
 		uint8_t dummy = 0;
 		if (HAL_I2C_Master_Transmit(&hi2c1, (uint16_t) (addr7 << 1), &dummy, 0u,
 				5u) == HAL_OK) {
-			printf("  - Found device at 0x%02X\r\n", addr7);
+			printf(LOG_PREFIX "  - Found device at 0x%02X\r\n", addr7);
 		}
 	}
 }

@@ -30,6 +30,8 @@
 #include "main.h"
 #include "sd_spi_low_level.h"   /* Low-level SPI/SD helpers (kept outside CubeMX) */
 
+#define LOG_PREFIX "[USER_DISKIO] "
+
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 #define SD_BLOCK_SIZE  512
@@ -90,7 +92,7 @@ DSTATUS USER_initialize (
 
 	/* 2) Now try CMD0 (go idle) with proper select/CRC inside SDLL_SendCommand */
 	r1 = SDLL_SendCommand(SD_CMD0, 0UL);
-	printf("CMD0(after handshake) R1=0x%02X\r\n", r1);
+	printf(LOG_PREFIX "CMD0(after handshake) R1=0x%02X\r\n", r1);
 
 	if (r1 == 1U)  /* Card entered Idle state */
 	{
@@ -98,7 +100,7 @@ DSTATUS USER_initialize (
 
 	    /* 3) Probe SDv2 with CMD8 */
 	    r1 = SDLL_SendCommand(SD_CMD8, 0x1AAUL);
-	    printf("CMD8 R1=0x%02X\r\n", r1);
+	    printf(LOG_PREFIX "CMD8 R1=0x%02X\r\n", r1);
 
 	    if (r1 == 1U)
 	    {

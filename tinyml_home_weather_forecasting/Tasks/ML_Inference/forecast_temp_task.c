@@ -31,6 +31,8 @@
 // Pull in stdlib so we can convert CSV strings into floats.
 #include <stdlib.h>
 
+#define LOG_PREFIX "[FORECAST_TASK] "
+
 // Provide a fallback for M_PI when the math library does not define it.
 #ifndef M_PI
 // Define M_PI as a float literal so our sine calculation has a sensible value.
@@ -564,7 +566,7 @@ static void forecast_temp_bootstrap_process_file(const char *file_path,
 		// Release the filesystem mutex now that we are done with FatFs.
 		FS_UNLOCK();
 		// Emit a diagnostic so we know which file could not be opened.
-		printf("[forecast] bootstrap failed to open %s fr=%d\r\n", file_path,
+		printf(LOG_PREFIX "[forecast] bootstrap failed to open %s fr=%d\r\n", file_path,
 				(int) fr);
 		// Nothing more we can do for this file.
 		return;
@@ -689,7 +691,7 @@ static void forecast_temp_bootstrap_from_sd_card(void) {
 		// Release the filesystem mutex now that we are done with FatFs.
 		FS_UNLOCK();
 		// Emit a diagnostic so we know why the replay step was skipped.
-		printf("[forecast] bootstrap failed to open %s fr=%d\r\n",
+		printf(LOG_PREFIX "[forecast] bootstrap failed to open %s fr=%d\r\n",
 				FORECAST_TEMP_LOG_DIRECTORY, (int) fr);
 		// Without directory access we cannot preload anything.
 		return;
@@ -771,7 +773,7 @@ static void forecast_temp_bootstrap_from_sd_card(void) {
 	FS_UNLOCK();
 	// Abort when no measurement files were discovered.
 	if (file_count == 0u) {
-		printf("[forecast] bootstrap found no CSV logs to replay\r\n");
+		printf(LOG_PREFIX "[forecast] bootstrap found no CSV logs to replay\r\n");
 		return;
 	}
 	// Sort the discovered files by date so we replay them chronologically.
@@ -814,7 +816,7 @@ static void forecast_temp_bootstrap_from_sd_card(void) {
 		printf(
 				"[forecast] bootstrap replayed %lu samples across %lu 30-minute slots\r\n",
 				(unsigned long) minute_counter, (unsigned long) slot_counter);
-		printf("[forecast] bootstrap window_count=%lu history_count=%lu\r\n",
+		printf(LOG_PREFIX "[forecast] bootstrap window_count=%lu history_count=%lu\r\n",
 				(unsigned long) g_feature_window_count,
 				(unsigned long) g_slot_history_count);
 	} else {
@@ -838,7 +840,7 @@ static void forecast_temp_task_entry(void *argument) {
 		case FORECAST_TEMP_STATE_INIT_NETWORK:
 			// Initialize the neural network before the task begins processing data.
 			if (!forecast_temp_initialize_network()) {
-				printf("[forecast] failed to init neural network\r\n");
+				printf(LOG_PREFIX "[forecast] failed to init neural network\r\n");
 			}
 			// Proceed immediately to the bootstrap phase regardless of success so the loop continues.
 			state = FORECAST_TEMP_STATE_BOOTSTRAP;
@@ -923,7 +925,7 @@ static void forecast_temp_task_entry(void *argument) {
 				state = FORECAST_TEMP_STATE_WAIT_MINUTE;
 
 			} else {
-				printf("[forecast] The window is full. Exporting window and proceeding with inference. ");
+				printf(LOG_PREFIX "[forecast] The window is full. Exporting window and proceeding with inference. ");
 				state = FORECAST_TEMP_STATE_EXPORT_WINDOW;
 			}
 			break;
@@ -981,7 +983,7 @@ static bool forecast_temp_initialize_network(void) {
 			&g_forecast_network, activations_table, weights_table);
 	// Abort if the runtime failed to create the network instance.
 	if (err.type != AI_ERROR_NONE) {
-		printf("[forecast] create_and_init failed type=%d code=%d\r\n",
+		printf(LOG_PREFIX "[forecast] create_and_init failed type=%d code=%d\r\n",
 				err.type, err.code);
 		return false;
 	}
@@ -993,7 +995,7 @@ static bool forecast_temp_initialize_network(void) {
 			g_forecast_network, NULL);
 	// Abort if either descriptor pointer is missing.
 	if ((g_network_inputs == NULL) || (g_network_outputs == NULL)) {
-		printf("[forecast] failed to query network buffers\r\n");
+		printf(LOG_PREFIX "[forecast] failed to query network buffers\r\n");
 		return false;
 	}
 	// Extract quantization info for the input tensor so we can pack data correctly.
@@ -1275,7 +1277,7 @@ static bool forecast_temp_run_inference(
 			g_network_inputs, g_network_outputs);
 	// Verify that the runtime processed exactly one batch.
 	if (batch_count != 1) {
-		printf("[forecast] inference failed batch_count=%ld\r\n",
+		printf(LOG_PREFIX "[forecast] inference failed batch_count=%ld\r\n",
 				(long) batch_count);
 		return false;
 	}
@@ -1288,7 +1290,7 @@ static bool forecast_temp_run_inference(
 				* FORECAST_TEMP_MINUTES_PER_SLOT);
 		const uint32_t lead_hours = lead_minutes_total / 60u;
 		const uint32_t lead_minutes = lead_minutes_total % 60u;
-		printf("[forecast] horizon+%02lu:%02lu %.2f C\r\n",
+		printf(LOG_PREFIX "[forecast] horizon+%02lu:%02lu %.2f C\r\n",
 				(unsigned long) lead_hours, (unsigned long) lead_minutes,
 				(double) dequantized);
 	}
