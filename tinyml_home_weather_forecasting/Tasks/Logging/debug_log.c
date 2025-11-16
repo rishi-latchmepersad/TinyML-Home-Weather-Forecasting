@@ -16,7 +16,7 @@ extern osMutexId_t g_fs_mutex;
 #endif
 
 #ifndef DEBUG_LOG_TASK_STACK_WORDS
-#define DEBUG_LOG_TASK_STACK_WORDS   (768u)
+#define DEBUG_LOG_TASK_STACK_WORDS   (1024u)
 #endif
 #ifndef DEBUG_LOG_TASK_PRIORITY
 #define DEBUG_LOG_TASK_PRIORITY      (osPriorityLow)
