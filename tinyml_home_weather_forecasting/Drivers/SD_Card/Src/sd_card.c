@@ -18,6 +18,8 @@
 #include <app_error.h>
 #include "sd_spi_low_level.h"
 
+#define LOG_PREFIX "[SD_CARD] "
+
 static FATFS s_fs;
 extern char USERPath[4];
 // --------------------------------
@@ -67,26 +69,26 @@ void SD_TestFatFs(void)
 	UINT bw, br;
 	char buffer[100];
 
-	printf("\r\n=== Testing FATFS functionality ===\r\n");
+	printf(LOG_PREFIX "\r\n=== Testing FATFS functionality ===\r\n");
 	fr = f_unlink("0:/test.txt"); // Attempt to delete the file
 
 	if (fr == FR_OK) {
-	    printf("test.txt deleted successfully\r\n");
+	    printf(LOG_PREFIX "test.txt deleted successfully\r\n");
 	} else {
-	   printf("Unable to delete text.txt\r\n");
+	   printf(LOG_PREFIX "Unable to delete text.txt\r\n");
 	}
 	fr = f_open(&fil, "0:/test.txt", FA_CREATE_ALWAYS | FA_WRITE);
 	if (fr == FR_OK) {
 		const char *test = "Hello from STM32 and SD card!\r\n";
 		fr = f_write(&fil, test, (UINT) strlen(test), &bw);
 		if (fr == FR_OK && bw == strlen(test)) {
-			printf("Data written successfully (%u bytes)\r\n", bw);
+			printf(LOG_PREFIX "Data written successfully (%u bytes)\r\n", bw);
 		} else {
-			printf("Write failed, fr=%d, bw=%u\r\n", fr, bw);
+			printf(LOG_PREFIX "Write failed, fr=%d, bw=%u\r\n", fr, bw);
 		}
 		f_close(&fil);
 	} else {
-		printf("Failed to create file, fr=%d\r\n", fr);
+		printf(LOG_PREFIX "Failed to create file, fr=%d\r\n", fr);
 		return;
 	}
 
@@ -96,13 +98,13 @@ void SD_TestFatFs(void)
 		fr = f_read(&fil, buffer, sizeof(buffer) - 1, &br);
 		if (fr == FR_OK) {
 			buffer[br] = '\0';
-			printf("Data read successfully (%u bytes): %s", br, buffer);
+			printf(LOG_PREFIX "Data read successfully (%u bytes): %s", br, buffer);
 		} else {
-			printf("Read failed, fr=%d\r\n", fr);
+			printf(LOG_PREFIX "Read failed, fr=%d\r\n", fr);
 		}
 		f_close(&fil);
 	} else {
-		printf("Failed to open file for reading, fr=%d\r\n", fr);
+		printf(LOG_PREFIX "Failed to open file for reading, fr=%d\r\n", fr);
 	}
 }
 
@@ -117,15 +119,15 @@ DWORD SD_GetFreeKB(void) {
 }
 
 void SD_DebugFatFsState(void) {
-	printf("=== FatFs Debug Info ===\r\n");
-	printf("_VOLUMES: %d\r\n", _VOLUMES);
-	printf("disk.nbr: %d\r\n", disk.nbr);
+	printf(LOG_PREFIX "=== FatFs Debug Info ===\r\n");
+	printf(LOG_PREFIX "_VOLUMES: %d\r\n", _VOLUMES);
+	printf(LOG_PREFIX "disk.nbr: %d\r\n", disk.nbr);
 
 	for (int i = 0; i < disk.nbr; i++) {
-		printf("Drive %d: drv=%p, lun=%d, init=%d\r\n", i, disk.drv[i],
+		printf(LOG_PREFIX "Drive %d: drv=%p, lun=%d, init=%d\r\n", i, disk.drv[i],
 				disk.lun[i], disk.is_initialized[i]);
 	}
-	printf("========================\r\n");
+	printf(LOG_PREFIX "========================\r\n");
 }
 
 // Optional: turn this on to auto-format blank cards
@@ -157,7 +159,7 @@ FRESULT SD_Mount(void) {
 		}
 
 		fr = f_mount(&s_fs, USERPath, 1);
-		printf("f_mount('%s') -> %d (try %d/%d)\r\n", USERPath, fr, attempt,
+		printf(LOG_PREFIX "f_mount('%s') -> %d (try %d/%d)\r\n", USERPath, fr, attempt,
 				MAX_TRIES);
 
 		if (fr == FR_OK) {
@@ -176,15 +178,15 @@ if (fr == FR_NO_FILESYSTEM) {
     BYTE sfd = 0; UINT au = 0;
     FRESULT mk = f_mkfs(USERPath, sfd, au, work, sizeof work);
   #endif
-    printf("f_mkfs -> %d\r\n", mk);
+    printf(LOG_PREFIX "f_mkfs -> %d\r\n", mk);
     if (mk == FR_OK) {
         FRESULT fr2 = f_mount(&s_fs, USERPath, 1);
-        printf("f_mount after mkfs -> %d\r\n", fr2);
+        printf(LOG_PREFIX "f_mount after mkfs -> %d\r\n", fr2);
         if (fr2 == FR_OK) { sd_bus_fast(); return FR_OK; }
     }
 }
 #else
-printf("mkfs disabled; enable SD_ENABLE_AUTO_MKFS && _USE_MKFS to format blank cards.\r\n");
+printf(LOG_PREFIX "mkfs disabled; enable SD_ENABLE_AUTO_MKFS && _USE_MKFS to format blank cards.\r\n");
 #endif
 
 		// If the card says "not ready", back off a bit more each time

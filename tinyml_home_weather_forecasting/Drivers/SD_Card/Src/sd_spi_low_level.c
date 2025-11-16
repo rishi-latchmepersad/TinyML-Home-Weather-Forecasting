@@ -3,6 +3,8 @@
 #include "stm32f7xx_hal.h"
 #include <stdio.h>
 
+#define LOG_PREFIX "[SD_SPI_LL] "
+
 /* Configure SPI and chip-select according to your CubeMX pins */
 extern SPI_HandleTypeDef hspi1;
 #define SD_SPI_HANDLE  hspi1
@@ -146,7 +148,7 @@ void sd_spi_power_on_sequence(void)
     }
     SDLL_CS_Low();
     uint8_t spi_probe_byte = SDLL_ReadByte();  /* clocks once with CS low */
-    printf("SPI probe after select: 0x%02X\r\n", spi_probe_byte);
+    printf(LOG_PREFIX "SPI probe after select: 0x%02X\r\n", spi_probe_byte);
     SDLL_CS_High();
 }
 

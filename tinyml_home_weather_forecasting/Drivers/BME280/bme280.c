@@ -42,6 +42,8 @@
 #include "bme280.h"
 #include <stdio.h>
 
+#define LOG_PREFIX "[BME280_DRIVER] "
+
 /**\name Internal macros */
 /* To identify osr settings selected by user */
 #define OVERSAMPLING_SETTINGS    UINT8_C(0x07)
@@ -428,7 +430,7 @@ int8_t bme280_init(struct bme280_dev *dev) {
 
 	/* Read the chip-id of bme280 sensor */
 	rslt = bme280_get_regs(BME280_REG_CHIP_ID, &chip_id, 1, dev);
-	printf("Chip ID read by driver: 0x%02X\n", chip_id);
+	printf(LOG_PREFIX "Chip ID read by driver: 0x%02X\n", chip_id);
 	/* Check for chip id validity */
 	if (rslt == BME280_OK) {
 		if (chip_id == BME280_CHIP_ID) {

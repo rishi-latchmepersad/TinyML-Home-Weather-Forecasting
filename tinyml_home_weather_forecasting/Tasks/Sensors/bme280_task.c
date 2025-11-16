@@ -21,6 +21,7 @@
 #include "measurement_logger_task.h"
 #include "led_service.h"
 
+#define LOG_PREFIX "[BME280_TASK] "
 #define BME280_TASK_STATE_DELAY (10000u) //take a measurement every X ms
 
 static uint8_t dev_addr = (BME280_I2C_ADDR_PRIM << 1);
@@ -32,7 +33,7 @@ static int8_t bme280_setup(struct bme280_dev *dev) {
 	struct bme280_settings settings;
 	int8_t result;
 
-	printf("Initializing BME280...\r\n");
+	printf(LOG_PREFIX "Initializing BME280...\r\n");
 	dev->read = bme280_i2c_read;
 	dev->write = bme280_i2c_write;
 	dev->delay_us = bme280_delay_us;
@@ -41,7 +42,7 @@ static int8_t bme280_setup(struct bme280_dev *dev) {
 
 	result = bme280_init(dev);
 	if (result != BME280_OK) {
-		printf("BME280 initialization failed! Error code: %d\r\n", result);
+		printf(LOG_PREFIX "BME280 initialization failed! Error code: %d\r\n", result);
 		return result;
 	}
 
@@ -55,7 +56,7 @@ static int8_t bme280_setup(struct bme280_dev *dev) {
 	result = bme280_set_sensor_settings(BME280_SEL_ALL_SETTINGS, &settings,
 			dev);
 	if (result != BME280_OK) {
-		printf("Failed to set BME280 settings! Error code: %d\r\n", result);
+		printf(LOG_PREFIX "Failed to set BME280 settings! Error code: %d\r\n", result);
 	}
 
 	return result;
@@ -84,7 +85,7 @@ void bme280SensorTask(void *argument) {
 			if (task_data.result == BME280_OK) {
 				task_data.state = BME280_STATE_TRIGGER_MEASUREMENT;
 			} else {
-				printf("Failed to setup BME280.\n");
+				printf(LOG_PREFIX "Failed to setup BME280.\n");
 				task_data.state = BME280_STATE_ERROR;
 			}
 			break;
@@ -137,7 +138,7 @@ void bme280SensorTask(void *argument) {
 				//drive external RGB LED purple for this sensor
 				led_service_pulse_activity_rgb(128,0, 128, 1000);
 			} else {
-				printf("Failed to read BME280 data! Error code: %d\r\n",
+				printf(LOG_PREFIX "Failed to read BME280 data! Error code: %d\r\n",
 						task_data.result);
 				task_data.state = BME280_STATE_ERROR;
 			}

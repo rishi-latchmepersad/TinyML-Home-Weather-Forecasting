@@ -13,6 +13,8 @@
 #include "sd_card.h" // Use helper functions for mounting the SD card before file access.
 #include "task.h" // Access FreeRTOS task utilities such as vTaskDelayUntil.
 // -----------------------------------------------------------------------------
+#define LOG_PREFIX "[INFERENCE_LOGGER] "
+// -----------------------------------------------------------------------------
 #ifndef INFERENCE_LOGGER_TASK_STACK_WORDS // Allow overriding the stack allocation for the logger task at build time.
 #define INFERENCE_LOGGER_TASK_STACK_WORDS   (1024u)
 #endif // End of default stack size guard.
@@ -153,7 +155,7 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
             float predicted_temperatures_c[FORECAST_TEMP_FORECAST_HORIZON_SLOTS] = {0.0f}; // Buffer to hold the latest predicted temperature vector.
             if (forecast_temp_get_latest_prediction(predicted_temperatures_c, FORECAST_TEMP_FORECAST_HORIZON_SLOTS)) { // Attempt to retrieve a new prediction from the forecasting module.
                 const double first_slot = (FORECAST_TEMP_FORECAST_HORIZON_SLOTS > 0u) ? (double)predicted_temperatures_c[0] : 0.0;
-                printf("We successfully got a %lu-slot prediction vector. First slot: %.2f C\n",
+                printf(LOG_PREFIX "We successfully got a %lu-slot prediction vector. First slot: %.2f C\n",
                        (unsigned long)FORECAST_TEMP_FORECAST_HORIZON_SLOTS,
                        first_slot);
                 char line[512]; // Buffer to store the formatted CSV line before writing to the main buffer.
@@ -173,7 +175,7 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
                 } // End formatted line validity check.
             } // End prediction availability check.
             else{
-            	printf("We couldn't get a prediction. \n");
+            	printf(LOG_PREFIX "We couldn't get a prediction. \n");
             }
             break; // Continue looping in RUNNING state when no flush is triggered.
         } // Close scoped variables for RUNNING state.
