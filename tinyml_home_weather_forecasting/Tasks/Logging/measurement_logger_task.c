@@ -660,14 +660,29 @@ static bool measurement_logger_open_today_file(const char *date_yyyy_mm_dd)
         FS_UNLOCK();
         printf("POSTCREATE f_stat(%s) -> fr=%d size=%lu\r\n",
                path, (int)fr, (unsigned long)fi.fsize);
+
         if (fr != FR_OK) {
-            printf("POSTCREATE stat failed (fr=%d)\r\n", (int)fr);
-            return false;
+            /* Some cards seem slow to expose the new entry; warn but try to reopen. */
+            printf("POSTCREATE stat failed (fr=%d) -- attempting OPEN_ALWAYS fallback\r\n",
+                   (int)fr);
         }
 
         FS_LOCK();
-        fr = f_open(&g_active_file, path, FA_OPEN_EXISTING | FA_WRITE);
-        if (fr == FR_OK) fr = f_lseek(&g_active_file, f_size(&g_active_file));
+        fr = f_open(&g_active_file, path, FA_OPEN_ALWAYS | FA_WRITE);
+        if (fr == FR_OK) {
+            /* If the file truly did not exist yet, ensure it still gets a header. */
+            if (f_size(&g_active_file) == 0) {
+                const char *hdr = "timestamp_iso8601,sensor,quantity,value,unit\r\n";
+                UINT bw = 0U;
+                FRESULT wr = f_write(&g_active_file, hdr, (UINT)strlen(hdr), &bw);
+                if (wr == FR_OK && bw == (UINT)strlen(hdr)) {
+                    (void)f_sync(&g_active_file);
+                } else {
+                    fr = (wr != FR_OK) ? wr : FR_DISK_ERR;
+                }
+            }
+            if (fr == FR_OK) fr = f_lseek(&g_active_file, f_size(&g_active_file));
+        }
         FS_UNLOCK();
         if (fr != FR_OK) {
             printf("reopen/seek failed for %s (fr=%d)\r\n", path, (int)fr);
