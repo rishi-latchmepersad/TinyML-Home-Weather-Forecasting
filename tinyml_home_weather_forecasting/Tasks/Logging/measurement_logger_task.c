@@ -496,22 +496,35 @@ static bool measurement_logger_flush_buffer_to_file(void) {
         FS_LOCK();
         FILINFO fi; memset(&fi, 0, sizeof fi);
         FRESULT fr = f_stat(g_active_path, &fi);
+        printf(LOG_PREFIX "REOPEN f_stat(%s) -> fr=%d size=%lu attr=0x%02X\r\n",
+               g_active_path, (int)fr, (unsigned long)fi.fsize, (unsigned)fi.fattrib);
         if (fr == FR_OK) {
             fr = f_open(&g_active_file, g_active_path, FA_OPEN_EXISTING | FA_WRITE);
-            if (fr == FR_OK) (void)f_lseek(&g_active_file, f_size(&g_active_file));
+            printf(LOG_PREFIX "REOPEN open existing -> fr=%d\r\n", (int)fr);
+            if (fr == FR_OK) {
+                FSIZE_t eof = f_size(&g_active_file);
+                (void)f_lseek(&g_active_file, eof);
+                printf(LOG_PREFIX "REOPEN seek eof -> %lu bytes\r\n", (unsigned long)eof);
+            }
         } else if (fr == FR_NO_FILE) {
             /* Create (no truncate), then write header if this is a brand-new file */
             fr = f_open(&g_active_file, g_active_path, FA_OPEN_ALWAYS | FA_WRITE);
+            printf(LOG_PREFIX "REOPEN open/create -> fr=%d\r\n", (int)fr);
             if (fr == FR_OK) {
                 if (f_size(&g_active_file) == 0) {
                     const char *hdr = "timestamp_iso8601,sensor,quantity,value,unit\r\n";
                     UINT bw = 0;
                     if (f_write(&g_active_file, hdr, (UINT)strlen(hdr), &bw) == FR_OK &&
                         bw == (UINT)strlen(hdr)) {
-                        (void)f_sync(&g_active_file);
+                        FRESULT sync_fr = f_sync(&g_active_file);
+                        printf(LOG_PREFIX "REOPEN header write bw=%u sync fr=%d\r\n",
+                               (unsigned)bw, (int)sync_fr);
                     }
                 }
-                (void)f_lseek(&g_active_file, f_size(&g_active_file));
+                FSIZE_t eof = f_size(&g_active_file);
+                (void)f_lseek(&g_active_file, eof);
+                printf(LOG_PREFIX "REOPEN new file seek eof -> %lu bytes\r\n",
+                       (unsigned long)eof);
             }
         }
         if (fr == FR_OK) g_file_open = true;
@@ -519,6 +532,7 @@ static bool measurement_logger_flush_buffer_to_file(void) {
 
         if (!g_file_open) {
             /* Keep buffer intact; let caller retry. */
+            printf(LOG_PREFIX "REOPEN failed -> leaving buffer intact\r\n");
             return false;
         }
     }
@@ -527,7 +541,17 @@ static bool measurement_logger_flush_buffer_to_file(void) {
     UINT bw = 0u;
     FS_LOCK();
     FRESULT wr = f_write(&g_active_file, g_write_buffer, (UINT)g_write_used, &bw);
-    if (wr == FR_OK && bw == g_write_used) wr = f_sync(&g_active_file);
+    if (wr != FR_OK || bw != g_write_used) {
+        printf(LOG_PREFIX "FLUSH f_write failed fr=%d bw=%u expected=%u\r\n",
+               (int)wr, (unsigned)bw, (unsigned)g_write_used);
+    }
+    if (wr == FR_OK && bw == g_write_used) {
+        FRESULT sync_fr = f_sync(&g_active_file);
+        if (sync_fr != FR_OK) {
+            printf(LOG_PREFIX "FLUSH f_sync failed fr=%d\r\n", (int)sync_fr);
+        }
+        wr = sync_fr;
+    }
     FS_UNLOCK();
 
     if (wr != FR_OK || bw != g_write_used) {
