@@ -21,12 +21,33 @@
 #define LOG_PREFIX "[SD_CARD] "
 
 static FATFS s_fs;
+static bool  s_is_mounted = false;
+static osMutexId_t s_mount_mutex = NULL;
 extern char USERPath[4];
 // --------------------------------
 
 extern SPI_HandleTypeDef hspi1;
 // From ff_gen_drv.c (for debug visibility)
 extern Disk_drvTypeDef disk;
+
+static inline void sd_mount_lock(void) {
+        if (osKernelGetState() != osKernelRunning) {
+                return;
+        }
+        if (s_mount_mutex == NULL) {
+                s_mount_mutex = osMutexNew(NULL);
+        }
+        if (s_mount_mutex != NULL) {
+                (void) osMutexAcquire(s_mount_mutex, osWaitForever);
+        }
+}
+
+static inline void sd_mount_unlock(void) {
+        if ((osKernelGetState() != osKernelRunning) || (s_mount_mutex == NULL)) {
+                return;
+        }
+        (void) osMutexRelease(s_mount_mutex);
+}
 // Sleep helper: works before and after the kernel starts.
 static inline void sd_sleep(uint32_t ms) {
 	if (osKernelGetState() == osKernelRunning)
@@ -135,10 +156,25 @@ void SD_DebugFatFsState(void) {
 #define SD_ENABLE_AUTO_MKFS 0
 #endif
 
+void SD_InvalidateMount(void) {
+        s_is_mounted = false;
+}
+
 FRESULT SD_Mount(void) {
-	SD_DebugFatFsState();
-	// Unmount just in case a previous run left things half-mounted
-	f_mount(NULL, "0:", 0);
+        sd_mount_lock();
+        SD_DebugFatFsState();
+
+        if (s_is_mounted) {
+                DSTATUS st = disk_status(0);
+                if ((st & STA_NOINIT) == 0U) {
+                        sd_mount_unlock();
+                        return FR_OK;
+                }
+                s_is_mounted = false;
+        }
+
+        // Unmount just in case a previous run left things half-mounted
+        f_mount(NULL, "0:", 0);
 
 	const int MAX_TRIES = 5;
 	FRESULT fr = FR_INT_ERR;
@@ -162,11 +198,13 @@ FRESULT SD_Mount(void) {
 		printf(LOG_PREFIX "f_mount('%s') -> %d (try %d/%d)\r\n", USERPath, fr, attempt,
 				MAX_TRIES);
 
-		if (fr == FR_OK) {
-			// Now it’s safe to go faster
-			sd_bus_fast();
-			return FR_OK;
-		}
+                        if (fr == FR_OK) {
+                                // Now it’s safe to go faster
+                                sd_bus_fast();
+                                s_is_mounted = true;
+                                sd_mount_unlock();
+                                return FR_OK;
+                        }
 
 #if SD_ENABLE_AUTO_MKFS && _USE_MKFS
 if (fr == FR_NO_FILESYSTEM) {
@@ -199,5 +237,7 @@ printf(LOG_PREFIX "mkfs disabled; enable SD_ENABLE_AUTO_MKFS && _USE_MKFS to for
 		sd_sleep(25U * attempt);
 	}
 
-	return fr; // caller prints a friendly message
+        s_is_mounted = false;
+        sd_mount_unlock();
+        return fr; // caller prints a friendly message
 }
