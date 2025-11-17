@@ -162,16 +162,23 @@ void SD_InvalidateMount(void) {
 
 FRESULT SD_Mount(void) {
         sd_mount_lock();
-        SD_DebugFatFsState();
 
         if (s_is_mounted) {
                 DSTATUS st = disk_status(0);
                 if ((st & STA_NOINIT) == 0U) {
+                        /* Already mounted and the card still reports ready. */
                         sd_mount_unlock();
                         return FR_OK;
                 }
                 s_is_mounted = false;
         }
+
+        /* Only dump the (expensive and noisy) FatFs debug snapshot when we
+         * are about to perform a fresh mount attempt.  Several tasks probe
+         * SD_Mount() to make sure the volume is ready, so calling the helper
+         * while the media is already mounted ended up spamming the console
+         * every few seconds without providing new information. */
+        SD_DebugFatFsState();
 
         // Unmount just in case a previous run left things half-mounted
         f_mount(NULL, "0:", 0);
