@@ -75,9 +75,10 @@ static bool measurement_logger_ensure_directory_exists(const char *dir_path);
 static bool measurement_logger_open_today_file(const char *date_yyyy_mm_dd);
 static bool measurement_logger_flush_buffer_to_file(void);
 static size_t measurement_logger_format_csv_line(
-		const measurement_logger_message_t *msg, char *out_line,
-		size_t out_capacity);
+                const measurement_logger_message_t *msg, char *out_line,
+                size_t out_capacity);
 static void measurement_logger_checkpoint_close(void);
+static bool measurement_logger_reopen_existing_file(const char *context_label);
 
 
 /****************************************************************************************
@@ -214,18 +215,7 @@ static void measurement_logger_force_commit_and_reopen(void) {
     FS_UNLOCK();
     vTaskDelay(pdMS_TO_TICKS(5));
 
-    /* Reopen append WITHOUT an f_stat probe */
-    FS_LOCK();
-    FRESULT fr = f_open(&g_active_file, g_active_path, FA_OPEN_ALWAYS | FA_WRITE);
-    if (fr == FR_OK) {
-        (void)f_lseek(&g_active_file, f_size(&g_active_file));
-        g_file_open = true;
-        printf(LOG_PREFIX "REOPENED: %s size=%lu\r\n",
-               g_active_path, (unsigned long)f_size(&g_active_file));
-    } else {
-        printf(LOG_PREFIX "REOPEN FAILED fr=%d on %s\r\n", (int)fr, g_active_path);
-    }
-    FS_UNLOCK();
+    (void)measurement_logger_reopen_existing_file("REOPENED");
 }
 /* --- Public API -------------------------------------------------------------------- */
 
@@ -755,14 +745,63 @@ static void measurement_logger_checkpoint_close(void) {
 
     vTaskDelay(pdMS_TO_TICKS(5));
 
+    (void)measurement_logger_reopen_existing_file("CHECKPOINT REOPENED");
+}
+
+/****************************************************************************************
+ * Function:    measurement_logger_reopen_existing_file
+ * Purpose:     Reopen the active CSV for append after a deliberate close (commit/checkpoint).
+ * Notes:       Logs both the on-disk size (via f_stat) and the size observed by the
+ *              newly opened FIL object so we can confirm FatFs sees the growth.
+ ****************************************************************************************/
+static bool measurement_logger_reopen_existing_file(const char *context_label) {
+    if (g_active_path[0] == '\0') {
+        printf(LOG_PREFIX "%s: no active path to reopen\r\n",
+               (context_label != NULL) ? context_label : "REOPEN");
+        return false;
+    }
+
+    FILINFO fi; memset(&fi, 0, sizeof(fi));
+    FRESULT fr = FR_OK;
+    FSIZE_t stat_size = 0;
+
     FS_LOCK();
-    FRESULT fr = f_open(&g_active_file, g_active_path, FA_OPEN_ALWAYS | FA_WRITE);
+    fr = f_stat(g_active_path, &fi);
+    FS_UNLOCK();
     if (fr == FR_OK) {
-        (void)f_lseek(&g_active_file, f_size(&g_active_file));
-        g_file_open = true;
-        printf(LOG_PREFIX "CHECKPOINT REOPENED: %s size=%lu\r\n", g_active_path, (unsigned long)f_size(&g_active_file));
+        stat_size = (FSIZE_t)fi.fsize;
     } else {
-        printf(LOG_PREFIX "CHECKPOINT REOPEN FAILED fr=%d on %s\r\n", (int)fr, g_active_path);
+        printf(LOG_PREFIX "%s: f_stat(%s) failed fr=%d\r\n",
+               (context_label != NULL) ? context_label : "REOPEN",
+               g_active_path, (int)fr);
+        return false;
+    }
+
+    FS_LOCK();
+    fr = f_open(&g_active_file, g_active_path, FA_OPEN_EXISTING | FA_WRITE);
+    if (fr == FR_OK) {
+        FSIZE_t eof = f_size(&g_active_file);
+        FRESULT seek_fr = f_lseek(&g_active_file, eof);
+        if (seek_fr == FR_OK) {
+            g_file_open = true;
+            printf(LOG_PREFIX "%s: %s stat=%lu reopened=%lu\r\n",
+                   (context_label != NULL) ? context_label : "REOPENED",
+                   g_active_path,
+                   (unsigned long)stat_size,
+                   (unsigned long)eof);
+        } else {
+            (void)f_close(&g_active_file);
+            fr = seek_fr;
+        }
     }
     FS_UNLOCK();
+
+    if (fr != FR_OK) {
+        printf(LOG_PREFIX "%s FAILED fr=%d on %s\r\n",
+               (context_label != NULL) ? context_label : "REOPEN",
+               (int)fr, g_active_path);
+        g_file_open = false;
+    }
+
+    return (fr == FR_OK);
 }
