@@ -24,6 +24,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
+#include "app_error.h"
 
 /* USER CODE END Includes */
 
@@ -54,6 +56,19 @@
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
+
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
+{
+  (void)xTask;
+  /* Stack overflow is fatal; report the offending task and halt so it is obvious on the serial console. */
+  printf("[FREERTOS] Stack overflow detected in task '%s'\r\n",
+         (pcTaskName != NULL) ? pcTaskName : "<unknown>");
+  error_indicator_red_led_solid_on();
+
+  taskDISABLE_INTERRUPTS();
+  for(;;) {
+  }
+}
 
 /* USER CODE END Application */
 
