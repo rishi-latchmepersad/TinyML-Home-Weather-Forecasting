@@ -437,17 +437,19 @@ static void measurement_logger_task_entry(void *argument) {
 			state = LOGGER_STATE_OPEN_TODAY;
 			break;
 
-		case LOGGER_STATE_ERROR_BACKOFF:
-			/* Close file if needed */
-			if (g_file_open) {
-				(void) f_close(&g_active_file);
-				g_file_open = false;
-			}
-			// show the red led
-			led_command_t err = { .led_identifier = led_identifier_ld3,
-					.pattern_identifier = led_pattern_identifier_error_code,
-					.error_code_count = 2, /* two-blink code = storage */
-					.duration_ms = 0, /* persist until cleared */
+                case LOGGER_STATE_ERROR_BACKOFF:
+                        /* Close file if needed */
+                        if (g_file_open) {
+                                (void) f_close(&g_active_file);
+                                g_file_open = false;
+                        }
+                        /* Force the next SD_Mount() call to perform a fresh re-init */
+                        SD_InvalidateMount();
+                        // show the red led
+                        led_command_t err = { .led_identifier = led_identifier_ld3,
+                                        .pattern_identifier = led_pattern_identifier_error_code,
+                                        .error_code_count = 2, /* two-blink code = storage */
+                                        .duration_ms = 0, /* persist until cleared */
 					.priority_level = 10 };
 			(void) led_service_set_pattern(&err);
 			vTaskDelay(pdMS_TO_TICKS(LOGGER_BACKOFF_MS));
