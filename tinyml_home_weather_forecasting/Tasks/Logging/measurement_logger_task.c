@@ -13,7 +13,16 @@
 
 /* === Configuration macros (override in project settings if desired) ================= */
 #ifndef LOGGER_TASK_STACK_WORDS
-#define LOGGER_TASK_STACK_WORDS   (600u)
+/*
+ * FatFs is configured with _USE_LFN = 2 which allocates an >1 KB working
+ * buffer on the caller's stack for many file APIs (f_open, f_stat, ...).
+ * The previous 600-word stack (≈2.4 KB) left very little headroom once the
+ * logger's own locals (message structs, CSV buffers, etc.) were accounted
+ * for, and the extra FatFs stack usage during SD_TestFatFs() could easily
+ * overflow the task stack and lock the system at startup.  Bump the default
+ * stack allocation to 1400 words (≈5.6 KB) to give comfortable margin.
+ */
+#define LOGGER_TASK_STACK_WORDS   (1400u)
 #endif
 #ifndef LOGGER_TASK_PRIORITY
 #define LOGGER_TASK_PRIORITY      (osPriorityNormal)
