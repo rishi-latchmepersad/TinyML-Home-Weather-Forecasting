@@ -5,8 +5,8 @@
 #define LED_SERVICE_TASK_TICK_MS                       (20u)   /* update timestep */
 #define LED_SERVICE_HEARTBEAT_PERIOD_MS                (2000u) /* green */
 #define LED_SERVICE_HEARTBEAT_PULSE_MS                 (500u)
-#define LED_SERVICE_ERROR_ON_MS                        (800u)
-#define LED_SERVICE_ERROR_OFF_MS                       (800u)
+#define LED_SERVICE_ERROR_ON_MS                        (1500u)
+#define LED_SERVICE_ERROR_OFF_MS                       (1500u)
 #define LED_SERVICE_ERROR_PAUSE_MS                     (1500u)
 #define LED_SERVICE_ACTIVITY_CREDIT_DECAY_MS       (LED_SERVICE_TASK_TICK_MS) /* 20 ms per tick */
 #define LED_SERVICE_ACTIVITY_CREDIT_CAP_MS         (2000u)                    /* clamp to 2 s */
