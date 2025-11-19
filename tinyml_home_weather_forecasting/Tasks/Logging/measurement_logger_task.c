@@ -541,6 +541,11 @@ static bool measurement_logger_flush_buffer_to_file(void) {
         FRESULT sync_fr = f_sync(&g_active_file);
         if (sync_fr != FR_OK) {
             printf(LOG_PREFIX "FLUSH f_sync failed fr=%d\r\n", (int)sync_fr);
+        } else {
+            DRESULT dr = disk_ioctl(0, CTRL_SYNC, NULL);
+            if (dr != RES_OK) {
+                printf(LOG_PREFIX "FLUSH disk_ioctl(CTRL_SYNC) failed dr=%d\r\n", (int)dr);
+            }
         }
         wr = sync_fr;
     }
