@@ -3,11 +3,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "FreeRTOS.h"
 #include "cmsis_os.h"
 #include "ff.h"
 #include "task.h"
+#include "sd_card.h"
 
 extern osMutexId_t g_fs_mutex;
 #ifndef FS_LOCK
@@ -43,6 +45,8 @@ extern osMutexId_t g_fs_mutex;
 #define DEBUG_LOG_FLUSH_PERIOD_MS    (2000u)
 #endif
 
+#define LOG_PREFIX "[DEBUG_LOG] "
+
 typedef struct {
     uint8_t buffer[DEBUG_LOG_BUFFER_BYTES];
     size_t head;
@@ -68,6 +72,7 @@ static void debug_log_flush(void);
 static bool debug_log_open_file(void);
 static bool debug_log_ensure_directory(void);
 static bool debug_log_rotate_if_needed(FSIZE_t incoming_length);
+static bool debug_log_mount_volume(void);
 
 bool debug_log_init(void) {
     if (g_ready) {
@@ -122,6 +127,13 @@ static void debug_log_flush(void) {
         return;
     }
 
+    /* Make sure the volume is mounted before touching FatFs.  We might race
+     * with the measurement logger's initial mount at boot, so quietly keep any
+     * buffered data and retry on the next flush if mounting fails. */
+    if (!debug_log_mount_volume()) {
+        return;
+    }
+
     uint8_t chunk[DEBUG_LOG_WRITE_CHUNK_BYTES];
     bool wrote_any = false;
 
@@ -170,6 +182,21 @@ static void debug_log_flush(void) {
         (void) f_sync(&g_log_file);
         FS_UNLOCK();
     }
+}
+
+static bool debug_log_mount_volume(void) {
+    FRESULT fr = SD_Mount();
+    if (fr != FR_OK) {
+        /* Avoid noisy printing on every failed poll but surface the first one
+         * so we know why no debug file appears on the card. */
+        static bool s_logged = false;
+        if (!s_logged) {
+            printf(LOG_PREFIX "SD_Mount failed fr=%d\r\n", (int)fr);
+            s_logged = true;
+        }
+        return false;
+    }
+    return true;
 }
 
 static bool debug_log_open_file(void) {
