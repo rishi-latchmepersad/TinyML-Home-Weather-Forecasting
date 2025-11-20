@@ -215,6 +215,19 @@ static void measurement_logger_force_commit_and_reopen(void) {
     FS_UNLOCK();
     vTaskDelay(pdMS_TO_TICKS(5));
 
+    /* Try a full unmount/remount cycle so we know directory entries reach the card */
+    printf(LOG_PREFIX "FORCE: unmounting and re-mounting volume to prove visibility\r\n");
+    FS_LOCK();
+    FRESULT unmount_fr = f_mount(NULL, "0:", 0);
+    FS_UNLOCK();
+    printf(LOG_PREFIX "FORCE: f_mount(NULL) -> fr=%d\r\n", (int)unmount_fr);
+
+    vTaskDelay(pdMS_TO_TICKS(10));
+
+    FRESULT remount_fr = SD_Mount();
+    printf(LOG_PREFIX "FORCE: SD_Mount (remount) -> fr=%d\r\n", (int)remount_fr);
+
+    measurement_logger_debug_snapshot();
     (void)measurement_logger_reopen_existing_file("REOPENED");
 }
 /* --- Public API -------------------------------------------------------------------- */
@@ -406,14 +419,20 @@ static void measurement_logger_task_entry(void *argument) {
 							(unsigned long) before, g_active_path, ts_now);
 					led_service_activity_bump(1000);
 					static bool s_force_once_done = false;
-					if (!s_force_once_done && g_file_open) {
-						s_force_once_done = true;
-						measurement_logger_force_commit_and_reopen();
-						measurement_logger_checkpoint_close();
-					}
-				} else {
-					//we don't have any data to flush
-				}
+                                        if (!s_force_once_done && g_file_open) {
+                                                s_force_once_done = true;
+                                                /*
+                                                 * Do a one-time forced commit and directory snapshot so users can
+                                                 * confirm the CSV is actually visible on the card (e.g., when they
+                                                 * move the microSD to a PC and think nothing was written).
+                                                 */
+                                                measurement_logger_force_commit_and_reopen();
+                                                measurement_logger_debug_snapshot();
+                                                measurement_logger_checkpoint_close();
+                                        }
+                                } else {
+                                        //we don't have any data to flush
+                                }
 				state = LOGGER_STATE_RUNNING;
 			}
 			break;

@@ -18,6 +18,11 @@ The board is powered via USB.
 
 After the data collection, we used TinyML to implement a CNN to forecast the temperature in the future.
 
+## MicroSD troubleshooting
+
+- Logged data is stored under `0:/logs/measurements_YYYY-MM-DD.csv`. After the first flush the firmware now performs a one-time sync, unmount/remount, and directory snapshot in the UART log so you can confirm the file exists as it would appear on a PC.
+- If you move the card to a PC and do not see the file, check the log for the `DIR 0:/` and `DIR 0:/logs` listings that appear after the first flush. If those are empty, reformat the card as FAT32 and reseat it; the logger will recreate the directory and CSV header on the next boot.
+
 ## Diagrams
 
 ### Block Diagram
