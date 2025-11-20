@@ -1,6 +1,6 @@
 ST Edge AI Core v2.2.0-20266 2adc00962
-Created date          : 2025-11-14 15:07:26
-Parameters            : generate --target stm32f7 --name forecast_temp_ml_model -m C:/Users/rishi_latchmepersad/Downloads/pruned_int8.tflite --compression none --verbosity 1 --workspace C:/Users/RISHI_~1/AppData/Local/Temp/mxAI_workspace1181981959094002304635518234875092 --output C:/Users/rishi_latchmepersad/.stm32cubemx/network_output
+Created date          : 2025-11-19 19:59:40
+Parameters            : generate --target stm32f7 --name forecast_temp_ml_model -m C:/Users/rishi_latchmepersad/Downloads/pruned_int8.tflite --compression none --verbosity 1 --workspace C:/Users/RISHI_~1/AppData/Local/Temp/mxAI_workspace4637007167560012060450312867478604 --output C:/Users/rishi_latchmepersad/.stm32cubemx/network_output
 
 Exec/report summary (generate)
 ------------------------------------------------------------------------------------------------------------------------------
@@ -11,19 +11,19 @@ compression        :   none
 options            :   allocate-inputs, allocate-outputs                                                                      
 optimization       :   balanced                                                                                               
 target/series      :   stm32f7                                                                                                
-workspace dir      :   C:\Users\RISHI_~1\AppData\Local\Temp\mxAI_workspace1181981959094002304635518234875092                  
+workspace dir      :   C:\Users\RISHI_~1\AppData\Local\Temp\mxAI_workspace4637007167560012060450312867478604                  
 output dir         :   C:\Users\rishi_latchmepersad\.stm32cubemx\network_output                                               
 model_fmt          :   ss/sa per channel                                                                                      
 model_name         :   pruned_int8                                                                                            
-model_hash         :   0xc3258a4baa78934fd065757fc9323e15                                                                     
-params #           :   2,200 items (2.43 KiB)                                                                                 
+model_hash         :   0x341ba75472a8bdadc522e9c88c21eb99                                                                     
+params #           :   2,572 items (2.81 KiB)                                                                                 
 ------------------------------------------------------------------------------------------------------------------------------
-input 1/1          :   'serving_default_pr..del_input0', int8(1x48x7), 336 Bytes, QLinear(0.043063752,-8,int8), activations   
-output 1/1         :   'gemm_14', int8(1x24), 24 Bytes, QLinear(0.142502889,-128,int8), activations                           
-macc               :   47,135                                                                                                 
-weights (ro)       :   2,492 B (2.43 KiB) (1 segment) / -6,308(-71.7%) vs float model                                         
-activations (rw)   :   1,964 B (1.92 KiB) (1 segment) *                                                                       
-ram (total)        :   1,964 B (1.92 KiB) = 1,964 + 0 + 0                                                                     
+input 1/1          :   'serving_default_pr..del_input0', int8(1x48x7), 336 Bytes, QLinear(0.068069182,-8,int8), activations   
+output 1/1         :   'gemm_14', int8(1x24), 24 Bytes, QLinear(0.143903702,-128,int8), activations                           
+macc               :   62,694                                                                                                 
+weights (ro)       :   2,880 B (2.81 KiB) (1 segment) / -7,408(-72.0%) vs float model                                         
+activations (rw)   :   2,620 B (2.56 KiB) (1 segment) *                                                                       
+ram (total)        :   2,620 B (2.56 KiB) = 2,620 + 0 + 0                                                                     
 ------------------------------------------------------------------------------------------------------------------------------
 (*) 'input'/'output' buffers are allocated in the activations buffer
 
@@ -34,29 +34,29 @@ m_id   layer (type,original)                      oshape                param/si
 0      serving_default_pr..del_input0 (Input, )   [b:1,h:48,c:7]                                                                 |                                
        reshape_0 (Reshape, EXPAND_DIMS)           [b:1,h:1,w:48,c:7]                            serving_default_pr..del_input0   |                                
 ------ ------------------------------------------ --------------------- ------------ -------- -------------------------------- --- -------------- --------------- -------------------- 
-1      conv2d_1 (Conv2D, CONV_2D)                 [b:1,h:1,w:48,c:11]   396/429        18,491                        reshape_0   |                                Conv2D_[0]           
-       nl_1_nl (Nonlinearity, CONV_2D)            [b:1,h:1,w:48,c:11]                     528                         conv2d_1   |                -528(-100.0%)   
+1      conv2d_1 (Conv2D, CONV_2D)                 [b:1,h:1,w:48,c:14]   504/546        23,534                        reshape_0   |                                Conv2D_[0]           
+       nl_1_nl (Nonlinearity, CONV_2D)            [b:1,h:1,w:48,c:14]                     672                         conv2d_1   |                -672(-100.0%)   
 ------ ------------------------------------------ --------------------- ------------ -------- -------------------------------- --- -------------- --------------- -------------------- 
-2      reshape_2 (Reshape, RESHAPE)               [b:1,h:48,c:11]                                                      nl_1_nl   |                                
+2      reshape_2 (Reshape, RESHAPE)               [b:1,h:48,c:14]                                                      nl_1_nl   |                                
 ------ ------------------------------------------ --------------------- ------------ -------- -------------------------------- --- -------------- --------------- -------------------- 
-3      reshape_3 (Reshape, EXPAND_DIMS)           [b:1,h:1,w:48,c:11]                                                reshape_2   |                                
+3      reshape_3 (Reshape, EXPAND_DIMS)           [b:1,h:1,w:48,c:14]                                                reshape_2   |                                
 ------ ------------------------------------------ --------------------- ------------ -------- -------------------------------- --- -------------- --------------- -------------------- 
-4      conv2d_4 (Conv2D, CONV_2D)                 [b:1,h:1,w:48,c:10]   340/370        15,850                        reshape_3   |                                Pad_/Conv2D_[1, 2]   
-       nl_4_nl (Nonlinearity, CONV_2D)            [b:1,h:1,w:48,c:10]                     480                         conv2d_4   |                -480(-100.0%)   
+4      conv2d_4 (Conv2D, CONV_2D)                 [b:1,h:1,w:48,c:12]   516/552        24,204                        reshape_3   |                                Pad_/Conv2D_[1, 2]   
+       nl_4_nl (Nonlinearity, CONV_2D)            [b:1,h:1,w:48,c:12]                     576                         conv2d_4   |                -576(-100.0%)   
 ------ ------------------------------------------ --------------------- ------------ -------- -------------------------------- --- -------------- --------------- -------------------- 
-5      reshape_5 (Reshape, RESHAPE)               [b:1,h:48,c:10]                                                      nl_4_nl   |                                
+5      reshape_5 (Reshape, RESHAPE)               [b:1,h:48,c:12]                                                      nl_4_nl   |                                
 ------ ------------------------------------------ --------------------- ------------ -------- -------------------------------- --- -------------- --------------- -------------------- 
-6      reshape_6 (Reshape, EXPAND_DIMS)           [b:1,h:1,w:48,c:10]                                                reshape_5   |                                
+6      reshape_6 (Reshape, EXPAND_DIMS)           [b:1,h:1,w:48,c:12]                                                reshape_5   |                                
 ------ ------------------------------------------ --------------------- ------------ -------- -------------------------------- --- -------------- --------------- -------------------- 
-7      pool_7 (Pool, MAX_POOL_2D)                 [b:1,h:1,w:24,c:10]                     480                        reshape_6   |                                Pool_[3]             
+7      pool_7 (Pool, MAX_POOL_2D)                 [b:1,h:1,w:24,c:12]                     576                        reshape_6   |                                Pool_[3]             
 ------ ------------------------------------------ --------------------- ------------ -------- -------------------------------- --- -------------- --------------- -------------------- 
-8      reshape_8 (Reshape, RESHAPE)               [b:1,h:24,c:10]                                                       pool_7   |                                
+8      reshape_8 (Reshape, RESHAPE)               [b:1,h:24,c:12]                                                       pool_7   |                                
 ------ ------------------------------------------ --------------------- ------------ -------- -------------------------------- --- -------------- --------------- -------------------- 
-9      reshape_9 (Reshape, EXPAND_DIMS)           [b:1,h:1,w:24,c:10]                                                reshape_8   |                                
+9      reshape_9 (Reshape, EXPAND_DIMS)           [b:1,h:1,w:24,c:12]                                                reshape_8   |                                
 ------ ------------------------------------------ --------------------- ------------ -------- -------------------------------- --- -------------- --------------- -------------------- 
-10     conv2d_10 (Conv2D, DEPTHWISE_CONV_2D)      [b:1,h:1,w:24,c:10]   40/70             730                        reshape_9   |                                Conv2D_[4]           
+10     conv2d_10 (Conv2D, DEPTHWISE_CONV_2D)      [b:1,h:1,w:24,c:12]   48/84             876                        reshape_9   |                                Conv2D_[4]           
 ------ ------------------------------------------ --------------------- ------------ -------- -------------------------------- --- -------------- --------------- -------------------- 
-11     conv2d_11 (Conv2D, CONV_2D)                [b:1,h:1,w:24,c:40]   440/560         9,640                        conv2d_10   |                                Conv2D_[5]           
+11     conv2d_11 (Conv2D, CONV_2D)                [b:1,h:1,w:24,c:40]   520/640        11,560                        conv2d_10   |                                Conv2D_[5]           
        nl_11_nl (Nonlinearity, CONV_2D)           [b:1,h:1,w:24,c:40]                     960                        conv2d_11   |                -960(-100.0%)   
 ------ ------------------------------------------ --------------------- ------------ -------- -------------------------------- --- -------------- --------------- -------------------- 
 12     reshape_12 (Reshape, RESHAPE)              [b:1,h:24,c:40]                                                     nl_11_nl   |                                
@@ -70,7 +70,7 @@ m_id   layer (type,original)                      oshape                param/si
                                                                                                             tfl_pseudo_qconst1   | 
                                                                                                              tfl_pseudo_qconst   | 
 ------ ------------------------------------------ --------------------- ------------ -------- -------------------------------- --- -------------- --------------- -------------------- 
-model/c-model: macc=49,103/47,135 -1,968(-4.0%) weights=2,485/2,492 +7(+0.3%) activations=--/1,964 io=--/0
+model/c-model: macc=64,902/62,694 -2,208(-3.4%) weights=2,878/2,880 +2(+0.1%) activations=--/2,620 io=--/0
 
 
 
@@ -80,9 +80,9 @@ model name            : pruned_int8
 c-name                : forecast_temp_ml_model
 c-node #              : 8
 c-array #             : 24
-activations size      : 1964 (1 segment)
-weights size          : 2492 (1 segment)
-macc                  : 47135
+activations size      : 2620 (1 segment)
+weights size          : 2880 (1 segment)
+macc                  : 62694
 inputs                : ['serving_default_pruned_model_input0_output']
 outputs               : ['gemm_14_output']
 
@@ -90,29 +90,29 @@ C-Arrays (24)
 ------ -------------------------------------------- ----------- ------------------------- ----------- --------- 
 c_id   name (*_array)                               item/size   domain/mem-pool           c-type      comment   
 ------ -------------------------------------------- ----------- ------------------------- ----------- --------- 
-0      conv2d_10_bias                               10/40       weights/weights           const s32             
-1      conv2d_10_output                             240/240     activations/**default**   s8                    
-2      conv2d_10_scratch0                           191/191     activations/**default**   s8                    
-3      conv2d_10_weights                            30/30       weights/weights           const s8              
+0      conv2d_10_bias                               12/48       weights/weights           const s32             
+1      conv2d_10_output                             288/288     activations/**default**   s8                    
+2      conv2d_10_scratch0                           229/229     activations/**default**   s8                    
+3      conv2d_10_weights                            36/36       weights/weights           const s8              
 4      conv2d_11_bias                               40/160      weights/weights           const s32             
 5      conv2d_11_output                             960/960     activations/**default**   s8                    
-6      conv2d_11_scratch0                           440/440     activations/**default**   s8                    
-7      conv2d_11_weights                            400/400     weights/weights           const s8              
-8      conv2d_1_bias                                11/44       weights/weights           const s32             
-9      conv2d_1_output                              528/528     activations/**default**   s8                    
-10     conv2d_1_scratch0                            1064/1064   activations/**default**   s8                    
-11     conv2d_1_weights                             385/385     weights/weights           const s8              
-12     conv2d_4_bias                                10/40       weights/weights           const s32             
-13     conv2d_4_output                              480/480     activations/**default**   s8                    
-14     conv2d_4_pad_before_output                   550/550     activations/**default**   s8                    
-15     conv2d_4_scratch0                            932/932     activations/**default**   s8                    
-16     conv2d_4_weights                             330/330     weights/weights           const s8              
+6      conv2d_11_scratch0                           448/448     activations/**default**   s8                    
+7      conv2d_11_weights                            480/480     weights/weights           const s8              
+8      conv2d_1_bias                                14/56       weights/weights           const s32             
+9      conv2d_1_output                              672/672     activations/**default**   s8                    
+10     conv2d_1_scratch0                            1316/1316   activations/**default**   s8                    
+11     conv2d_1_weights                             490/490     weights/weights           const s8              
+12     conv2d_4_bias                                12/48       weights/weights           const s32             
+13     conv2d_4_output                              576/576     activations/**default**   s8                    
+14     conv2d_4_pad_before_output                   700/700     activations/**default**   s8                    
+15     conv2d_4_scratch0                            1344/1344   activations/**default**   s8                    
+16     conv2d_4_weights                             504/504     weights/weights           const s8              
 17     gemm_14_bias                                 24/96       weights/weights           const s32             
 18     gemm_14_output                               24/24       activations/**default**   s8          /output   
 19     gemm_14_scratch0                             160/320     activations/**default**   s16                   
 20     gemm_14_weights                              960/960     weights/weights           const s8              
 21     pool_13_output                               40/40       activations/**default**   s8                    
-22     pool_7_output                                240/240     activations/**default**   s8                    
+22     pool_7_output                                288/288     activations/**default**   s8                    
 23     serving_default_pruned_model_input0_output   336/336     activations/**default**   s8          /input    
 ------ -------------------------------------------- ----------- ------------------------- ----------- --------- 
 
@@ -120,33 +120,33 @@ C-Layers (8)
 ------ --------------------- ---- ------------ ------- ------ ----------------------------------------------- ---------------------- 
 c_id   name (*_layer)        id   layer_type   macc    rom    tensors                                         shape (array id)       
 ------ --------------------- ---- ------------ ------- ------ ----------------------------------------------- ---------------------- 
-0      conv2d_1              1    Conv2D       18491   429    I: serving_default_pruned_model_input0_output   int8(1x48x7) (23)      
+0      conv2d_1              1    Conv2D       23534   546    I: serving_default_pruned_model_input0_output   int8(1x48x7) (23)      
                                                               S: conv2d_1_scratch0                                                   
-                                                              W: conv2d_1_weights                             int8(11x1x5x7) (11)    
-                                                              W: conv2d_1_bias                                int32(11) (8)          
-                                                              O: conv2d_1_output                              int8(1x1x48x11) (9)    
+                                                              W: conv2d_1_weights                             int8(14x1x5x7) (11)    
+                                                              W: conv2d_1_bias                                int32(14) (8)          
+                                                              O: conv2d_1_output                              int8(1x1x48x14) (9)    
 ------ --------------------- ---- ------------ ------- ------ ----------------------------------------------- ---------------------- 
-1      conv2d_4_pad_before   4    Pad          0       0      I: conv2d_1_output                              int8(1x1x48x11) (9)    
-                                                              O: conv2d_4_pad_before_output                   int8(1x1x50x11) (14)   
+1      conv2d_4_pad_before   4    Pad          0       0      I: conv2d_1_output                              int8(1x1x48x14) (9)    
+                                                              O: conv2d_4_pad_before_output                   int8(1x1x50x14) (14)   
 ------ --------------------- ---- ------------ ------- ------ ----------------------------------------------- ---------------------- 
-2      conv2d_4              4    Conv2D       15850   370    I: conv2d_4_pad_before_output                   int8(1x1x50x11) (14)   
+2      conv2d_4              4    Conv2D       24204   552    I: conv2d_4_pad_before_output                   int8(1x1x50x14) (14)   
                                                               S: conv2d_4_scratch0                                                   
-                                                              W: conv2d_4_weights                             int8(10x1x3x11) (16)   
-                                                              W: conv2d_4_bias                                int32(10) (12)         
-                                                              O: conv2d_4_output                              int8(1x1x48x10) (13)   
+                                                              W: conv2d_4_weights                             int8(12x1x3x14) (16)   
+                                                              W: conv2d_4_bias                                int32(12) (12)         
+                                                              O: conv2d_4_output                              int8(1x1x48x12) (13)   
 ------ --------------------- ---- ------------ ------- ------ ----------------------------------------------- ---------------------- 
-3      pool_7                7    Pool         480     0      I: conv2d_4_output                              int8(1x1x48x10) (13)   
-                                                              O: pool_7_output                                int8(1x1x24x10) (22)   
+3      pool_7                7    Pool         576     0      I: conv2d_4_output                              int8(1x1x48x12) (13)   
+                                                              O: pool_7_output                                int8(1x1x24x12) (22)   
 ------ --------------------- ---- ------------ ------- ------ ----------------------------------------------- ---------------------- 
-4      conv2d_10             10   Conv2D       730     70     I: pool_7_output                                int8(1x1x24x10) (22)   
+4      conv2d_10             10   Conv2D       876     84     I: pool_7_output                                int8(1x1x24x12) (22)   
                                                               S: conv2d_10_scratch0                                                  
-                                                              W: conv2d_10_weights                            int8(1x1x3x10) (3)     
-                                                              W: conv2d_10_bias                               int32(10) (0)          
-                                                              O: conv2d_10_output                             int8(1x1x24x10) (1)    
+                                                              W: conv2d_10_weights                            int8(1x1x3x12) (3)     
+                                                              W: conv2d_10_bias                               int32(12) (0)          
+                                                              O: conv2d_10_output                             int8(1x1x24x12) (1)    
 ------ --------------------- ---- ------------ ------- ------ ----------------------------------------------- ---------------------- 
-5      conv2d_11             11   Conv2D       9640    560    I: conv2d_10_output                             int8(1x1x24x10) (1)    
+5      conv2d_11             11   Conv2D       11560   640    I: conv2d_10_output                             int8(1x1x24x12) (1)    
                                                               S: conv2d_11_scratch0                                                  
-                                                              W: conv2d_11_weights                            int8(40x1x1x10) (7)    
+                                                              W: conv2d_11_weights                            int8(40x1x1x12) (7)    
                                                               W: conv2d_11_bias                               int32(40) (4)          
                                                               O: conv2d_11_output                             int8(1x1x24x40) (5)    
 ------ --------------------- ---- ------------ ------- ------ ----------------------------------------------- ---------------------- 
@@ -166,53 +166,53 @@ Number of operations per c-layer
 ------- ------ --------------------------- -------- ------------ 
 c_id    m_id   name (type)                      #op         type 
 ------- ------ --------------------------- -------- ------------ 
-0       1      conv2d_1 (Conv2D)             18,491   smul_s8_s8 
+0       1      conv2d_1 (Conv2D)             23,534   smul_s8_s8 
 1       4      conv2d_4_pad_before (Pad)          0   smul_s8_s8 
-2       4      conv2d_4 (Conv2D)             15,850   smul_s8_s8 
-3       7      pool_7 (Pool)                    480   smul_s8_s8 
-4       10     conv2d_10 (Conv2D)               730   smul_s8_s8 
-5       11     conv2d_11 (Conv2D)             9,640   smul_s8_s8 
+2       4      conv2d_4 (Conv2D)             24,204   smul_s8_s8 
+3       7      pool_7 (Pool)                    576   smul_s8_s8 
+4       10     conv2d_10 (Conv2D)               876   smul_s8_s8 
+5       11     conv2d_11 (Conv2D)            11,560   smul_s8_s8 
 6       13     pool_13 (Pool)                   960   smul_s8_s8 
 7       14     gemm_14 (Dense)                  984   smul_s8_s8 
 ------- ------ --------------------------- -------- ------------ 
-total                                        47,135 
+total                                        62,694 
 
 Number of operation types
 ---------------- -------- ----------- 
 operation type          #           % 
 ---------------- -------- ----------- 
-smul_s8_s8         47,135      100.0% 
+smul_s8_s8         62,694      100.0% 
 
 Complexity report (model)
 ------ -------------------- ------------------------- ------------------------- -------- 
 m_id   name                 c_macc                    c_rom                     c_id     
 ------ -------------------- ------------------------- ------------------------- -------- 
-1      conv2d_1             ||||||||||||||||  39.2%   |||||||           17.2%   [0]      
-4      conv2d_4             |||||||||||||     33.6%   ||||||            14.8%   [1, 2]   
-7      pool_7               |                  1.0%   |                  0.0%   [3]      
-10     conv2d_10            |                  1.5%   |                  2.8%   [4]      
-11     conv2d_11            ||||||||          20.5%   ||||||||          22.5%   [5]      
-13     pool_13              |                  2.0%   |                  0.0%   [6]      
-14     tfl_pseudo_qconst1   |                  2.1%   ||||||||||||||||  42.4%   [7]      
+1      conv2d_1             |||||||||||||||   37.5%   ||||||||          19.0%   [0]      
+4      conv2d_4             ||||||||||||||||  38.6%   ||||||||          19.2%   [1, 2]   
+7      pool_7               |                  0.9%   |                  0.0%   [3]      
+10     conv2d_10            |                  1.4%   ||                 2.9%   [4]      
+11     conv2d_11            ||||||||          18.4%   ||||||||||        22.2%   [5]      
+13     pool_13              |                  1.5%   |                  0.0%   [6]      
+14     tfl_pseudo_qconst1   |                  1.6%   ||||||||||||||||  36.7%   [7]      
 ------ -------------------- ------------------------- ------------------------- -------- 
-macc=47,135 weights=2,492 act=1,964 ram_io=0
+macc=62,694 weights=2,880 act=2,620 ram_io=0
  
  Requested memory size by section - "stm32f7" target
  ------------------------------- -------- -------- ------- ------- 
  module                              text   rodata    data     bss 
  ------------------------------- -------- -------- ------- ------- 
  NetworkRuntime1020_CM7_GCC.a      29,076        0       0       0 
- forecast_temp_ml_model.o             732      825   3,208     184 
+ forecast_temp_ml_model.o             732      860   3,208     184 
  forecast_temp_ml_model_data.o         48       16      88       0 
  lib (toolchain)*                       0        0       0       0 
  ------------------------------- -------- -------- ------- ------- 
- RT total**                        29,856      841   3,296     184 
+ RT total**                        29,856      876   3,296     184 
  ------------------------------- -------- -------- ------- ------- 
- weights                                0    2,496       0       0 
- activations                            0        0       0   1,964 
+ weights                                0    2,880       0       0 
+ activations                            0        0       0   2,620 
  io                                     0        0       0       0 
  ------------------------------- -------- -------- ------- ------- 
- TOTAL                             29,856    3,337   3,296   2,148 
+ TOTAL                             29,856    3,756   3,296   2,804 
  ------------------------------- -------- -------- ------- ------- 
  *  toolchain objects (libm/libgcc*)
  ** RT AI runtime objects (kernels+infrastructure)
@@ -221,9 +221,9 @@ macc=47,135 weights=2,492 act=1,964 ram_io=0
   ---------------------------------------------------
                FLASH (ro)      %*   RAM (rw)       % 
   ---------------------------------------------------
-  RT total         33,993   93.2%      3,480   63.9% 
+  RT total         34,028   92.2%      3,480   57.0% 
   ---------------------------------------------------
-  TOTAL            36,489              5,444         
+  TOTAL            36,908              6,100         
   ---------------------------------------------------
   *  rt/total
 

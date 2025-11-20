@@ -39,8 +39,6 @@
 #include "forecast_temp_task.h"
 /* USER CODE END Includes */
 
-#define LOG_PREFIX "[MAIN] "
-
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
@@ -50,6 +48,7 @@
 /* USER CODE BEGIN PD */
 #define FS_LOCK()   osMutexAcquire(g_fs_mutex, osWaitForever)
 #define FS_UNLOCK() osMutexRelease(g_fs_mutex)
+#define LOG_PREFIX "[MAIN_TASK] "
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
