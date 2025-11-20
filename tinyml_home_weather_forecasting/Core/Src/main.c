@@ -78,9 +78,10 @@ const osThreadAttr_t defaultTask_attributes = {
 /* USER CODE BEGIN PV */
 osThreadId_t bme280SensorTaskHandle;
 const osThreadAttr_t bme280SensorTask_attributes = { .name = "bme280SensorTask",
-		.stack_size = 256 * 4, .priority = (osPriority_t) osPriorityNormal, };
+                .stack_size = 256 * 4, .priority = (osPriority_t) osPriorityNormal, };
 osMutexId_t printfMutexHandle;
 osMutexId_t g_fs_mutex;
+osMutexId_t g_i2c1_mutex;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -174,6 +175,11 @@ int main(void)
         // a filesystem mutex to prevent concurrency issues in the SD card
         g_fs_mutex = osMutexNew(NULL);
         if (g_fs_mutex == NULL) {
+                Error_Handler();
+        }
+        // serialize access to the I2C1 bus (used by the DS3231 RTC)
+        g_i2c1_mutex = osMutexNew(NULL);
+        if (g_i2c1_mutex == NULL) {
                 Error_Handler();
         }
         (void) debug_log_init();
