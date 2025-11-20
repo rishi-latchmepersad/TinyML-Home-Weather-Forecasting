@@ -69,6 +69,8 @@ static FIL g_active_file;
 static bool g_file_open = false;
 static char g_last_date_yyyy_mm_dd[11] = { 0 }; /* "YYYY-MM-DD" + NUL */
 static char g_active_path[128] = { 0 };
+static char g_last_good_timestamp_iso8601[24] = "2000-01-01T00:00:00Z";
+static bool g_ds3231_warned = false;
 #if defined(__GNUC__)
 __attribute__((aligned(32)))
 #endif
@@ -84,10 +86,36 @@ static bool measurement_logger_ensure_directory_exists(const char *dir_path);
 static bool measurement_logger_open_today_file(const char *date_yyyy_mm_dd);
 static bool measurement_logger_flush_buffer_to_file(void);
 static size_t measurement_logger_format_csv_line(
-		const measurement_logger_message_t *msg, char *out_line,
-		size_t out_capacity);
+                const measurement_logger_message_t *msg, char *out_line,
+                size_t out_capacity);
 static void measurement_logger_checkpoint_close(void);
 static bool measurement_logger_reopen_existing_file(const char *context_label);
+static bool measurement_logger_fill_timestamp(char *dst, size_t cap, bool log_warning);
+
+/****************************************************************************************
+ * Function:    measurement_logger_fill_timestamp
+ * Purpose:     Read the DS3231 and fall back to the last known-good timestamp on error.
+ ****************************************************************************************/
+static bool measurement_logger_fill_timestamp(char *dst, size_t cap, bool log_warning) {
+        HAL_StatusTypeDef st = ds3231_read_time_iso8601_utc_i2c1(dst, cap);
+        if (st == HAL_OK) {
+                (void) strncpy(g_last_good_timestamp_iso8601, dst,
+                                sizeof g_last_good_timestamp_iso8601);
+                g_last_good_timestamp_iso8601[sizeof g_last_good_timestamp_iso8601 - 1] = '\0';
+                g_ds3231_warned = false;
+                return true;
+        }
+
+        if (log_warning && !g_ds3231_warned) {
+                printf(LOG_PREFIX
+                                "We weren't able to get the current time from the DS3231 (using last known timestamp).\n");
+                g_ds3231_warned = true;
+        }
+
+        (void) strncpy(dst, g_last_good_timestamp_iso8601, cap);
+        dst[cap - 1] = '\0';
+        return false;
+}
 
 /****************************************************************************************
  * Function:    print_dir_listing_r012c
@@ -333,16 +361,11 @@ static void measurement_logger_task_entry(void *argument) {
 			}
 			break;
 
-		case LOGGER_STATE_OPEN_TODAY: {
-			char ts[24];
-			if (ds3231_read_time_iso8601_utc_i2c1(ts, sizeof ts) != HAL_OK) {
-				printf(
-						LOG_PREFIX "We weren't able to get the current time from the DS3231\n");
-				state = LOGGER_STATE_ERROR_BACKOFF;
-				break;
-			} else {
-				printf(LOG_PREFIX "The DS3231 seems to be responding. \n");
-			}
+                case LOGGER_STATE_OPEN_TODAY: {
+                        char ts[24];
+                        bool rtc_ok = measurement_logger_fill_timestamp(ts, sizeof ts, true);
+                        if (rtc_ok)
+                                printf(LOG_PREFIX "The DS3231 seems to be responding. \n");
 			char date[11];
 			memcpy(date, ts, 10);
 			date[10] = '\0';
@@ -359,15 +382,10 @@ static void measurement_logger_task_entry(void *argument) {
 			break;
 		}
 
-		case LOGGER_STATE_RUNNING: {
-			/* Check for date change to rotate */
-			char ts_now[24];
-			if (ds3231_read_time_iso8601_utc_i2c1(ts_now, sizeof ts_now)
-					!= HAL_OK) {
-				printf(
-						LOG_PREFIX "We weren't able to get the current time from the DS3231\n");
-				(void) snprintf(ts_now, sizeof ts_now, "2000-01-01T00:00:00Z");
-			}
+                case LOGGER_STATE_RUNNING: {
+                        /* Check for date change to rotate */
+                        char ts_now[24];
+                        (void) measurement_logger_fill_timestamp(ts_now, sizeof ts_now, true);
 			char date_now[11];
 			memcpy(date_now, ts_now, 10);
 			date_now[10] = '\0';
@@ -407,15 +425,10 @@ static void measurement_logger_task_entry(void *argument) {
 			break;
 		}
 
-		case LOGGER_STATE_FLUSH:
-			//get the current timestamp
-			char ts_now[24];
-			if (ds3231_read_time_iso8601_utc_i2c1(ts_now, sizeof ts_now)
-					!= HAL_OK) {
-				printf(
-						LOG_PREFIX "We weren't able to get the current time from the DS3231\n");
-				(void) snprintf(ts_now, sizeof ts_now, "2000-01-01T00:00:00Z");
-			}
+                case LOGGER_STATE_FLUSH:
+                        //get the current timestamp
+                        char ts_now[24];
+                        (void) measurement_logger_fill_timestamp(ts_now, sizeof ts_now, true);
 			const size_t before = g_write_used;
 			bool flush_result = measurement_logger_flush_buffer_to_file();
 			if (!flush_result) {
@@ -496,12 +509,11 @@ static void measurement_logger_task_entry(void *argument) {
  * Purpose:     Make one CSV line: timestamp_iso8601,sensor,quantity,value,unit\r\n
  ****************************************************************************************/
 static size_t measurement_logger_format_csv_line(
-		const measurement_logger_message_t *msg, char *out_line,
-		size_t out_capacity) {
-	char ts[24];
-	if (ds3231_read_time_iso8601_utc_i2c1(ts, sizeof ts) != HAL_OK) {
-		(void) snprintf(ts, sizeof ts, "TIME?");
-	}
+                const measurement_logger_message_t *msg, char *out_line,
+                size_t out_capacity) {
+        char ts[24];
+        if (!measurement_logger_fill_timestamp(ts, sizeof ts, false))
+                (void) snprintf(ts, sizeof ts, "TIME?");
 
 	int n = snprintf(out_line, out_capacity, "%s,%s,%s,%.6f,%s\r\n", ts,
 			(msg->sensor_name != NULL) ? msg->sensor_name : "",

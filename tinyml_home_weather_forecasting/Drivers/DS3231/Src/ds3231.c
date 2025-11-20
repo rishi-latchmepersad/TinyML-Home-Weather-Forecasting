@@ -10,6 +10,12 @@
 #define DS3231_ADDR_8BIT  (DS3231_ADDR_7BIT << 1)
 
 extern I2C_HandleTypeDef hi2c1;
+extern osMutexId_t g_i2c1_mutex;
+
+#ifndef I2C1_LOCK
+#define I2C1_LOCK()   osMutexAcquire(g_i2c1_mutex, osWaitForever)
+#define I2C1_UNLOCK() osMutexRelease(g_i2c1_mutex)
+#endif
 
 static inline uint8_t bcd_to_bin(uint8_t b) {
 	return (uint8_t) (((b >> 4) * 10u) + (b & 0x0Fu));
@@ -23,17 +29,34 @@ static inline uint8_t bin_to_bcd(uint8_t d) {
  * Purpose:     Read DS3231 via I²C1 and format UTC as "YYYY-MM-DDTHH:MM:SSZ".
  ****************************************************************************************/
 HAL_StatusTypeDef ds3231_read_time_iso8601_utc_i2c1(char *dst, size_t cap) {
-	uint8_t reg = 0x00u; /* seconds */
-	uint8_t raw[7];
+        uint8_t reg = 0x00u; /* seconds */
+        uint8_t raw[7];
+        HAL_StatusTypeDef st = HAL_ERROR;
 
-	HAL_StatusTypeDef st = HAL_I2C_Master_Transmit(&hi2c1, DS3231_ADDR_8BIT,
-			&reg, 1u, 50u);
-	if (st != HAL_OK)
-		return st;
+        /* Serialize access to I2C1 because the driver is not reentrant. */
+        if (g_i2c1_mutex != NULL)
+                I2C1_LOCK();
 
-	st = HAL_I2C_Master_Receive(&hi2c1, DS3231_ADDR_8BIT, raw, sizeof raw, 50u);
-	if (st != HAL_OK)
-		return st;
+        for (int attempt = 0; attempt < 3; ++attempt) {
+                st = HAL_I2C_Master_Transmit(&hi2c1, DS3231_ADDR_8BIT, &reg, 1u, 100u);
+                if (st != HAL_OK) {
+                        (void) osDelay(2u);
+                        continue;
+                }
+
+                st = HAL_I2C_Master_Receive(&hi2c1, DS3231_ADDR_8BIT, raw, sizeof raw,
+                                100u);
+                if (st == HAL_OK)
+                        break;
+
+                (void) osDelay(2u);
+        }
+
+        if (g_i2c1_mutex != NULL)
+                I2C1_UNLOCK();
+
+        if (st != HAL_OK)
+                return st;
 
 	uint8_t sec_bcd = raw[0] & 0x7Fu;
 	uint8_t min_bcd = raw[1] & 0x7Fu;
@@ -69,8 +92,8 @@ HAL_StatusTypeDef ds3231_read_time_iso8601_utc_i2c1(char *dst, size_t cap) {
  * Purpose:     Set DS3231 date/time over I²C1 from discrete UTC components.
  ****************************************************************************************/
 HAL_StatusTypeDef ds3231_set_time_from_components_utc_i2c1(uint16_t year_yyyy,
-		uint8_t month_1_12, uint8_t day_1_31, uint8_t hour_0_23,
-		uint8_t minute_0_59, uint8_t second_0_59) {
+                uint8_t month_1_12, uint8_t day_1_31, uint8_t hour_0_23,
+                uint8_t minute_0_59, uint8_t second_0_59) {
 	uint8_t frame[8];
 	frame[0] = 0x00u; /* start at seconds */
 	frame[1] = bin_to_bcd((uint8_t) (second_0_59 & 0x7Fu));
@@ -82,8 +105,18 @@ HAL_StatusTypeDef ds3231_set_time_from_components_utc_i2c1(uint16_t year_yyyy,
 	frame[7] = bin_to_bcd(
 			(uint8_t) ((year_yyyy >= 2000u) ? (year_yyyy - 2000u) : 0u));
 
-	return HAL_I2C_Master_Transmit(&hi2c1, DS3231_ADDR_8BIT, frame,
-			sizeof frame, 100u);
+        HAL_StatusTypeDef st;
+
+        if (g_i2c1_mutex != NULL)
+                I2C1_LOCK();
+
+        st = HAL_I2C_Master_Transmit(&hi2c1, DS3231_ADDR_8BIT, frame,
+                        sizeof frame, 150u);
+
+        if (g_i2c1_mutex != NULL)
+                I2C1_UNLOCK();
+
+        return st;
 }
 
 /****************************************************************************************

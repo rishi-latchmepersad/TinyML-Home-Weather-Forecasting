@@ -1,6 +1,7 @@
 #pragma once
 #include <stddef.h>
 #include "stm32f7xx_hal.h"
+#include "cmsis_os.h"
 
 /****************************************************************************************
  * Function:    ds3231_read_time_iso8601_utc_i2c1
