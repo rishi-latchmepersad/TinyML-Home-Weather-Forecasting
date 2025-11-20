@@ -51,7 +51,7 @@
  * full close/reopen cycle.  Enable a post-flush checkpoint by default so every
  * batch forces metadata to the card before the user ejects it.
  */
-#define LOGGER_CHECKPOINT_AFTER_FLUSH 1
+#define LOGGER_CHECKPOINT_AFTER_FLUSH 0
 #endif
 extern osMutexId_t g_fs_mutex;
 #ifndef FS_LOCK
@@ -425,19 +425,19 @@ static void measurement_logger_task_entry(void *argument) {
 				if (flush_result && before > 0u) {
 					printf(LOG_PREFIX "Flushed %lu bytes to file %s on %s.\r\n",
 							(unsigned long) before, g_active_path, ts_now);
-					led_service_activity_bump(1000);
+					led_service_activity_bump(2000);
 					static bool s_force_once_done = false;
-                                        if (!s_force_once_done && g_file_open) {
-                                                s_force_once_done = true;
-                                                /*
-                                                 * Do a one-time forced commit and directory snapshot so users can
-                                                 * confirm the CSV is actually visible on the card (e.g., when they
-                                                 * move the microSD to a PC and think nothing was written).
-                                                 */
-                                                measurement_logger_force_commit_and_reopen();
-                                                measurement_logger_debug_snapshot();
-                                                measurement_logger_checkpoint_close();
-                                        }
+//                                        if (!s_force_once_done && g_file_open) {
+//                                                s_force_once_done = true;
+//                                                /*
+//                                                 * Do a one-time forced commit and directory snapshot so users can
+//                                                 * confirm the CSV is actually visible on the card (e.g., when they
+//                                                 * move the microSD to a PC and think nothing was written).
+//                                                 */
+//                                                measurement_logger_force_commit_and_reopen();
+//                                                measurement_logger_debug_snapshot();
+//                                                measurement_logger_checkpoint_close();
+//                                        }
 #if LOGGER_CHECKPOINT_AFTER_FLUSH
                                         /*
                                          * Always checkpoint after a successful flush so directory entries stay in
