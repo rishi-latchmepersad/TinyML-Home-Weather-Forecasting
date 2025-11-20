@@ -8,6 +8,7 @@
 #include "led_service.h"
 #include "ff.h"
 #include "sd_card.h"
+#include "app_error.h"
 
 #define LOG_PREFIX "[MEASUREMENT_LOGGER] "
 
@@ -337,7 +338,8 @@ static void measurement_logger_task_entry(void *argument) {
 			if (ds3231_read_time_iso8601_utc_i2c1(ts, sizeof ts) != HAL_OK) {
 				printf(
 						LOG_PREFIX "We weren't able to get the current time from the DS3231\n");
-				(void) snprintf(ts, sizeof ts, "2000-01-01T00:00:00Z");
+				state = LOGGER_STATE_ERROR_BACKOFF;
+				break;
 			} else {
 				printf(LOG_PREFIX "The DS3231 seems to be responding. \n");
 			}
@@ -463,7 +465,7 @@ static void measurement_logger_task_entry(void *argument) {
 			break;
 
 		case LOGGER_STATE_ERROR_BACKOFF:
-			printf("Error with SD card. \n");
+			printf("Error in the measurement logger.\n");
 			/* Close file if needed */
 			if (g_file_open) {
 				(void) f_close(&g_active_file);
@@ -480,6 +482,8 @@ static void measurement_logger_task_entry(void *argument) {
 			(void) led_service_set_pattern(&err);
 			vTaskDelay(pdMS_TO_TICKS(LOGGER_BACKOFF_MS));
 			state = LOGGER_STATE_STARTUP;
+			// do a full system reboot
+			error_handler_with_message("Error with SD card or DS3231. \n");
 			break;
 		}
 	}
