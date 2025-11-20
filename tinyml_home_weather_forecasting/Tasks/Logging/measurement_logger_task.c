@@ -75,105 +75,102 @@ static bool measurement_logger_ensure_directory_exists(const char *dir_path);
 static bool measurement_logger_open_today_file(const char *date_yyyy_mm_dd);
 static bool measurement_logger_flush_buffer_to_file(void);
 static size_t measurement_logger_format_csv_line(
-                const measurement_logger_message_t *msg, char *out_line,
-                size_t out_capacity);
+		const measurement_logger_message_t *msg, char *out_line,
+		size_t out_capacity);
 static void measurement_logger_checkpoint_close(void);
 static bool measurement_logger_reopen_existing_file(const char *context_label);
-
 
 /****************************************************************************************
  * Function:    print_dir_listing_r012c
  * Purpose:     List a directory (R0.12c). Uses FILINFO.fname (LFN/primary) and
  *              falls back to FILINFO.altname (8.3) when needed.
  ****************************************************************************************/
-static void print_dir_listing(const TCHAR *path)
-{
-    FRESULT fr;
-    DIR     dir;
-    FILINFO fno;
+static void print_dir_listing(const TCHAR *path) {
+	FRESULT fr;
+	DIR dir;
+	FILINFO fno;
 
-    memset(&fno, 0, sizeof(fno));
-    printf(LOG_PREFIX "DIR %s\r\n", path);
+	memset(&fno, 0, sizeof(fno));
+	printf(LOG_PREFIX "DIR %s\r\n", path);
 
-    fr = f_opendir(&dir, path);
-    if (fr != FR_OK) {
-        printf(LOG_PREFIX "  <opendir failed fr=%d>\r\n", (int)fr);
-        return;
-    }
+	fr = f_opendir(&dir, path);
+	if (fr != FR_OK) {
+		printf(LOG_PREFIX "  <opendir failed fr=%d>\r\n", (int) fr);
+		return;
+	}
 
-    for (;;) {
-        fr = f_readdir(&dir, &fno);
-        if (fr != FR_OK) {
-            printf(LOG_PREFIX "  <readdir error fr=%d>\r\n", (int)fr);
-            break;
-        }
-        if (fno.fname[0] == '\0') {
-            /* End of directory */
-            break;
-        }
+	for (;;) {
+		fr = f_readdir(&dir, &fno);
+		if (fr != FR_OK) {
+			printf(LOG_PREFIX "  <readdir error fr=%d>\r\n", (int) fr);
+			break;
+		}
+		if (fno.fname[0] == '\0') {
+			/* End of directory */
+			break;
+		}
 
-        /* Prefer primary name (LFN if enabled), else 8.3 alias */
-        const TCHAR *name_ptr = (fno.fname[0] != '\0') ? fno.fname : fno.altname;
+		/* Prefer primary name (LFN if enabled), else 8.3 alias */
+		const TCHAR *name_ptr =
+				(fno.fname[0] != '\0') ? fno.fname : fno.altname;
 
-        printf(LOG_PREFIX "  %c %10lu %s\r\n",
-               (fno.fattrib & AM_DIR) ? 'D' : 'F',
-               (unsigned long)fno.fsize,
-               name_ptr);
-    }
+		printf(LOG_PREFIX "  %c %10lu %s\r\n",
+				(fno.fattrib & AM_DIR) ? 'D' : 'F', (unsigned long) fno.fsize,
+				name_ptr);
+	}
 
-    (void)f_closedir(&dir);
+	(void) f_closedir(&dir);
 }
 
 /****************************************************************************************
  * Function:    measurement_logger_debug_snapshot
  * Purpose:     Print volume info and list "0:/" and "0:/logs" using the R0.12c fields.
  ****************************************************************************************/
-static void measurement_logger_debug_snapshot(void)
-{
-    FRESULT fr;
-    FATFS  *pfs = NULL;
-    DWORD   nfree = 0, totsec = 0, freesec = 0;
-    TCHAR   label[32];
-    DWORD   vsn = 0;
+static void measurement_logger_debug_snapshot(void) {
+	FRESULT fr;
+	FATFS *pfs = NULL;
+	DWORD nfree = 0, totsec = 0, freesec = 0;
+	TCHAR label[32];
+	DWORD vsn = 0;
 
 #ifdef FS_LOCK
-    FS_LOCK();
+	FS_LOCK();
 #endif
 
-    fr = f_getlabel("0:/", label, &vsn);
-    printf(LOG_PREFIX "VOL: fr=%d label=\"%s\" vsn=%08lX\r\n",
-           (int)fr, (label[0] ? label : ""), (unsigned long)vsn);
+	fr = f_getlabel("0:/", label, &vsn);
+	printf(LOG_PREFIX "VOL: fr=%d label=\"%s\" vsn=%08lX\r\n", (int) fr,
+			(label[0] ? label : ""), (unsigned long) vsn);
 
-    fr = f_getfree("0:/", &nfree, &pfs);
-    if (fr == FR_OK && pfs) {
-        totsec  = (DWORD)(pfs->n_fatent - 2U) * (DWORD)pfs->csize;
-        freesec = (DWORD)nfree * (DWORD)pfs->csize;
-        printf(LOG_PREFIX "FS: total=%lu KB free=%lu KB\r\n",
-               (unsigned long)(totsec/2U), (unsigned long)(freesec/2U));
-    } else {
-        printf(LOG_PREFIX "FS: f_getfree failed fr=%d\r\n", (int)fr);
-    }
+	fr = f_getfree("0:/", &nfree, &pfs);
+	if (fr == FR_OK && pfs) {
+		totsec = (DWORD) (pfs->n_fatent - 2U) * (DWORD) pfs->csize;
+		freesec = (DWORD) nfree * (DWORD) pfs->csize;
+		printf(LOG_PREFIX "FS: total=%lu KB free=%lu KB\r\n",
+				(unsigned long) (totsec / 2U), (unsigned long) (freesec / 2U));
+	} else {
+		printf(LOG_PREFIX "FS: f_getfree failed fr=%d\r\n", (int) fr);
+	}
 
-    print_dir_listing("0:/");
-    print_dir_listing("0:/logs");
+	print_dir_listing("0:/");
+	print_dir_listing("0:/logs");
 
 #ifdef FS_UNLOCK
-    FS_UNLOCK();
+	FS_UNLOCK();
 #endif
 }
 
 /* Optional: compile-time probe so you *know* what this CU sees */
 static void fatfs_build_probe(void) {
 #if defined(_FFCONF)
-    printf(LOG_PREFIX "_FFCONF=%ld ", (long)_FFCONF);
+	printf(LOG_PREFIX "_FFCONF=%ld ", (long) _FFCONF);
 #endif
 #if defined(_USE_LFN)
-    printf(LOG_PREFIX "_USE_LFN=%d ", (int)_USE_LFN);
+	printf(LOG_PREFIX "_USE_LFN=%d ", (int) _USE_LFN);
 #endif
 #if defined(_MAX_LFN)
-    printf(LOG_PREFIX "_MAX_LFN=%d ", (int)_MAX_LFN);
+	printf(LOG_PREFIX "_MAX_LFN=%d ", (int) _MAX_LFN);
 #endif
-    printf(LOG_PREFIX "\r\n");
+	printf(LOG_PREFIX "\r\n");
 }
 
 /****************************************************************************************
@@ -304,7 +301,8 @@ static void measurement_logger_task_entry(void *argument) {
 			/* Print DMA-visible buffer address once */
 			static bool s_buf_addr_printed = false;
 			if (!s_buf_addr_printed) {
-				printf(LOG_PREFIX "g_write_buffer @ %p\r\n", (void*) g_write_buffer);
+				printf(LOG_PREFIX "g_write_buffer @ %p\r\n",
+						(void*) g_write_buffer);
 				s_buf_addr_printed = true;
 			}
 			if (SD_Mount() == FR_OK) {
@@ -329,10 +327,10 @@ static void measurement_logger_task_entry(void *argument) {
 		case LOGGER_STATE_OPEN_TODAY: {
 			char ts[24];
 			if (ds3231_read_time_iso8601_utc_i2c1(ts, sizeof ts) != HAL_OK) {
-				printf(LOG_PREFIX "We weren't able to get the current time from the DS3231\n");
+				printf(
+						LOG_PREFIX "We weren't able to get the current time from the DS3231\n");
 				(void) snprintf(ts, sizeof ts, "2000-01-01T00:00:00Z");
-			}
-			else{
+			} else {
 				printf(LOG_PREFIX "The DS3231 seems to be responding. \n");
 			}
 			char date[11];
@@ -356,7 +354,8 @@ static void measurement_logger_task_entry(void *argument) {
 			char ts_now[24];
 			if (ds3231_read_time_iso8601_utc_i2c1(ts_now, sizeof ts_now)
 					!= HAL_OK) {
-				printf(LOG_PREFIX "We weren't able to get the current time from the DS3231\n");
+				printf(
+						LOG_PREFIX "We weren't able to get the current time from the DS3231\n");
 				(void) snprintf(ts_now, sizeof ts_now, "2000-01-01T00:00:00Z");
 			}
 			char date_now[11];
@@ -403,7 +402,8 @@ static void measurement_logger_task_entry(void *argument) {
 			char ts_now[24];
 			if (ds3231_read_time_iso8601_utc_i2c1(ts_now, sizeof ts_now)
 					!= HAL_OK) {
-				printf(LOG_PREFIX "We weren't able to get the current time from the DS3231\n");
+				printf(
+						LOG_PREFIX "We weren't able to get the current time from the DS3231\n");
 				(void) snprintf(ts_now, sizeof ts_now, "2000-01-01T00:00:00Z");
 			}
 			const size_t before = g_write_used;
@@ -446,19 +446,20 @@ static void measurement_logger_task_entry(void *argument) {
 			state = LOGGER_STATE_OPEN_TODAY;
 			break;
 
-                case LOGGER_STATE_ERROR_BACKOFF:
-                        /* Close file if needed */
-                        if (g_file_open) {
-                                (void) f_close(&g_active_file);
-                                g_file_open = false;
-                        }
-                        /* Force the next SD_Mount() call to perform a fresh re-init */
-                        SD_InvalidateMount();
-                        // show the red led
-                        led_command_t err = { .led_identifier = led_identifier_ld3,
-                                        .pattern_identifier = led_pattern_identifier_error_code,
-                                        .error_code_count = 2, /* two-blink code = storage */
-                                        .duration_ms = 0, /* persist until cleared */
+		case LOGGER_STATE_ERROR_BACKOFF:
+			printf("Error with SD card. \n");
+			/* Close file if needed */
+			if (g_file_open) {
+				(void) f_close(&g_active_file);
+				g_file_open = false;
+			}
+			/* Force the next SD_Mount() call to perform a fresh re-init */
+			SD_InvalidateMount();
+			// show the red led
+			led_command_t err = { .led_identifier = led_identifier_ld3,
+					.pattern_identifier = led_pattern_identifier_error_code,
+					.error_code_count = 2, /* two-blink code = storage */
+					.duration_ms = 1000, /* persist until cleared */
 					.priority_level = 10 };
 			(void) led_service_set_pattern(&err);
 			vTaskDelay(pdMS_TO_TICKS(LOGGER_BACKOFF_MS));
@@ -499,86 +500,97 @@ static size_t measurement_logger_format_csv_line(
  * Returns:     bool - true on success.
  ****************************************************************************************/
 static bool measurement_logger_flush_buffer_to_file(void) {
-    /* Nothing to flush? */
-    if (g_write_used == 0u) return true;
+	/* Nothing to flush? */
+	if (g_write_used == 0u)
+		return true;
 
-    /* Ensure an open file; create if missing. */
-    if (!g_file_open) {
-        FS_LOCK();
-        FILINFO fi; memset(&fi, 0, sizeof fi);
-        FRESULT fr = f_stat(g_active_path, &fi);
-        printf(LOG_PREFIX "REOPEN f_stat(%s) -> fr=%d size=%lu attr=0x%02X\r\n",
-               g_active_path, (int)fr, (unsigned long)fi.fsize, (unsigned)fi.fattrib);
-        if (fr == FR_OK) {
-            fr = f_open(&g_active_file, g_active_path, FA_OPEN_EXISTING | FA_WRITE);
-            printf(LOG_PREFIX "REOPEN open existing -> fr=%d\r\n", (int)fr);
-            if (fr == FR_OK) {
-                FSIZE_t eof = f_size(&g_active_file);
-                (void)f_lseek(&g_active_file, eof);
-                printf(LOG_PREFIX "REOPEN seek eof -> %lu bytes\r\n", (unsigned long)eof);
-            }
-        } else if (fr == FR_NO_FILE) {
-            /* Create (no truncate), then write header if this is a brand-new file */
-            fr = f_open(&g_active_file, g_active_path, FA_OPEN_ALWAYS | FA_WRITE);
-            printf(LOG_PREFIX "REOPEN open/create -> fr=%d\r\n", (int)fr);
-            if (fr == FR_OK) {
-                if (f_size(&g_active_file) == 0) {
-                    const char *hdr = "timestamp_iso8601,sensor,quantity,value,unit\r\n";
-                    UINT bw = 0;
-                    if (f_write(&g_active_file, hdr, (UINT)strlen(hdr), &bw) == FR_OK &&
-                        bw == (UINT)strlen(hdr)) {
-                        FRESULT sync_fr = f_sync(&g_active_file);
-                        printf(LOG_PREFIX "REOPEN header write bw=%u sync fr=%d\r\n",
-                               (unsigned)bw, (int)sync_fr);
-                    }
-                }
-                FSIZE_t eof = f_size(&g_active_file);
-                (void)f_lseek(&g_active_file, eof);
-                printf(LOG_PREFIX "REOPEN new file seek eof -> %lu bytes\r\n",
-                       (unsigned long)eof);
-            }
-        }
-        if (fr == FR_OK) g_file_open = true;
-        FS_UNLOCK();
+	/* Ensure an open file; create if missing. */
+	if (!g_file_open) {
+		FS_LOCK();
+		FILINFO fi;
+		memset(&fi, 0, sizeof fi);
+		FRESULT fr = f_stat(g_active_path, &fi);
+		printf(LOG_PREFIX "REOPEN f_stat(%s) -> fr=%d size=%lu attr=0x%02X\r\n",
+				g_active_path, (int) fr, (unsigned long) fi.fsize,
+				(unsigned) fi.fattrib);
+		if (fr == FR_OK) {
+			fr = f_open(&g_active_file, g_active_path,
+					FA_OPEN_EXISTING | FA_WRITE);
+			printf(LOG_PREFIX "REOPEN open existing -> fr=%d\r\n", (int) fr);
+			if (fr == FR_OK) {
+				FSIZE_t eof = f_size(&g_active_file);
+				(void) f_lseek(&g_active_file, eof);
+				printf(LOG_PREFIX "REOPEN seek eof -> %lu bytes\r\n",
+						(unsigned long) eof);
+			}
+		} else if (fr == FR_NO_FILE) {
+			/* Create (no truncate), then write header if this is a brand-new file */
+			fr = f_open(&g_active_file, g_active_path,
+					FA_OPEN_ALWAYS | FA_WRITE);
+			printf(LOG_PREFIX "REOPEN open/create -> fr=%d\r\n", (int) fr);
+			if (fr == FR_OK) {
+				if (f_size(&g_active_file) == 0) {
+					const char *hdr =
+							"timestamp_iso8601,sensor,quantity,value,unit\r\n";
+					UINT bw = 0;
+					if (f_write(&g_active_file, hdr, (UINT) strlen(hdr), &bw)
+							== FR_OK && bw == (UINT) strlen(hdr)) {
+						FRESULT sync_fr = f_sync(&g_active_file);
+						printf(
+								LOG_PREFIX "REOPEN header write bw=%u sync fr=%d\r\n",
+								(unsigned) bw, (int) sync_fr);
+					}
+				}
+				FSIZE_t eof = f_size(&g_active_file);
+				(void) f_lseek(&g_active_file, eof);
+				printf(LOG_PREFIX "REOPEN new file seek eof -> %lu bytes\r\n",
+						(unsigned long) eof);
+			}
+		}
+		if (fr == FR_OK)
+			g_file_open = true;
+		FS_UNLOCK();
 
-        if (!g_file_open) {
-            /* Keep buffer intact; let caller retry. */
-            printf(LOG_PREFIX "REOPEN failed -> leaving buffer intact\r\n");
-            return false;
-        }
-    }
+		if (!g_file_open) {
+			/* Keep buffer intact; let caller retry. */
+			printf(LOG_PREFIX "REOPEN failed -> leaving buffer intact\r\n");
+			return false;
+		}
+	}
 
-    /* Append buffered data and sync. */
-    UINT bw = 0u;
-    FS_LOCK();
-    FRESULT wr = f_write(&g_active_file, g_write_buffer, (UINT)g_write_used, &bw);
-    if (wr != FR_OK || bw != g_write_used) {
-        printf(LOG_PREFIX "FLUSH f_write failed fr=%d bw=%u expected=%u\r\n",
-               (int)wr, (unsigned)bw, (unsigned)g_write_used);
-    }
-    if (wr == FR_OK && bw == g_write_used) {
-        FRESULT sync_fr = f_sync(&g_active_file);
-        if (sync_fr != FR_OK) {
-            printf(LOG_PREFIX "FLUSH f_sync failed fr=%d\r\n", (int)sync_fr);
-        } else {
-            DRESULT dr = disk_ioctl(0, CTRL_SYNC, NULL);
-            if (dr != RES_OK) {
-                printf(LOG_PREFIX "FLUSH disk_ioctl(CTRL_SYNC) failed dr=%d\r\n", (int)dr);
-            }
-        }
-        wr = sync_fr;
-    }
-    FS_UNLOCK();
+	/* Append buffered data and sync. */
+	UINT bw = 0u;
+	FS_LOCK();
+	FRESULT wr = f_write(&g_active_file, g_write_buffer, (UINT) g_write_used,
+			&bw);
+	if (wr != FR_OK || bw != g_write_used) {
+		printf(LOG_PREFIX "FLUSH f_write failed fr=%d bw=%u expected=%u\r\n",
+				(int) wr, (unsigned) bw, (unsigned) g_write_used);
+	}
+	if (wr == FR_OK && bw == g_write_used) {
+		FRESULT sync_fr = f_sync(&g_active_file);
+		if (sync_fr != FR_OK) {
+			printf(LOG_PREFIX "FLUSH f_sync failed fr=%d\r\n", (int) sync_fr);
+		} else {
+			DRESULT dr = disk_ioctl(0, CTRL_SYNC, NULL);
+			if (dr != RES_OK) {
+				printf(
+						LOG_PREFIX "FLUSH disk_ioctl(CTRL_SYNC) failed dr=%d\r\n",
+						(int) dr);
+			}
+		}
+		wr = sync_fr;
+	}
+	FS_UNLOCK();
 
-    if (wr != FR_OK || bw != g_write_used) {
-        /* Keep buffer for retry */
-        return false;
-    }
+	if (wr != FR_OK || bw != g_write_used) {
+		/* Keep buffer for retry */
+		return false;
+	}
 
-    g_write_used = 0u;
-    return true;
+	g_write_used = 0u;
+	return true;
 }
-
 
 /****************************************************************************************
  * Function:    measurement_logger_ensure_directory_exists
@@ -620,156 +632,171 @@ static bool measurement_logger_ensure_directory_exists(const char *dir_path) {
  *   - FatFs R0.12c: FILINFO has .fname (primary/LFN if enabled) and .altname (8.3).
  *   - We log every step with FRESULT codes so failures are unambiguous.
  ****************************************************************************************/
-static bool measurement_logger_open_today_file(const char *date_yyyy_mm_dd)
-{
-    FRESULT fr;
-    FILINFO fi_dir; memset(&fi_dir, 0, sizeof(fi_dir));
-    FILINFO fi;     memset(&fi, 0, sizeof(fi));
-    char path[128];
+static bool measurement_logger_open_today_file(const char *date_yyyy_mm_dd) {
+	FRESULT fr;
+	FILINFO fi_dir;
+	memset(&fi_dir, 0, sizeof(fi_dir));
+	FILINFO fi;
+	memset(&fi, 0, sizeof(fi));
+	char path[128];
 
-    /* Build "0:/logs/measurements_YYYY-MM-DD.csv" */
-    (void)snprintf(path, sizeof path, LOGGER_BASE_DIR "/measurements_%s.csv",
-                   date_yyyy_mm_dd);
+	/* Build "0:/logs/measurements_YYYY-MM-DD.csv" */
+	(void) snprintf(path, sizeof path, LOGGER_BASE_DIR "/measurements_%s.csv",
+			date_yyyy_mm_dd);
 
-    /* Hex dump the path once to catch invisible characters */
-    {
-        size_t L = strlen(path);
-        printf(LOG_PREFIX "PATH len=%u: ", (unsigned)L);
-        for (size_t i = 0; i < L; ++i) printf(LOG_PREFIX "%02X ", (unsigned char)path[i]);
-        printf(LOG_PREFIX "\r\n");
-    }
+	/* Hex dump the path once to catch invisible characters */
+	{
+		size_t L = strlen(path);
+		printf(LOG_PREFIX "PATH len=%u: ", (unsigned) L);
+		for (size_t i = 0; i < L; ++i)
+			printf(LOG_PREFIX "%02X ", (unsigned char) path[i]);
+		printf(LOG_PREFIX "\r\n");
+	}
 
-    /* 1) Ensure the base directory exists */
-    FS_LOCK();
-    fr = f_stat(LOGGER_BASE_DIR, &fi_dir);
-    FS_UNLOCK();
-    printf(LOG_PREFIX "DIRCHECK f_stat(%s) -> fr=%d attr=0x%02X\r\n",
-           LOGGER_BASE_DIR, (int)fr, (unsigned)fi_dir.fattrib);
+	/* 1) Ensure the base directory exists */
+	FS_LOCK();
+	fr = f_stat(LOGGER_BASE_DIR, &fi_dir);
+	FS_UNLOCK();
+	printf(LOG_PREFIX "DIRCHECK f_stat(%s) -> fr=%d attr=0x%02X\r\n",
+	LOGGER_BASE_DIR, (int) fr, (unsigned) fi_dir.fattrib);
 
-    if (fr == FR_NO_FILE || ((fi_dir.fattrib & AM_DIR) == 0)) {
-        FS_LOCK();
-        FRESULT mr = f_mkdir(LOGGER_BASE_DIR);
-        FS_UNLOCK();
-        printf(LOG_PREFIX "mkdir(%s) -> fr=%d\r\n", LOGGER_BASE_DIR, (int)mr);
-        if (mr != FR_OK && mr != FR_EXIST) {
-            return false; /* parent path truly missing/invalid */
-        }
-    } else if (fr != FR_OK) {
-        /* e.g., FR_INVALID_NAME, FR_DISK_ERR, etc. */
-        return false;
-    }
+	if (fr == FR_NO_FILE || ((fi_dir.fattrib & AM_DIR) == 0)) {
+		FS_LOCK();
+		FRESULT mr = f_mkdir(LOGGER_BASE_DIR);
+		FS_UNLOCK();
+		printf(LOG_PREFIX "mkdir(%s) -> fr=%d\r\n", LOGGER_BASE_DIR, (int) mr);
+		if (mr != FR_OK && mr != FR_EXIST) {
+			return false; /* parent path truly missing/invalid */
+		}
+	} else if (fr != FR_OK) {
+		/* e.g., FR_INVALID_NAME, FR_DISK_ERR, etc. */
+		return false;
+	}
 
-    /* 2) If file already exists, open+seek EOF; else create it */
-    FS_LOCK();
-    fr = f_stat(path, &fi);
-    FS_UNLOCK();
-    printf(LOG_PREFIX "PRESCAN f_stat(%s) -> fr=%d size=%lu\r\n",
-           path, (int)fr, (unsigned long)fi.fsize);
+	/* 2) If file already exists, open+seek EOF; else create it */
+	FS_LOCK();
+	fr = f_stat(path, &fi);
+	FS_UNLOCK();
+	printf(LOG_PREFIX "PRESCAN f_stat(%s) -> fr=%d size=%lu\r\n", path,
+			(int) fr, (unsigned long) fi.fsize);
 
-    if (fr == FR_OK) {
-        /* Exists -> open existing, seek to EOF */
-        FS_LOCK();
-        fr = f_open(&g_active_file, path, FA_OPEN_EXISTING | FA_WRITE);
-        if (fr == FR_OK) fr = f_lseek(&g_active_file, f_size(&g_active_file));
-        FS_UNLOCK();
-        if (fr != FR_OK) {
-            printf(LOG_PREFIX "open/seek existing failed for %s (fr=%d)\r\n", path, (int)fr);
-            FS_LOCK(); (void)f_close(&g_active_file); FS_UNLOCK();
-            return false;
-        }
-    } else if (fr == FR_NO_FILE) {
-        /* New -> create, write header, sync+close to cement dir entry, reopen append */
-        FS_LOCK();
-        fr = f_open(&g_active_file, path, FA_CREATE_NEW | FA_WRITE);
-        FS_UNLOCK();
-        if (fr != FR_OK) {
-            /* If parent was missing, CREATE_NEW returns FR_NO_FILE — double-check dir */
-            printf(LOG_PREFIX "CREATE_NEW failed for %s (fr=%d)\r\n", path, (int)fr);
-            return false;
-        }
+	if (fr == FR_OK) {
+		/* Exists -> open existing, seek to EOF */
+		FS_LOCK();
+		fr = f_open(&g_active_file, path, FA_OPEN_EXISTING | FA_WRITE);
+		if (fr == FR_OK)
+			fr = f_lseek(&g_active_file, f_size(&g_active_file));
+		FS_UNLOCK();
+		if (fr != FR_OK) {
+			printf(LOG_PREFIX "open/seek existing failed for %s (fr=%d)\r\n",
+					path, (int) fr);
+			FS_LOCK();
+			(void) f_close(&g_active_file);
+			FS_UNLOCK();
+			return false;
+		}
+	} else if (fr == FR_NO_FILE) {
+		/* New -> create, write header, sync+close to cement dir entry, reopen append */
+		FS_LOCK();
+		fr = f_open(&g_active_file, path, FA_CREATE_NEW | FA_WRITE);
+		FS_UNLOCK();
+		if (fr != FR_OK) {
+			/* If parent was missing, CREATE_NEW returns FR_NO_FILE — double-check dir */
+			printf(LOG_PREFIX "CREATE_NEW failed for %s (fr=%d)\r\n", path,
+					(int) fr);
+			return false;
+		}
 
-        /* Write header once */
-        {
-            const char *hdr = "timestamp_iso8601,sensor,quantity,value,unit\r\n";
-            UINT bw = 0U;
-            FS_LOCK();
-            fr = f_write(&g_active_file, hdr, (UINT)strlen(hdr), &bw);
-            if (fr == FR_OK && bw == (UINT)strlen(hdr)) (void)f_sync(&g_active_file);
-            (void)f_close(&g_active_file);
-            (void)disk_ioctl(0, CTRL_SYNC, NULL);
-            FS_UNLOCK();
-            if (fr != FR_OK || bw != (UINT)strlen(hdr)) {
-                printf(LOG_PREFIX "header write/sync failed for %s (fr=%d bw=%u)\r\n",
-                       path, (int)fr, (unsigned)bw);
-                return false;
-            }
-        }
+		/* Write header once */
+		{
+			const char *hdr = "timestamp_iso8601,sensor,quantity,value,unit\r\n";
+			UINT bw = 0U;
+			FS_LOCK();
+			fr = f_write(&g_active_file, hdr, (UINT) strlen(hdr), &bw);
+			if (fr == FR_OK && bw == (UINT) strlen(hdr))
+				(void) f_sync(&g_active_file);
+			(void) f_close(&g_active_file);
+			(void) disk_ioctl(0, CTRL_SYNC, NULL);
+			FS_UNLOCK();
+			if (fr != FR_OK || bw != (UINT) strlen(hdr)) {
+				printf(
+						LOG_PREFIX "header write/sync failed for %s (fr=%d bw=%u)\r\n",
+						path, (int) fr, (unsigned) bw);
+				return false;
+			}
+		}
 
-        /* Verify via f_stat and reopen for append */
-        FS_LOCK();
-        fr = f_stat(path, &fi);
-        FS_UNLOCK();
-        printf(LOG_PREFIX "POSTCREATE f_stat(%s) -> fr=%d size=%lu\r\n",
-               path, (int)fr, (unsigned long)fi.fsize);
+		/* Verify via f_stat and reopen for append */
+		FS_LOCK();
+		fr = f_stat(path, &fi);
+		FS_UNLOCK();
+		printf(LOG_PREFIX "POSTCREATE f_stat(%s) -> fr=%d size=%lu\r\n", path,
+				(int) fr, (unsigned long) fi.fsize);
 
-        if (fr != FR_OK) {
-            /* Some cards seem slow to expose the new entry; warn but try to reopen. */
-            printf(LOG_PREFIX "POSTCREATE stat failed (fr=%d) -- attempting OPEN_ALWAYS fallback\r\n",
-                   (int)fr);
-        }
+		if (fr != FR_OK) {
+			/* Some cards seem slow to expose the new entry; warn but try to reopen. */
+			printf(
+					LOG_PREFIX "POSTCREATE stat failed (fr=%d) -- attempting OPEN_ALWAYS fallback\r\n",
+					(int) fr);
+		}
 
-        FS_LOCK();
-        fr = f_open(&g_active_file, path, FA_OPEN_ALWAYS | FA_WRITE);
-        if (fr == FR_OK) {
-            /* If the file truly did not exist yet, ensure it still gets a header. */
-            if (f_size(&g_active_file) == 0) {
-                const char *hdr = "timestamp_iso8601,sensor,quantity,value,unit\r\n";
-                UINT bw = 0U;
-                FRESULT wr = f_write(&g_active_file, hdr, (UINT)strlen(hdr), &bw);
-                if (wr == FR_OK && bw == (UINT)strlen(hdr)) {
-                    (void)f_sync(&g_active_file);
-                } else {
-                    fr = (wr != FR_OK) ? wr : FR_DISK_ERR;
-                }
-            }
-            if (fr == FR_OK) fr = f_lseek(&g_active_file, f_size(&g_active_file));
-        }
-        FS_UNLOCK();
-        if (fr != FR_OK) {
-            printf(LOG_PREFIX "reopen/seek failed for %s (fr=%d)\r\n", path, (int)fr);
-            return false;
-        }
-    } else {
-        /* Some other f_stat error */
-        printf(LOG_PREFIX "PRESCAN stat unexpected fr=%d for %s\r\n", (int)fr, path);
-        return false;
-    }
+		FS_LOCK();
+		fr = f_open(&g_active_file, path, FA_OPEN_ALWAYS | FA_WRITE);
+		if (fr == FR_OK) {
+			/* If the file truly did not exist yet, ensure it still gets a header. */
+			if (f_size(&g_active_file) == 0) {
+				const char *hdr =
+						"timestamp_iso8601,sensor,quantity,value,unit\r\n";
+				UINT bw = 0U;
+				FRESULT wr = f_write(&g_active_file, hdr, (UINT) strlen(hdr),
+						&bw);
+				if (wr == FR_OK && bw == (UINT) strlen(hdr)) {
+					(void) f_sync(&g_active_file);
+				} else {
+					fr = (wr != FR_OK) ? wr : FR_DISK_ERR;
+				}
+			}
+			if (fr == FR_OK)
+				fr = f_lseek(&g_active_file, f_size(&g_active_file));
+		}
+		FS_UNLOCK();
+		if (fr != FR_OK) {
+			printf(LOG_PREFIX "reopen/seek failed for %s (fr=%d)\r\n", path,
+					(int) fr);
+			return false;
+		}
+	} else {
+		/* Some other f_stat error */
+		printf(LOG_PREFIX "PRESCAN stat unexpected fr=%d for %s\r\n", (int) fr,
+				path);
+		return false;
+	}
 
-    g_file_open = true;
-    (void)strncpy(g_last_date_yyyy_mm_dd, date_yyyy_mm_dd, sizeof g_last_date_yyyy_mm_dd);
-    (void)strncpy(g_active_path, path, sizeof g_active_path - 1);
-    g_active_path[sizeof g_active_path - 1] = '\0';
+	g_file_open = true;
+	(void) strncpy(g_last_date_yyyy_mm_dd, date_yyyy_mm_dd,
+			sizeof g_last_date_yyyy_mm_dd);
+	(void) strncpy(g_active_path, path, sizeof g_active_path - 1);
+	g_active_path[sizeof g_active_path - 1] = '\0';
 
-    printf(LOG_PREFIX "Daily log ready: %s size=%lu\r\n",
-           g_active_path, (unsigned long)f_size(&g_active_file));
-    return true;
+	printf(LOG_PREFIX "Daily log ready: %s size=%lu\r\n", g_active_path,
+			(unsigned long) f_size(&g_active_file));
+	return true;
 }
 
-
-
 static void measurement_logger_checkpoint_close(void) {
-    if (!g_file_open || g_active_path[0] == '\0') return;
+	if (!g_file_open || g_active_path[0] == '\0')
+		return;
 
-    FS_LOCK();
-    (void)f_sync(&g_active_file);
-    (void)f_close(&g_active_file);
-    g_file_open = false;
-    (void)disk_ioctl(0, CTRL_SYNC, NULL);
-    FS_UNLOCK();
+	FS_LOCK();
+	(void) f_sync(&g_active_file);
+	(void) f_close(&g_active_file);
+	g_file_open = false;
+	(void) disk_ioctl(0, CTRL_SYNC, NULL);
+	FS_UNLOCK();
 
-    vTaskDelay(pdMS_TO_TICKS(5));
+	vTaskDelay(pdMS_TO_TICKS(5));
 
-    (void)measurement_logger_reopen_existing_file("CHECKPOINT REOPENED");
+	(void) measurement_logger_reopen_existing_file("CHECKPOINT REOPENED");
 }
 
 /****************************************************************************************
@@ -779,53 +806,53 @@ static void measurement_logger_checkpoint_close(void) {
  *              newly opened FIL object so we can confirm FatFs sees the growth.
  ****************************************************************************************/
 static bool measurement_logger_reopen_existing_file(const char *context_label) {
-    if (g_active_path[0] == '\0') {
-        printf(LOG_PREFIX "%s: no active path to reopen\r\n",
-               (context_label != NULL) ? context_label : "REOPEN");
-        return false;
-    }
+	if (g_active_path[0] == '\0') {
+		printf(LOG_PREFIX "%s: no active path to reopen\r\n",
+				(context_label != NULL) ? context_label : "REOPEN");
+		return false;
+	}
 
-    FILINFO fi; memset(&fi, 0, sizeof(fi));
-    FRESULT fr = FR_OK;
-    FSIZE_t stat_size = 0;
+	FILINFO fi;
+	memset(&fi, 0, sizeof(fi));
+	FRESULT fr = FR_OK;
+	FSIZE_t stat_size = 0;
 
-    FS_LOCK();
-    fr = f_stat(g_active_path, &fi);
-    FS_UNLOCK();
-    if (fr == FR_OK) {
-        stat_size = (FSIZE_t)fi.fsize;
-    } else {
-        printf(LOG_PREFIX "%s: f_stat(%s) failed fr=%d\r\n",
-               (context_label != NULL) ? context_label : "REOPEN",
-               g_active_path, (int)fr);
-        return false;
-    }
+	FS_LOCK();
+	fr = f_stat(g_active_path, &fi);
+	FS_UNLOCK();
+	if (fr == FR_OK) {
+		stat_size = (FSIZE_t) fi.fsize;
+	} else {
+		printf(LOG_PREFIX "%s: f_stat(%s) failed fr=%d\r\n",
+				(context_label != NULL) ? context_label : "REOPEN",
+				g_active_path, (int) fr);
+		return false;
+	}
 
-    FS_LOCK();
-    fr = f_open(&g_active_file, g_active_path, FA_OPEN_EXISTING | FA_WRITE);
-    if (fr == FR_OK) {
-        FSIZE_t eof = f_size(&g_active_file);
-        FRESULT seek_fr = f_lseek(&g_active_file, eof);
-        if (seek_fr == FR_OK) {
-            g_file_open = true;
-            printf(LOG_PREFIX "%s: %s stat=%lu reopened=%lu\r\n",
-                   (context_label != NULL) ? context_label : "REOPENED",
-                   g_active_path,
-                   (unsigned long)stat_size,
-                   (unsigned long)eof);
-        } else {
-            (void)f_close(&g_active_file);
-            fr = seek_fr;
-        }
-    }
-    FS_UNLOCK();
+	FS_LOCK();
+	fr = f_open(&g_active_file, g_active_path, FA_OPEN_EXISTING | FA_WRITE);
+	if (fr == FR_OK) {
+		FSIZE_t eof = f_size(&g_active_file);
+		FRESULT seek_fr = f_lseek(&g_active_file, eof);
+		if (seek_fr == FR_OK) {
+			g_file_open = true;
+			printf(LOG_PREFIX "%s: %s stat=%lu reopened=%lu\r\n",
+					(context_label != NULL) ? context_label : "REOPENED",
+					g_active_path, (unsigned long) stat_size,
+					(unsigned long) eof);
+		} else {
+			(void) f_close(&g_active_file);
+			fr = seek_fr;
+		}
+	}
+	FS_UNLOCK();
 
-    if (fr != FR_OK) {
-        printf(LOG_PREFIX "%s FAILED fr=%d on %s\r\n",
-               (context_label != NULL) ? context_label : "REOPEN",
-               (int)fr, g_active_path);
-        g_file_open = false;
-    }
+	if (fr != FR_OK) {
+		printf(LOG_PREFIX "%s FAILED fr=%d on %s\r\n",
+				(context_label != NULL) ? context_label : "REOPEN", (int) fr,
+				g_active_path);
+		g_file_open = false;
+	}
 
-    return (fr == FR_OK);
+	return (fr == FR_OK);
 }
