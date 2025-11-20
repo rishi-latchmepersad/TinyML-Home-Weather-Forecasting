@@ -45,6 +45,14 @@
 #ifndef LOGGER_SYNC_PERIOD_MS
 #define LOGGER_SYNC_PERIOD_MS   (5000u)   /* sync at least every 5 s */
 #endif
+#ifndef LOGGER_CHECKPOINT_AFTER_FLUSH
+/*
+ * Some SD cards appear blank on a PC unless the directory entry is updated by a
+ * full close/reopen cycle.  Enable a post-flush checkpoint by default so every
+ * batch forces metadata to the card before the user ejects it.
+ */
+#define LOGGER_CHECKPOINT_AFTER_FLUSH 1
+#endif
 extern osMutexId_t g_fs_mutex;
 #ifndef FS_LOCK
 #define FS_LOCK()   osMutexAcquire(g_fs_mutex, osWaitForever)
@@ -430,11 +438,19 @@ static void measurement_logger_task_entry(void *argument) {
                                                 measurement_logger_debug_snapshot();
                                                 measurement_logger_checkpoint_close();
                                         }
+#if LOGGER_CHECKPOINT_AFTER_FLUSH
+                                        /*
+                                         * Always checkpoint after a successful flush so directory entries stay in
+                                         * sync with data that has already been written to the media.  This makes
+                                         * the CSV visible even when the card is removed immediately after a flush.
+                                         */
+                                        measurement_logger_checkpoint_close();
+#endif
                                 } else {
                                         //we don't have any data to flush
                                 }
-				state = LOGGER_STATE_RUNNING;
-			}
+                                state = LOGGER_STATE_RUNNING;
+                        }
 			break;
 
 		case LOGGER_STATE_ROTATE:
@@ -784,19 +800,22 @@ static bool measurement_logger_open_today_file(const char *date_yyyy_mm_dd) {
 }
 
 static void measurement_logger_checkpoint_close(void) {
-	if (!g_file_open || g_active_path[0] == '\0')
-		return;
+        if (!g_file_open || g_active_path[0] == '\0')
+                return;
 
-	FS_LOCK();
-	(void) f_sync(&g_active_file);
-	(void) f_close(&g_active_file);
-	g_file_open = false;
-	(void) disk_ioctl(0, CTRL_SYNC, NULL);
+        printf(LOG_PREFIX "CHECKPOINT: syncing and closing %s\r\n", g_active_path);
+        FS_LOCK();
+        (void) f_sync(&g_active_file);
+        (void) f_close(&g_active_file);
+        g_file_open = false;
+        (void) disk_ioctl(0, CTRL_SYNC, NULL);
 	FS_UNLOCK();
 
-	vTaskDelay(pdMS_TO_TICKS(5));
+        vTaskDelay(pdMS_TO_TICKS(5));
 
-	(void) measurement_logger_reopen_existing_file("CHECKPOINT REOPENED");
+        if (!measurement_logger_reopen_existing_file("CHECKPOINT REOPENED")) {
+                printf(LOG_PREFIX "CHECKPOINT: reopen failed, leaving file closed\r\n");
+        }
 }
 
 /****************************************************************************************
