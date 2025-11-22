@@ -22,6 +22,8 @@
 #include "../../Drivers/DS3231/Inc/ds3231.h"
 // Pull in the FatFs declarations so we can read persisted CSV logs.
 #include "ff.h"
+// Pull in the SD card helper so we can (re)mount before checkpointing state.
+#include "sd_card.h"
 // Pull in the auto-generated network API so we can run inference.
 #include "forecast_temp_ml_model.h"
 // Pull in the data helpers so we can allocate the activation buffers correctly.
@@ -72,6 +74,10 @@ extern osMutexId_t g_fs_mutex;
 #define FORECAST_TEMP_BOOTSTRAP_MAX_FILES   (32u)
 // Declare the FatFs directory where the measurement logger writes CSV files.
 #define FORECAST_TEMP_LOG_DIRECTORY         "0:/logs"
+// Declare where we checkpoint the in-progress 30-minute accumulator for crash recovery.
+#define FORECAST_TEMP_SLOT_CACHE_PATH       "0:/logs/forecast_minute_cache.bin"
+// Declare a version tag so we can invalidate stale cache files when the layout changes.
+#define FORECAST_TEMP_SLOT_CACHE_VERSION    (1u)
 
 // Sanity-check that our feature count divides cleanly into the network input
 // tensor so we can stride through the flattened buffer without overruns.
@@ -191,6 +197,8 @@ typedef struct {
 } forecast_temp_slot_accumulator_t;
 // Instantiate a single accumulator that the task updates each minute.
 static forecast_temp_slot_accumulator_t g_slot_accumulator = { 0 };
+// Remember the current 30-minute slot key so we can validate persisted checkpoints.
+static char g_slot_accumulator_slot_key[20] = { 0 };
 
 // Enumerate the states that drive the forecasting task state machine.
 typedef enum {
@@ -280,10 +288,14 @@ static bool forecast_temp_finalize_slot_sample(float *temperature_c_out,
 		float *illuminance_lux_out);
 // Forward declare a helper that updates the raw history ring buffer.
 static void forecast_temp_store_slot_history(float temperature_c,
-		float pressure_pa);
+                float pressure_pa);
+// Forward declare a helper that persists or restores the partial 30-minute slot.
+static bool forecast_temp_compute_slot_key(char *slot_key_out, size_t slot_key_cap);
+static void forecast_temp_restore_slot_checkpoint(void);
+static void forecast_temp_persist_slot_checkpoint(void);
 // Forward declare a helper that builds the normalized feature vector for the completed slot.
 static void forecast_temp_prepare_features(float temperature_c,
-		float humidity_pct, float pressure_pa, float illuminance_lux,
+                float humidity_pct, float pressure_pa, float illuminance_lux,
 		float out_features[FORECAST_TEMP_FEATURE_COUNT]);
 // Forward declare a helper that pushes a normalized feature vector into the sliding window.
 static void forecast_temp_append_feature_vector(
@@ -845,12 +857,14 @@ static void forecast_temp_task_entry(void *argument) {
 			// Proceed immediately to the bootstrap phase regardless of success so the loop continues.
 			state = FORECAST_TEMP_STATE_BOOTSTRAP;
 			break;
-		case FORECAST_TEMP_STATE_BOOTSTRAP:
-			// Replay persisted SD-card measurements so the window fills immediately.
-			forecast_temp_bootstrap_from_sd_card();
-			// Initialize the tick count used by vTaskDelayUntil().
-			context.last_wake_tick = xTaskGetTickCount();
-			// Transition into the periodic wait state.
+                case FORECAST_TEMP_STATE_BOOTSTRAP:
+                        // Replay persisted SD-card measurements so the window fills immediately.
+                        forecast_temp_bootstrap_from_sd_card();
+                        // Restore any in-progress slot accumulation so we do not restart from zero.
+                        forecast_temp_restore_slot_checkpoint();
+                        // Initialize the tick count used by vTaskDelayUntil().
+                        context.last_wake_tick = xTaskGetTickCount();
+                        // Transition into the periodic wait state.
 			state = FORECAST_TEMP_STATE_WAIT_MINUTE;
 			break;
 		case FORECAST_TEMP_STATE_WAIT_MINUTE:
@@ -1087,24 +1101,33 @@ static bool forecast_temp_read_local_hour(uint8_t *hour_out) {
 
 // Add a minute-level reading into the 30-minute accumulator.
 static void forecast_temp_accumulate_minute_sample(float temperature_c,
-		float humidity_pct, float pressure_pa, float illuminance_lux) {
-	// Add the new temperature sample into the running sum.
-	g_slot_accumulator.temperature_sum += temperature_c;
-	// Add the new humidity sample into the running sum.
-	g_slot_accumulator.humidity_sum += humidity_pct;
-	// Add the new pressure sample into the running sum.
-	g_slot_accumulator.pressure_sum += pressure_pa;
-	// Add the new illuminance sample into the running sum.
-	g_slot_accumulator.illuminance_sum += illuminance_lux;
-	// Increment the sample counter so we know how many minutes have accumulated toward the 30-minute slot.
-	g_slot_accumulator.sample_count += 1u;
+                float humidity_pct, float pressure_pa, float illuminance_lux) {
+        // Capture the slot key the first time we add a minute to a new accumulator.
+        if (g_slot_accumulator.sample_count == 0u) {
+                if (!forecast_temp_compute_slot_key(g_slot_accumulator_slot_key,
+                                sizeof(g_slot_accumulator_slot_key))) {
+                        g_slot_accumulator_slot_key[0] = '\0';
+                }
+        }
+        // Add the new temperature sample into the running sum.
+        g_slot_accumulator.temperature_sum += temperature_c;
+        // Add the new humidity sample into the running sum.
+        g_slot_accumulator.humidity_sum += humidity_pct;
+        // Add the new pressure sample into the running sum.
+        g_slot_accumulator.pressure_sum += pressure_pa;
+        // Add the new illuminance sample into the running sum.
+        g_slot_accumulator.illuminance_sum += illuminance_lux;
+        // Increment the sample counter so we know how many minutes have accumulated toward the 30-minute slot.
+        g_slot_accumulator.sample_count += 1u;
+        // Persist the partial slot so a reboot can resume accumulation.
+        forecast_temp_persist_slot_checkpoint();
 }
 
 // Convert the minute accumulator into a 30-minute average when enough data exists.
 static bool forecast_temp_finalize_slot_sample(float *temperature_c_out,
-		float *humidity_pct_out, float *pressure_pa_out,
-		float *illuminance_lux_out) {
-	// Ensure all output pointers are valid.
+                float *humidity_pct_out, float *pressure_pa_out,
+                float *illuminance_lux_out) {
+        // Ensure all output pointers are valid.
 	if ((temperature_c_out == NULL) || (humidity_pct_out == NULL)
 			|| (pressure_pa_out == NULL) || (illuminance_lux_out == NULL)) {
 		return false;
@@ -1121,12 +1144,140 @@ static bool forecast_temp_finalize_slot_sample(float *temperature_c_out,
 	*humidity_pct_out = g_slot_accumulator.humidity_sum * reciprocal;
 	// Calculate the 30-minute average pressure.
 	*pressure_pa_out = g_slot_accumulator.pressure_sum * reciprocal;
-	// Calculate the 30-minute average illuminance.
-	*illuminance_lux_out = g_slot_accumulator.illuminance_sum * reciprocal;
-	// Reset the accumulator so the next slot starts fresh.
-	memset(&g_slot_accumulator, 0, sizeof(g_slot_accumulator));
-	// Signal that the caller received a complete slot.
-	return true;
+        // Calculate the 30-minute average illuminance.
+        *illuminance_lux_out = g_slot_accumulator.illuminance_sum * reciprocal;
+        // Reset the accumulator so the next slot starts fresh.
+        memset(&g_slot_accumulator, 0, sizeof(g_slot_accumulator));
+        // Clear the slot key alongside the sums.
+        g_slot_accumulator_slot_key[0] = '\0';
+        // Remove any stale checkpoint now that the slot rolled over.
+        forecast_temp_persist_slot_checkpoint();
+        // Signal that the caller received a complete slot.
+        return true;
+}
+
+// Persist the in-progress 30-minute accumulator so a reboot can resume the slot.
+typedef struct {
+        uint32_t version;
+        uint32_t sample_count;
+        char slot_key[20];
+        float temperature_sum;
+        float humidity_sum;
+        float pressure_sum;
+        float illuminance_sum;
+} forecast_temp_slot_checkpoint_t;
+
+// Derive the YYYY-MM-DDTHH:MM slot key from the RTC so checkpoints can be validated.
+static bool forecast_temp_compute_slot_key(char *slot_key_out, size_t slot_key_cap) {
+        if ((slot_key_out == NULL) || (slot_key_cap < 17u)) {
+                return false;
+        }
+        char timestamp[24];
+        if (ds3231_read_time_iso8601_utc_i2c1(timestamp, sizeof timestamp) != HAL_OK) {
+                return false;
+        }
+        memcpy(slot_key_out, timestamp, 16u);
+        slot_key_out[16] = '\0';
+        return true;
+}
+
+// Write the partial slot accumulator to disk so it survives a reboot.
+static void forecast_temp_persist_slot_checkpoint(void) {
+        if (SD_Mount() != FR_OK) {
+                        return;
+        }
+
+        forecast_temp_slot_checkpoint_t checkpoint = {
+                        .version = FORECAST_TEMP_SLOT_CACHE_VERSION,
+                        .sample_count = g_slot_accumulator.sample_count,
+                        .temperature_sum = g_slot_accumulator.temperature_sum,
+                        .humidity_sum = g_slot_accumulator.humidity_sum,
+                        .pressure_sum = g_slot_accumulator.pressure_sum,
+                        .illuminance_sum = g_slot_accumulator.illuminance_sum,
+        };
+        (void) strncpy(checkpoint.slot_key, g_slot_accumulator_slot_key,
+                        sizeof(checkpoint.slot_key) - 1u);
+        checkpoint.slot_key[sizeof(checkpoint.slot_key) - 1u] = '\0';
+
+        FS_LOCK();
+        if (checkpoint.sample_count == 0u) {
+                (void) f_unlink(FORECAST_TEMP_SLOT_CACHE_PATH);
+                FS_UNLOCK();
+                return;
+        }
+
+        FIL file;
+        FRESULT fr = f_open(&file, FORECAST_TEMP_SLOT_CACHE_PATH,
+                        FA_CREATE_ALWAYS | FA_WRITE);
+        bool ok = (fr == FR_OK);
+        UINT bw = 0u;
+        if (ok) {
+                fr = f_write(&file, &checkpoint, (UINT) sizeof(checkpoint), &bw);
+                ok = (fr == FR_OK) && (bw == (UINT) sizeof(checkpoint));
+        }
+        if (ok) {
+                ok = (f_sync(&file) == FR_OK);
+        }
+        (void) f_close(&file);
+        if (!ok) {
+                (void) f_unlink(FORECAST_TEMP_SLOT_CACHE_PATH);
+        }
+        FS_UNLOCK();
+}
+
+// Restore any cached partial slot so we do not lose progress across reboots.
+static void forecast_temp_restore_slot_checkpoint(void) {
+        if (SD_Mount() != FR_OK) {
+                return;
+        }
+        forecast_temp_slot_checkpoint_t checkpoint;
+        FS_LOCK();
+        FIL file;
+        FRESULT fr = f_open(&file, FORECAST_TEMP_SLOT_CACHE_PATH,
+                        FA_OPEN_EXISTING | FA_READ);
+        if (fr != FR_OK) {
+                FS_UNLOCK();
+                return;
+        }
+        UINT br = 0u;
+        fr = f_read(&file, &checkpoint, (UINT) sizeof(checkpoint), &br);
+        (void) f_close(&file);
+        FS_UNLOCK();
+        if ((fr != FR_OK) || (br != (UINT) sizeof(checkpoint))) {
+                return;
+        }
+        if ((checkpoint.version != FORECAST_TEMP_SLOT_CACHE_VERSION)
+                        || (checkpoint.sample_count == 0u)) {
+                FS_LOCK();
+                (void) f_unlink(FORECAST_TEMP_SLOT_CACHE_PATH);
+                FS_UNLOCK();
+                return;
+        }
+
+        char current_slot_key[sizeof(checkpoint.slot_key)] = { 0 };
+        if (forecast_temp_compute_slot_key(current_slot_key,
+                        sizeof(current_slot_key))
+                        && (strncmp(current_slot_key, checkpoint.slot_key,
+                                        sizeof(checkpoint.slot_key)) != 0)) {
+                FS_LOCK();
+                (void) f_unlink(FORECAST_TEMP_SLOT_CACHE_PATH);
+                FS_UNLOCK();
+                return;
+        }
+
+        g_slot_accumulator.sample_count = checkpoint.sample_count;
+        g_slot_accumulator.temperature_sum = checkpoint.temperature_sum;
+        g_slot_accumulator.humidity_sum = checkpoint.humidity_sum;
+        g_slot_accumulator.pressure_sum = checkpoint.pressure_sum;
+        g_slot_accumulator.illuminance_sum = checkpoint.illuminance_sum;
+        (void) strncpy(g_slot_accumulator_slot_key, checkpoint.slot_key,
+                        sizeof(g_slot_accumulator_slot_key) - 1u);
+        g_slot_accumulator_slot_key[sizeof(g_slot_accumulator_slot_key) - 1u] =
+                        '\0';
+        printf(LOG_PREFIX
+                        "[forecast] restored %lu/%lu minutes for the current 30-minute slot\r\n",
+                        (unsigned long) checkpoint.sample_count,
+                        (unsigned long) FORECAST_TEMP_MINUTES_PER_SLOT);
 }
 
 // Store the latest 30-minute temperature and pressure so deltas stay accurate.

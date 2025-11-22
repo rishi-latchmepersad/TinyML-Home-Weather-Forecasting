@@ -30,7 +30,7 @@ extern osMutexId_t g_fs_mutex;
 #define DEBUG_LOG_WRITE_CHUNK_BYTES  (256u)
 #endif
 #ifndef DEBUG_LOG_MAX_BYTES
-#define DEBUG_LOG_MAX_BYTES          (256u * 1024u)
+#define DEBUG_LOG_MAX_BYTES          (512u * 1024u)
 #endif
 #ifndef DEBUG_LOG_DIR
 #define DEBUG_LOG_DIR                "0:/logs"

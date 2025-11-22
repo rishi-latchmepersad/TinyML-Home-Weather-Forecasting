@@ -223,6 +223,11 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
 static bool inference_logger_flush_buffer_to_file(void) { // Helper that writes the buffered log data to disk and resets the buffer.
     const size_t bytes_to_write = g_write_used; // Capture how many bytes are pending so we write exactly that amount.
 // -----------------------------------------------------------------------------
+    if (SD_Mount() != FR_OK) { // Ensure the SD card is mounted before touching FatFS.
+        printf(LOG_PREFIX "SD_Mount failed while flushing inference log\r\n");
+        return false; // Signal failure so the caller retries later.
+    }
+// -----------------------------------------------------------------------------
     if (bytes_to_write == 0u) { // If no data is queued, we consider the flush successful without performing I/O.
         return true; // Nothing to do, so report success.
     } // End empty buffer check.
@@ -330,6 +335,7 @@ static bool inference_logger_ensure_directory_exists(const char *dir_path) { // 
         return (fr == FR_OK || fr == FR_EXIST); // Treat both successful creation and "already exists" as success to handle race conditions.
     } // End missing directory handling.
 // -----------------------------------------------------------------------------
+    printf(LOG_PREFIX "Failed to stat log directory %s fr=%d\r\n", dir_path, (int)fr);
     return false; // For any other error, report failure so the caller can back off and retry.
 } // End of inference_logger_ensure_directory_exists helper.
 // -----------------------------------------------------------------------------
@@ -353,6 +359,7 @@ static bool inference_logger_open_today_file(const char *date_yyyy_mm_dd) { // O
         } // End open success handling.
         FS_UNLOCK(); // Release the mutex after attempting to open and seek.
         if (fr != FR_OK) { // If either opening or seeking failed, signal failure.
+            printf(LOG_PREFIX "Failed to reopen inference log %s fr=%d\r\n", path, (int)fr);
             return false; // Return false so the state machine can back off.
         } // End failure handling for existing file.
     } else if (fr == FR_NO_FILE) { // File does not exist, so create a new one with a header.
@@ -369,6 +376,7 @@ static bool inference_logger_open_today_file(const char *date_yyyy_mm_dd) { // O
         }
         FS_UNLOCK(); // Release the filesystem mutex after file creation.
         if (fr != FR_OK) { // If creation or header write failed, indicate failure.
+            printf(LOG_PREFIX "Failed to create inference log %s fr=%d\r\n", path, (int)fr);
             return false; // Abort opening so the caller can handle the error.
         } // End failure handling after creation.
 // -----------------------------------------------------------------------------
@@ -379,9 +387,11 @@ static bool inference_logger_open_today_file(const char *date_yyyy_mm_dd) { // O
         } // End reopen success handling.
         FS_UNLOCK(); // Release the filesystem mutex after reopening and seeking.
         if (fr != FR_OK) { // If reopening failed, report failure.
+            printf(LOG_PREFIX "Failed to reopen freshly created inference log %s fr=%d\r\n", path, (int)fr);
             return false; // Inform the caller to handle the error.
         } // End failure handling for reopened file.
     } else { // Some other error occurred while checking the file status.
+        printf(LOG_PREFIX "Unable to stat inference log %s fr=%d\r\n", path, (int)fr);
         return false; // Propagate failure so the caller can enter the error state.
     } // End file existence handling.
 // -----------------------------------------------------------------------------
