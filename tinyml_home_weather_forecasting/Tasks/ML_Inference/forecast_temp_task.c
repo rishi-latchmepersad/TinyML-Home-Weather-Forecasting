@@ -697,11 +697,16 @@ static void forecast_temp_bootstrap_process_file(const char *file_path,
 
 // Discover recent CSV logs on the SD card and replay them into the feature window.
 static void forecast_temp_bootstrap_from_sd_card(void) {
-	// Allocate storage for the set of measurement files we care about.
-	forecast_temp_log_file_t files[FORECAST_TEMP_BOOTSTRAP_MAX_FILES];
-	// Track how many files we actually discovered in the directory.
-	size_t file_count = 0u;
-	// Declare a FatFs directory object so we can iterate through 0:/logs.
+        // Ensure the SD card is mounted so directory scans succeed after a reboot.
+        if (SD_Mount() != FR_OK) {
+                printf(LOG_PREFIX "[forecast] bootstrap failed to mount SD card for log replay\r\n");
+                return;
+        }
+        // Allocate storage for the set of measurement files we care about.
+        forecast_temp_log_file_t files[FORECAST_TEMP_BOOTSTRAP_MAX_FILES];
+        // Track how many files we actually discovered in the directory.
+        size_t file_count = 0u;
+        // Declare a FatFs directory object so we can iterate through 0:/logs.
 	DIR directory;
 	// Take the filesystem mutex before issuing FatFs calls.
 	FS_LOCK();
