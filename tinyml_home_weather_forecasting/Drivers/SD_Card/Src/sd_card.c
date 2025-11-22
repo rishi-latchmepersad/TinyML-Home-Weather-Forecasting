@@ -91,14 +91,14 @@ void SD_TestFatFs(void)
 	char buffer[100];
 
 	printf(LOG_PREFIX "\r\n=== Testing FATFS functionality ===\r\n");
-	fr = f_unlink("0:/test.txt"); // Attempt to delete the file
+    fr = f_unlink("0:/text.txt"); // Attempt to delete the file
 
 	if (fr == FR_OK) {
-	    printf(LOG_PREFIX "test.txt deleted successfully\r\n");
-	} else {
-	   printf(LOG_PREFIX "Unable to delete text.txt\r\n");
-	}
-	fr = f_open(&fil, "0:/test.txt", FA_CREATE_ALWAYS | FA_WRITE);
+            printf(LOG_PREFIX "text.txt deleted successfully\r\n");
+        } else {
+           printf(LOG_PREFIX "Unable to delete text.txt\r\n");
+        }
+        fr = f_open(&fil, "0:/text.txt", FA_CREATE_ALWAYS | FA_WRITE);
 	if (fr == FR_OK) {
 		const char *test = "Hello from STM32 and SD card!\r\n";
 		fr = f_write(&fil, test, (UINT) strlen(test), &bw);
@@ -113,7 +113,7 @@ void SD_TestFatFs(void)
 		return;
 	}
 
-	fr = f_open(&fil, "0:/test.txt", FA_READ);
+        fr = f_open(&fil, "0:/text.txt", FA_READ);
 
 	if (fr == FR_OK) {
 		fr = f_read(&fil, buffer, sizeof(buffer) - 1, &br);
