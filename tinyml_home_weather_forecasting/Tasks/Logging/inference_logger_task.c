@@ -228,6 +228,11 @@ static bool inference_logger_flush_buffer_to_file(void) { // Helper that writes 
         return false; // Signal failure so the caller retries later.
     }
 // -----------------------------------------------------------------------------
+    if (g_active_path[0] == '\0') { // Refuse to flush when we do not know the active file path.
+        printf(LOG_PREFIX "No active inference log path set; skipping flush\r\n");
+        return false;
+    }
+// -----------------------------------------------------------------------------
     if (bytes_to_write == 0u) { // If no data is queued, we consider the flush successful without performing I/O.
         return true; // Nothing to do, so report success.
     } // End empty buffer check.
@@ -273,6 +278,7 @@ static bool inference_logger_flush_buffer_to_file(void) { // Helper that writes 
     } // End write verification.
 // -----------------------------------------------------------------------------
     led_service_activity_bump(1000); // Trigger LED activity feedback for one second to indicate a successful log flush.
+    printf(LOG_PREFIX "Flushed %u bytes to inference log %s\r\n", (unsigned)bw, g_active_path);
     g_write_used = 0u; // Reset the buffered byte count so we can accumulate new data.
     return true; // Indicate that flushing succeeded.
 } // End of inference_logger_flush_buffer_to_file helper.
