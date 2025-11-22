@@ -228,9 +228,10 @@
 /  _NORTC_MDAY and _NORTC_YEAR have no effect.
 /  These options have no effect at read-only configuration (_FS_READONLY = 1). */
 
-#define _FS_LOCK    4     /* 0:Disable or >=1:Enable */
-/* Increase lock count so measurement + inference loggers and the rolling debug log
- * can keep their files open simultaneously without hitting FR_TOO_MANY_OPEN_FILES.
+#define _FS_LOCK    8     /* 0:Disable or >=1:Enable */
+/* Raise the lock budget so measurement, inference, and debug loggers can all keep
+ * their files open while other tasks (for example, bootstrap readers) temporarily
+ * open additional handles without tripping FR_TOO_MANY_OPEN_FILES.
  */
 /* The option _FS_LOCK switches file lock function to control duplicated file open
 /  and illegal operation to open objects. This option must be 0 when _FS_READONLY

@@ -1424,15 +1424,28 @@ static bool forecast_temp_export_window_to_network(int8_t *destination_buffer) {
 
 // Run the neural network and decode the resulting prediction vector.
 static bool forecast_temp_run_inference(
-		float predictions_out[FORECAST_TEMP_FORECAST_HORIZON_SLOTS]) {
-	// Guard against NULL output pointers.
-	if (predictions_out == NULL) {
-		return false;
-	}
-	// Abort when the network handle is not valid.
-	if (g_forecast_network == AI_HANDLE_NULL) {
-		return false;
-	}
+                float predictions_out[FORECAST_TEMP_FORECAST_HORIZON_SLOTS]) {
+        // Guard against NULL output pointers.
+        if (predictions_out == NULL) {
+                return false;
+        }
+        // Only emit verbose console output at a limited cadence to avoid spamming
+        // the UART when the state machine loops quickly (for example, after
+        // bootstrap replay).
+        static TickType_t s_last_console_log_tick = 0;
+        const TickType_t now = xTaskGetTickCount();
+        const bool should_log =
+                        (s_last_console_log_tick == 0)
+                                        || ((now - s_last_console_log_tick)
+                                                        >= pdMS_TO_TICKS(
+                                                                        FORECAST_TEMP_TASK_PERIOD_MS));
+        if (should_log) {
+                s_last_console_log_tick = now;
+        }
+        // Abort when the network handle is not valid.
+        if (g_forecast_network == AI_HANDLE_NULL) {
+                return false;
+        }
 	// Attach the input tensor buffer to the runtime descriptor.
 	g_network_inputs[0].data = AI_HANDLE_PTR(g_network_input_buffer);
 	// Attach the output tensor buffer to the runtime descriptor.
@@ -1448,17 +1461,20 @@ static bool forecast_temp_run_inference(
 	}
 	// Decode the int8 outputs back into floating-point units and report each lead time.
 	for (size_t i = 0u; i < FORECAST_TEMP_FORECAST_HORIZON_SLOTS; ++i) {
-		const float dequantized = ((float) g_network_output_buffer[i]
-				- (float) g_output_zero_point) * g_output_scale;
-		predictions_out[i] = dequantized;
-		const uint32_t lead_minutes_total = (uint32_t) ((i + 1u)
-				* FORECAST_TEMP_MINUTES_PER_SLOT);
-		const uint32_t lead_hours = lead_minutes_total / 60u;
-		const uint32_t lead_minutes = lead_minutes_total % 60u;
-		printf(LOG_PREFIX "[forecast] horizon+%02lu:%02lu %.2f C\r\n",
-				(unsigned long) lead_hours, (unsigned long) lead_minutes,
-				(double) dequantized);
-	}
-	// Signal success to the caller.
-	return true;
+                const float dequantized = ((float) g_network_output_buffer[i]
+                                - (float) g_output_zero_point) * g_output_scale;
+                predictions_out[i] = dequantized;
+                const uint32_t lead_minutes_total = (uint32_t) ((i + 1u)
+                                * FORECAST_TEMP_MINUTES_PER_SLOT);
+                const uint32_t lead_hours = lead_minutes_total / 60u;
+                const uint32_t lead_minutes = lead_minutes_total % 60u;
+                if (should_log) {
+                        printf(LOG_PREFIX "[forecast] horizon+%02lu:%02lu %.2f C\r\n",
+                                        (unsigned long) lead_hours,
+                                        (unsigned long) lead_minutes,
+                                        (double) dequantized);
+                }
+        }
+        // Signal success to the caller.
+        return true;
 }
