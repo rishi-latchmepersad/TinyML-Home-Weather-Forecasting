@@ -629,18 +629,27 @@ static void forecast_temp_bootstrap_process_file(const char *file_path,
 		}
 		// Convert the numeric value from ASCII into a float.
 		const float value = strtof(value_str, NULL);
-		// Detect when a new timestamp begins so we can flush the previous bundle.
-		if (!bundle.in_use
-				|| (strncmp(bundle.timestamp_iso8601, timestamp,
-						sizeof(bundle.timestamp_iso8601)) != 0)) {
-			// Submit the previous bundle before starting the new one.
-			forecast_temp_bootstrap_submit_bundle(&bundle, slot_bucket,
-					minute_counter, slot_counter);
+                // Derive the minute-level bucket for this reading so slightly different seconds
+                // (e.g., temperature at 00:00:01 and illuminance at 00:00:07) still merge into the
+                // same per-minute bundle.
+                if (strlen(timestamp) < 16u) {
+                        continue;
+                }
+                char minute_bucket[sizeof(bundle.timestamp_iso8601)] = { 0 };
+                (void) strncpy(minute_bucket, timestamp, 16u);
+                minute_bucket[16] = '\0';
+                // Detect when a new minute bucket begins so we can flush the previous bundle.
+                if (!bundle.in_use
+                                || (strncmp(bundle.timestamp_iso8601, minute_bucket,
+                                                sizeof(bundle.timestamp_iso8601)) != 0)) {
+                        // Submit the previous bundle before starting the new one.
+                        forecast_temp_bootstrap_submit_bundle(&bundle, slot_bucket,
+                                        minute_counter, slot_counter);
 			// Reset the bundle so it can hold readings for the new timestamp.
 			forecast_temp_bootstrap_reset_bundle(&bundle);
 			// Copy the new timestamp into the bundle for future comparisons.
-			(void) strncpy(bundle.timestamp_iso8601, timestamp,
-					sizeof(bundle.timestamp_iso8601) - 1u);
+                        (void) strncpy(bundle.timestamp_iso8601, minute_bucket,
+                                        sizeof(bundle.timestamp_iso8601) - 1u);
 			// Guarantee the stored timestamp is null-terminated.
 			bundle.timestamp_iso8601[sizeof(bundle.timestamp_iso8601) - 1u] =
 					'\0';
