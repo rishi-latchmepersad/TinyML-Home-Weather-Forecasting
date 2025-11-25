@@ -164,10 +164,19 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
                                                       FORECAST_TEMP_FORECAST_HORIZON_SLOTS,
                                                       line, sizeof line); // Provide the destination buffer and its capacity to prevent overflow.
                 if (len > 0u) { // Ensure the formatted line is valid before attempting to buffer it.
+                    if (len > sizeof g_write_buffer) { // Refuse to log entries that can never fit in the buffer.
+                        printf(LOG_PREFIX "Formatted inference line (%lu bytes) exceeds buffer (%lu bytes); dropping entry\r\n",
+                               (unsigned long)len,
+                               (unsigned long)sizeof g_write_buffer);
+                        state = INFERENCE_LOGGER_STATE_ERROR_BACKOFF; // Retry later to avoid spinning forever.
+                        break; // Abort this iteration because the data cannot be buffered safely.
+                    }
                     if ((g_write_used + len) > sizeof g_write_buffer) { // Check if adding the line would exceed the buffer capacity.
-                        state = INFERENCE_LOGGER_STATE_FLUSH; // If the buffer is full, flush existing data before adding more.
-                        break; // Exit to handle flushing before appending the new line.
-                    } // End buffer capacity check.
+                        if (!inference_logger_flush_buffer_to_file()) { // Flush current data before appending to prevent loss.
+                            state = INFERENCE_LOGGER_STATE_ERROR_BACKOFF; // Retry after a backoff when the flush fails.
+                            break; // Leave the RUNNING state to honor the backoff delay.
+                        }
+                    }
                     memcpy(&g_write_buffer[g_write_used], line, len); // Copy the formatted line into the write buffer at the current end.
                     g_write_used += len; // Update the number of bytes used to include the new line.
                     state = INFERENCE_LOGGER_STATE_FLUSH; // Trigger a flush so the newly added data is persisted promptly.
