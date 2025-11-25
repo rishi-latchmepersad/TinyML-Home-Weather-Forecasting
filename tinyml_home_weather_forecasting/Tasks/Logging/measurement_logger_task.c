@@ -21,9 +21,10 @@
  * logger's own locals (message structs, CSV buffers, etc.) were accounted
  * for, and the extra FatFs stack usage during SD_TestFatFs() could easily
  * overflow the task stack and lock the system at startup.  Bump the default
- * stack allocation to 1400 words (≈5.6 KB) to give comfortable margin.
+ * stack allocation to 1800 words (≈7.2 KB) so the FatFs long-file-name buffer
+ * and our own temporaries cannot exhaust the stack during the self-test.
  */
-#define LOGGER_TASK_STACK_WORDS   (1400u)
+#define LOGGER_TASK_STACK_WORDS   (1800u)
 #endif
 #ifndef LOGGER_TASK_PRIORITY
 #define LOGGER_TASK_PRIORITY      (osPriorityNormal)
@@ -342,12 +343,19 @@ static void measurement_logger_task_entry(void *argument) {
 						(void*) g_write_buffer);
 				s_buf_addr_printed = true;
 			}
-			if (SD_Mount() == FR_OK) {
-				printf(LOG_PREFIX "SD card mounted successfully!\r\n");
-				SD_TestFatFs();
-				state = LOGGER_STATE_ENSURE_DIR;
-				break;
-			} else {
+                        if (SD_Mount() == FR_OK) {
+                                printf(LOG_PREFIX "SD card mounted successfully!\r\n");
+                                SD_TestFatFs();
+                                /*
+                                 * Confirm we still have stack headroom after the FatFs
+                                 * self-test (uses the long-file-name work buffer).
+                                 */
+                                UBaseType_t watermark = uxTaskGetStackHighWaterMark(NULL);
+                                printf(LOG_PREFIX "Stack watermark after SD self-test: %lu words\r\n",
+                                               (unsigned long) watermark);
+                                state = LOGGER_STATE_ENSURE_DIR;
+                                break;
+                        } else {
 				printf(LOG_PREFIX "Unable to mount SD card!\r\n");
 				state = LOGGER_STATE_ERROR_BACKOFF;
 				break;
