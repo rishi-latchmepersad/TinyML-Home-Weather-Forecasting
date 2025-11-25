@@ -574,19 +574,20 @@ static void forecast_temp_bootstrap_process_file(const char *file_path,
 	}
 	// Declare a FatFs file object that will represent the open CSV.
 	FIL file;
-	// Take the filesystem mutex so the logger task does not race us.
-	FS_LOCK();
-	// Attempt to open the CSV file for reading.
-	FRESULT fr = f_open(&file, file_path, FA_READ);
-	// If the open call failed we can release the mutex and bail out.
-	if (fr != FR_OK) {
-		// Release the filesystem mutex now that we are done with FatFs.
-		FS_UNLOCK();
-		// Emit a diagnostic so we know which file could not be opened.
-		printf(LOG_PREFIX "[forecast] bootstrap failed to open %s fr=%d\r\n", file_path,
-				(int) fr);
-		// Nothing more we can do for this file.
-		return;
+        // Take the filesystem mutex so the logger task does not race us while opening the file.
+        FS_LOCK();
+        // Attempt to open the CSV file for reading.
+        FRESULT fr = f_open(&file, file_path, FA_READ);
+        // Release the filesystem mutex immediately after the open call so other tasks
+        // are not blocked while we parse the file contents.
+        FS_UNLOCK();
+        // If the open call failed we can bail out early.
+        if (fr != FR_OK) {
+                // Emit a diagnostic so we know which file could not be opened.
+                printf(LOG_PREFIX "[forecast] bootstrap failed to open %s fr=%d\r\n", file_path,
+                                (int) fr);
+                // Nothing more we can do for this file.
+                return;
 	}
 	// Prepare a reusable bundle so we can group lines by timestamp.
 	forecast_temp_measurement_bundle_t bundle;
@@ -599,7 +600,11 @@ static void forecast_temp_bootstrap_process_file(const char *file_path,
 		// Allocate a buffer to hold one CSV line including the newline terminator.
 		char line[192] = { 0 };
 		// Read the next line from the CSV file.
-		char *result = f_gets(line, (int) sizeof(line), &file);
+                // Serialize individual FatFs calls rather than holding the mutex for the
+                // entire file parse to avoid starving the logger task and other SD users.
+                FS_LOCK();
+                char *result = f_gets(line, (int) sizeof(line), &file);
+                FS_UNLOCK();
 		// Break the loop once FatFs signals end-of-file.
 		if (result == NULL) {
 			break;
@@ -691,13 +696,13 @@ static void forecast_temp_bootstrap_process_file(const char *file_path,
 			continue;
 		}
 	}
-	// Submit the final bundle so the last timestamp contributes to the aggregates.
-	forecast_temp_bootstrap_submit_bundle(&bundle, slot_bucket, minute_counter,
-			slot_counter);
-	// Close the CSV file now that parsing is complete.
-	(void) f_close(&file);
-	// Release the filesystem mutex so other tasks may use FatFs.
-	FS_UNLOCK();
+        // Submit the final bundle so the last timestamp contributes to the aggregates.
+        forecast_temp_bootstrap_submit_bundle(&bundle, slot_bucket, minute_counter,
+                        slot_counter);
+        // Close the CSV file now that parsing is complete.
+        FS_LOCK();
+        (void) f_close(&file);
+        FS_UNLOCK();
 }
 
 // Discover recent CSV logs on the SD card and replay them into the feature window.
