@@ -283,6 +283,11 @@ static bool inference_logger_flush_buffer_to_file(void) { // Helper that writes 
     FS_UNLOCK(); // Release the filesystem lock so other tasks may access the SD card.
 // -----------------------------------------------------------------------------
     if (wr != FR_OK || bw != bytes_to_write) { // Verify the write and sync both succeeded.
+        printf(LOG_PREFIX "Failed to write %u/%u bytes to inference log %s wr=%d\r\n",
+               (unsigned)bw,
+               (unsigned)bytes_to_write,
+               g_active_path,
+               (int)wr);
         FS_LOCK(); // Ensure the file handle is closed on failure so we do not leak descriptors.
         (void)f_close(&g_active_file);
         FS_UNLOCK();
