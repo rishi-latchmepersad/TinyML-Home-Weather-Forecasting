@@ -16,13 +16,13 @@
 #define LOG_PREFIX "[INFERENCE_LOGGER] "
 // -----------------------------------------------------------------------------
 #ifndef INFERENCE_LOGGER_TASK_STACK_WORDS // Allow overriding the stack allocation for the logger task at build time.
-#define INFERENCE_LOGGER_TASK_STACK_WORDS   (1024u)
+#define INFERENCE_LOGGER_TASK_STACK_WORDS   (2048u)
 #endif // End of default stack size guard.
 #ifndef INFERENCE_LOGGER_TASK_PRIORITY // Allow the application to override the logger task priority.
 #define INFERENCE_LOGGER_TASK_PRIORITY      (osPriorityLow) // Run the logger at low priority so it does not block critical work.
 #endif // End of default priority guard.
 #ifndef INFERENCE_LOGGER_BUFFER_BYTES // Permit build-time customization of the write buffer size.
-#define INFERENCE_LOGGER_BUFFER_BYTES       (1024u) // Buffer writes to limit SD card access frequency while staying memory conscious.
+#define INFERENCE_LOGGER_BUFFER_BYTES       (2048u) // Buffer writes to limit SD card access frequency while staying memory conscious.
 #endif // End of default buffer size guard.
 #ifndef INFERENCE_LOGGER_BASE_DIR // Let integrators change the log directory without modifying code.
 #define INFERENCE_LOGGER_BASE_DIR           "0:/logs" // Store logs on the SD card in the /logs directory for organization.
