@@ -274,9 +274,17 @@ static bool inference_logger_flush_buffer_to_file(void) { // Helper that writes 
     FS_UNLOCK(); // Release the filesystem lock so other tasks may access the SD card.
 // -----------------------------------------------------------------------------
     if (wr != FR_OK || bw != bytes_to_write) { // Verify the write and sync both succeeded.
+        FS_LOCK(); // Ensure the file handle is closed on failure so we do not leak descriptors.
+        (void)f_close(&g_active_file);
+        FS_UNLOCK();
+        g_file_open = false; // Mark the file as closed so a future attempt will reopen cleanly.
         return false; // On failure, report back so the caller can handle the error.
     } // End write verification.
 // -----------------------------------------------------------------------------
+    FS_LOCK(); // Release the handle after a successful flush to keep descriptor usage low.
+    (void)f_close(&g_active_file);
+    FS_UNLOCK();
+    g_file_open = false; // Mark the file as closed; the next flush will reopen as needed.
     led_service_activity_bump(1000); // Trigger LED activity feedback for one second to indicate a successful log flush.
     printf(LOG_PREFIX "Flushed %u bytes to inference log %s\r\n", (unsigned)bw, g_active_path);
     g_write_used = 0u; // Reset the buffered byte count so we can accumulate new data.
@@ -408,6 +416,11 @@ static bool inference_logger_open_today_file(const char *date_yyyy_mm_dd) { // O
     strncpy(g_active_path, path, sizeof g_active_path); // Remember the path so we can reopen or reference it later as needed.
     g_active_path[sizeof g_active_path - 1] = '\0'; // Guarantee the active path string is null-terminated.
     g_write_used = 0u; // Reset the buffered data count since we start fresh after opening a file.
+// -----------------------------------------------------------------------------
+    FS_LOCK(); // Close the file immediately so the logger does not hold an extra descriptor between flushes.
+    (void)f_close(&g_active_file);
+    FS_UNLOCK();
+    g_file_open = false; // Mark the file as closed; the flush routine will reopen it when needed.
     return true; // Indicate that the file is ready for logging.
 } // End of inference_logger_open_today_file helper.
 // -----------------------------------------------------------------------------
