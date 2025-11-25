@@ -64,10 +64,12 @@ extern osMutexId_t g_fs_mutex;
 #define FORECAST_TEMP_DELTA_T_LAG_SLOTS     (1u)
 // Declare how many 30-minute slots back we look when computing the pressure delta (12 hours).
 #define FORECAST_TEMP_DELTA_P_LAG_SLOTS     (24u)
-// Declare how many engineered plus raw features the model expects per time step.
-#define FORECAST_TEMP_FEATURE_COUNT         (7u)
+// Declare how many engineered plus raw features the model expects per time step. Tie this
+// directly to the generated model metadata so the inference task automatically adapts when
+// the notebook changes the input feature count.
+#define FORECAST_TEMP_FEATURE_COUNT         (AI_FORECAST_TEMP_ML_MODEL_IN_1_CHANNEL)
 // Declare how many chronological 30-minute slots the compiled model encodes per inference.
-#define FORECAST_TEMP_NETWORK_WINDOW_SLOTS  (AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE / FORECAST_TEMP_FEATURE_COUNT)
+#define FORECAST_TEMP_NETWORK_WINDOW_SLOTS  (AI_FORECAST_TEMP_ML_MODEL_IN_1_HEIGHT)
 // Declare the capacity of our raw history ring so pressure deltas have room.
 #define FORECAST_TEMP_HISTORY_CAPACITY      (FORECAST_TEMP_WINDOW_LENGTH + FORECAST_TEMP_DELTA_P_LAG_SLOTS)
 // Declare how many daily log files we will scan when replaying persisted data.
@@ -83,6 +85,9 @@ extern osMutexId_t g_fs_mutex;
 // tensor so we can stride through the flattened buffer without overruns.
 #if ((AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE % FORECAST_TEMP_FEATURE_COUNT) != 0u)
 #error "AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE must be divisible by FORECAST_TEMP_FEATURE_COUNT"
+#endif
+#if ((FORECAST_TEMP_FEATURE_COUNT * FORECAST_TEMP_NETWORK_WINDOW_SLOTS) != AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE)
+#error "Model input tensor dimensions must match the flattened input size"
 #endif
 
 #if (FORECAST_TEMP_WINDOW_LENGTH != 48u)
