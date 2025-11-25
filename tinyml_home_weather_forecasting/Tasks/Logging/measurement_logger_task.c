@@ -674,14 +674,29 @@ static bool measurement_logger_open_today_file(const char *date_yyyy_mm_dd) {
 	(void) snprintf(path, sizeof path, LOGGER_BASE_DIR "/measurements_%s.csv",
 			date_yyyy_mm_dd);
 
-	/* Hex dump the path once to catch invisible characters */
-	{
-		size_t L = strlen(path);
-		printf(LOG_PREFIX "PATH len=%u: ", (unsigned) L);
-		for (size_t i = 0; i < L; ++i)
-			printf(LOG_PREFIX "%02X ", (unsigned char) path[i]);
-		printf(LOG_PREFIX "\r\n");
-	}
+        /* Hex dump the path once to catch invisible characters */
+        {
+                size_t L = strlen(path);
+                char linebuf[4 * sizeof(path)]; /* "AA " per char + prefix */
+                size_t used = 0;
+
+                used = (size_t) snprintf(linebuf, sizeof linebuf,
+                                        LOG_PREFIX "PATH len=%u: ", (unsigned) L);
+                if (used >= sizeof linebuf)
+                        used = sizeof linebuf - 1;
+
+                for (size_t i = 0; i < L && used + 4 < sizeof linebuf; ++i) {
+                        used += (size_t) snprintf(linebuf + used, sizeof linebuf - used,
+                                                "%02X ", (unsigned char) path[i]);
+                        if (used >= sizeof linebuf) {
+                                used = sizeof linebuf - 1;
+                                break;
+                        }
+                }
+
+                linebuf[sizeof linebuf - 1] = '\0';
+                printf("%s\r\n", linebuf);
+        }
 
 	/* 1) Ensure the base directory exists */
 	FS_LOCK();
