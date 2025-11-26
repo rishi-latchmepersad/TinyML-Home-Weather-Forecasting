@@ -1016,39 +1016,39 @@
     </mxGraphModel>
   </diagram>
   <diagram id="cnn-model" name="1D CNN Model">
-    <mxGraphModel dx="973" dy="674" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1605" dy="1046" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="cnn-input" value="&lt;b&gt;Input Layer&lt;/b&gt;&lt;div&gt;(7 features across a sliding window)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="40" y="200" width="160" height="150" as="geometry" />
+        <mxCell id="cnn-input" value="&lt;b&gt;Input Layer&lt;/b&gt;&lt;div&gt;(9 features across a sliding window)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="80" y="200" width="160" height="150" as="geometry" />
         </mxCell>
-        <mxCell id="cnn-conv1" value="&lt;b&gt;1D Convolution Layer&lt;/b&gt; (filters=16, kernel size=5, padding = same, ReLU activation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="250" y="200" width="160" height="140" as="geometry" />
+        <mxCell id="cnn-conv1" value="&lt;b&gt;1D Convolution Layer&lt;/b&gt; (filters=24, kernel size=5, padding = same, ReLU activation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="265" y="200" width="160" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="cnn-conv2" value="&lt;b&gt;1D Convolution Layer&lt;/b&gt;&amp;nbsp;&lt;div&gt;(filters=16, kernel size=3, padding = same, ReLU activation)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
+        <mxCell id="cnn-conv2" value="&lt;b&gt;1D Convolution Layer&lt;/b&gt;&amp;nbsp;&lt;div&gt;(filters=24, kernel size=3, padding = same, ReLU activation)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
           <mxGeometry x="460" y="200" width="160" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="cnn-pool" value="&lt;b&gt;1D Max Pooling Layer&lt;/b&gt;&lt;div&gt;(stride = 2)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
+        <mxCell id="cnn-pool" value="&lt;b&gt;1D Max Pooling Layer&lt;/b&gt;&lt;div&gt;(pool size and stride = 2)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
           <mxGeometry x="650" y="200" width="160" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="_4emgZPc5BUWupdbiICC-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="cnn-sep" target="_4emgZPc5BUWupdbiICC-1">
+        <mxCell id="_4emgZPc5BUWupdbiICC-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="cnn-sep" target="_4emgZPc5BUWupdbiICC-1" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="cnn-sep" value="&lt;b&gt;1D Separable Convolution Layer (&lt;/b&gt;filters=32, kernel size=3, ReLU activation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
+        <mxCell id="cnn-sep" value="&lt;b&gt;1D Separable Convolution Layer (&lt;/b&gt;filters=64, kernel size=3, ReLU activation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;" parent="1" vertex="1">
           <mxGeometry x="840" y="200" width="160" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="cnn-gap" value="&lt;b&gt;1D Global Average Pooling Layer&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="1380" y="200" width="160" height="140" as="geometry" />
+        <mxCell id="cnn-gap" value="&lt;b&gt;1D Global Average Pooling Layer&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="460" y="410" width="160" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="mk7oxJ9Y7Ej4MJ7LPMAS-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="cnn-dropout" target="mk7oxJ9Y7Ej4MJ7LPMAS-1">
+        <mxCell id="mk7oxJ9Y7Ej4MJ7LPMAS-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="cnn-dropout" target="mk7oxJ9Y7Ej4MJ7LPMAS-1" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="cnn-dropout" value="&lt;b&gt;Dense Projection&amp;nbsp;&lt;/b&gt;&lt;div&gt;&lt;b&gt;Layer&lt;/b&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="1570" y="200" width="160" height="130" as="geometry" />
+        <mxCell id="cnn-dropout" value="&lt;b&gt;Dense Projection&amp;nbsp;&lt;/b&gt;&lt;div&gt;&lt;b&gt;Layer&lt;/b&gt;&lt;/div&gt;&lt;div&gt;(dense units = 96)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="265" y="410" width="160" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="cnn-dense" value="&lt;b&gt;Dense Output Layer&lt;/b&gt;&lt;div&gt;(horizon vector, units=forecast_slots)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="1930" y="200" width="160" height="130" as="geometry" />
+        <mxCell id="cnn-dense" value="&lt;b&gt;Dense Output Layer&lt;/b&gt;&lt;div&gt;(24 output units)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="80" y="610" width="160" height="130" as="geometry" />
         </mxCell>
         <mxCell id="cnn-edge-0" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="cnn-input" target="cnn-conv1" edge="1">
           <mxGeometry relative="1" as="geometry" />
@@ -1065,49 +1065,25 @@
         <mxCell id="cnn-edge-5" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="cnn-gap" target="cnn-dropout" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="cnn-edge-6" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" target="cnn-dense" edge="1">
+        <mxCell id="cnn-edge-6" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" target="cnn-dense" edge="1" source="mk7oxJ9Y7Ej4MJ7LPMAS-1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1910" y="265" as="sourcePoint" />
+            <mxPoint x="1000" y="740" as="sourcePoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="nkZE1KDXsEQHUKCuNHgy-2" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_2;align=left;labelPosition=right;pointerEvents=1;rotation=-90;" parent="1" vertex="1">
-          <mxGeometry x="90" y="350" width="50" height="100" as="geometry" />
-        </mxCell>
-        <mxCell id="nkZE1KDXsEQHUKCuNHgy-3" value="Input" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="72.5" y="430" width="85" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="nkZE1KDXsEQHUKCuNHgy-4" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_2;align=left;labelPosition=right;pointerEvents=1;rotation=-90;" parent="1" vertex="1">
-          <mxGeometry x="505" y="125" width="50" height="550" as="geometry" />
-        </mxCell>
-        <mxCell id="nkZE1KDXsEQHUKCuNHgy-6" value="Convolution Block 1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="466.25" y="430" width="127.5" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="nkZE1KDXsEQHUKCuNHgy-7" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_2;align=left;labelPosition=right;pointerEvents=1;rotation=-90;" parent="1" vertex="1">
-          <mxGeometry x="1353.44" y="-138.43" width="50" height="1076.87" as="geometry" />
-        </mxCell>
-        <mxCell id="nkZE1KDXsEQHUKCuNHgy-8" value="Convolution Block 2" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="1320" y="430" width="127.5" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="nkZE1KDXsEQHUKCuNHgy-9" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_2;align=left;labelPosition=right;pointerEvents=1;rotation=-90;" parent="1" vertex="1">
-          <mxGeometry x="1985" y="350" width="50" height="100" as="geometry" />
-        </mxCell>
-        <mxCell id="nkZE1KDXsEQHUKCuNHgy-10" value="Output" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="1967.5" y="430" width="85" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="_4emgZPc5BUWupdbiICC-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="_4emgZPc5BUWupdbiICC-1" target="_4emgZPc5BUWupdbiICC-3">
+        <mxCell id="_4emgZPc5BUWupdbiICC-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="_4emgZPc5BUWupdbiICC-1" target="_4emgZPc5BUWupdbiICC-3" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="_4emgZPc5BUWupdbiICC-1" value="&lt;b&gt;1D Separable Convolution Layer (&lt;/b&gt;filters=32, kernel size=3, ReLU activation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" vertex="1" parent="1">
-          <mxGeometry x="1018.75" y="200" width="160" height="140" as="geometry" />
+        <mxCell id="_4emgZPc5BUWupdbiICC-1" value="&lt;b&gt;1D Separable Convolution Layer (&lt;/b&gt;filters=64, kernel size=3, ReLU activation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="840" y="410" width="160" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="_4emgZPc5BUWupdbiICC-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="_4emgZPc5BUWupdbiICC-3" target="cnn-gap">
+        <mxCell id="_4emgZPc5BUWupdbiICC-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="_4emgZPc5BUWupdbiICC-3" target="cnn-gap" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="_4emgZPc5BUWupdbiICC-3" value="&lt;b&gt;1D Max Pooling Layer&lt;/b&gt;&lt;div&gt;(stride = 2)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" vertex="1" parent="1">
-          <mxGeometry x="1200" y="200" width="160" height="140" as="geometry" />
+        <mxCell id="_4emgZPc5BUWupdbiICC-3" value="&lt;b&gt;1D Max Pooling Layer&lt;/b&gt;&lt;div&gt;(pool size and stride = 2)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="650" y="410" width="160" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="mk7oxJ9Y7Ej4MJ7LPMAS-1" value="&lt;b&gt;Dropout Layer&lt;/b&gt;&lt;div&gt;(dropout rate=0.10)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" vertex="1" parent="1">
-          <mxGeometry x="1750" y="200" width="160" height="130" as="geometry" />
+        <mxCell id="mk7oxJ9Y7Ej4MJ7LPMAS-1" value="&lt;b&gt;Dropout Layer&lt;/b&gt;&lt;div&gt;(dropout rate=0.10)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="80" y="410" width="160" height="140" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
