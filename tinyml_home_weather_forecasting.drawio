@@ -1113,42 +1113,42 @@
     </mxGraphModel>
   </diagram>
   <diagram id="forecast-temp-state" name="forecast_temp_task State Machine">
-    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1823" dy="674" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="ft-init" value="&lt;b&gt;INIT_NETWORK&lt;/b&gt;&lt;div&gt;Initialize pointers to the model input and output buffers (in SRAM)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
-          <mxGeometry x="60" y="60" width="200" height="80" as="geometry" />
+          <mxGeometry x="-100" y="190" width="200" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="ft-bootstrap" value="&lt;b&gt;BOOTSTRAP&lt;/b&gt;&lt;div&gt;Mount the SD Card, scan the existing CSV files, and replay contents into the in-progress window&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
-          <mxGeometry x="60" y="180" width="220" height="80" as="geometry" />
+        <mxCell id="ft-bootstrap" value="&lt;b&gt;BOOTSTRAP&lt;/b&gt;&lt;div&gt;Mount the SD Card, scan the existing CSV files, and replay contents into the in-progress window (the last 24 hours)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="130" y="190" width="220" height="80" as="geometry" />
         </mxCell>
         <mxCell id="ft-fetch" value="&lt;b&gt;FETCH_SENSORS&lt;/b&gt;&lt;div&gt;Read sensor data from BME280 and VEML7700&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" parent="1" vertex="1">
-          <mxGeometry x="310" y="60" width="220" height="80" as="geometry" />
+          <mxGeometry x="320" y="60" width="220" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="ft-accum" value="&lt;b&gt;ACCUMULATE_MINUTE&lt;/b&gt;&lt;div&gt;Add sensor sample to the running 30-min window sums&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
-          <mxGeometry x="550" y="60" width="220" height="80" as="geometry" />
+        <mxCell id="ft-accum" value="&lt;b&gt;ACCUMULATE_MINUTE&lt;/b&gt;&lt;div&gt;Add sensor samples to the running 30-min window sums&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" parent="1" vertex="1">
+          <mxGeometry x="580" y="60" width="220" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="ft-check" value="&lt;b&gt;CHECK_SLOT&lt;/b&gt;&lt;div&gt;Has the 30-min slot accumulated sensor features from 10 measurements?&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
-          <mxGeometry x="790" y="60" width="220" height="80" as="geometry" />
+        <mxCell id="ft-check" value="&lt;b&gt;CHECK_SLOT&lt;/b&gt;&lt;div&gt;Check if we have sufficient samples for this 30-min window&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" parent="1" vertex="1">
+          <mxGeometry x="820" y="60" width="220" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="ft-prepare" value="&lt;b&gt;PREPARE_FEATURES&lt;/b&gt;&lt;div&gt;Compute averages for the 30-min accumulated sensor features, normalizes the features&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
-          <mxGeometry x="1030" y="60" width="240" height="80" as="geometry" />
+        <mxCell id="ft-prepare" value="&lt;b&gt;PREPARE_FEATURES&lt;/b&gt;&lt;div&gt;Compute averages for the 30-min accumulated sensor features and normalize the features&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" vertex="1" parent="1">
+          <mxGeometry x="1070" y="60" width="240" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="ft-append" value="&lt;b&gt;APPEND_FEATURES&lt;/b&gt;&lt;div&gt;Update the sliding window with the newest feature vector&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
-          <mxGeometry x="900" y="180" width="220" height="80" as="geometry" />
+        <mxCell id="ft-append" value="&lt;b&gt;APPEND_FEATURES&lt;/b&gt;&lt;div&gt;Update the sliding window with the newest feature vector&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" parent="1" vertex="1">
+          <mxGeometry x="1080" y="190" width="220" height="80" as="geometry" />
         </mxCell>
         <mxCell id="ft-wait" value="&lt;b&gt;WAIT_MINUTE&lt;/b&gt;&lt;div&gt;Pause the loop for 1 min&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
           <mxGeometry x="390" y="190" width="220" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="ft-run" value="&lt;b&gt;RUN_INFERENCE&lt;/b&gt;&lt;div&gt;Call the 1D-CNN model exported through X-CubeAI, dequantize output, and denormalize the input tensor&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
-          <mxGeometry x="510" y="320" width="240" height="80" as="geometry" />
+        <mxCell id="ft-run" value="&lt;b&gt;RUN_INFERENCE&lt;/b&gt;&lt;div&gt;Call the 1D-CNN model (exported through X-CubeAI) and denormalize and dequantize the output&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;" parent="1" vertex="1">
+          <mxGeometry x="600" y="320" width="240" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="ft-export" value="&lt;b&gt;EXPORT_WINDOW&lt;/b&gt;&lt;div&gt;Export the window metrics to an inference tensor&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
-          <mxGeometry x="760" y="320" width="220" height="80" as="geometry" />
+        <mxCell id="ft-export" value="&lt;b&gt;EXPORT_WINDOW&lt;/b&gt;&lt;div&gt;Quantize and export the window to an int8 tensor&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;" parent="1" vertex="1">
+          <mxGeometry x="1080" y="320" width="220" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="ft-publish" value="&lt;b&gt;PUBLISH_PREDICTION&lt;/b&gt;&lt;div&gt;Use the 48 slots of the window to compute the next 3-slot forecast temperatures&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
-          <mxGeometry x="270" y="320" width="220" height="80" as="geometry" />
+        <mxCell id="ft-publish" value="&lt;b&gt;PUBLISH_PREDICTION&lt;/b&gt;&lt;div&gt;Make the current 12 hour prediction available to other modules through a method call and a context variable&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;" parent="1" vertex="1">
+          <mxGeometry x="350" y="320" width="220" height="80" as="geometry" />
         </mxCell>
         <mxCell id="ft-edge-0" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-init" target="ft-bootstrap" edge="1">
           <mxGeometry relative="1" as="geometry" />
@@ -1156,7 +1156,7 @@
         <mxCell id="ft-edge-1" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-bootstrap" target="ft-wait" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-2" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-wait" target="ft-fetch" edge="1">
+        <mxCell id="ft-edge-2" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;exitX=0.25;exitY=0;exitDx=0;exitDy=0;edgeStyle=orthogonalEdgeStyle;curved=1;" parent="1" source="ft-wait" target="ft-fetch" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="ft-edge-3" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-fetch" target="ft-accum" edge="1">
@@ -1174,25 +1174,34 @@
         <mxCell id="ft-edge-7" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-append" target="ft-export" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
+        <mxCell id="KRebAaIgn4OHgCfLEDw0-2" value="if window is full" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ft-edge-7">
+          <mxGeometry x="0.2" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
         <mxCell id="ft-edge-8" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-export" target="ft-run" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="ft-edge-9" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-run" target="ft-publish" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-10" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-publish" target="ft-wait" edge="1">
+        <mxCell id="ft-edge-10" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;entryX=0.25;entryY=1;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;curved=1;" parent="1" source="ft-publish" target="ft-wait" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-slot-incomplete" value="if slot not complete" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-check" target="ft-wait" edge="1">
+        <mxCell id="ft-edge-slot-incomplete" value="if slot not complete" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="ft-check" target="ft-wait">
+          <mxGeometry x="0.0448" y="-20" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ft-edge-window-not-full" value="if the window is not full" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-append" target="ft-wait">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-window-not-full" value="if the window is not full" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-append" target="ft-wait" edge="1">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="ft-edge-export-failed" value="if tensor export failed" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;entryX=1;entryY=0.75;entryDx=0;entryDy=0;exitX=0;exitY=0.25;exitDx=0;exitDy=0;" edge="1" parent="1" source="ft-export" target="ft-wait">
+          <mxGeometry x="0.2632" y="20" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
         </mxCell>
-        <mxCell id="ft-edge-export-failed" value="if tensor export failed" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-export" target="ft-wait" edge="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="ft-edge-run-failed" value="if inference failed" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-run" target="ft-wait" edge="1">
+        <mxCell id="ft-edge-run-failed" value="if inference failed" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;entryX=0.861;entryY=1.025;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ft-run" target="ft-wait">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
