@@ -1124,16 +1124,16 @@
           <mxGeometry x="130" y="190" width="220" height="80" as="geometry" />
         </mxCell>
         <mxCell id="ft-fetch" value="&lt;b&gt;FETCH_SENSORS&lt;/b&gt;&lt;div&gt;Read sensor data from BME280 and VEML7700&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" parent="1" vertex="1">
-          <mxGeometry x="320" y="60" width="220" height="80" as="geometry" />
+          <mxGeometry x="320" y="40" width="220" height="100" as="geometry" />
         </mxCell>
         <mxCell id="ft-accum" value="&lt;b&gt;ACCUMULATE_MINUTE&lt;/b&gt;&lt;div&gt;Add sensor samples to the running 30-min window sums&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" parent="1" vertex="1">
-          <mxGeometry x="580" y="60" width="220" height="80" as="geometry" />
+          <mxGeometry x="580" y="40" width="220" height="100" as="geometry" />
         </mxCell>
         <mxCell id="ft-check" value="&lt;b&gt;CHECK_SLOT&lt;/b&gt;&lt;div&gt;Check if we have sufficient samples for this 30-min window&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" parent="1" vertex="1">
-          <mxGeometry x="820" y="60" width="220" height="80" as="geometry" />
+          <mxGeometry x="820" y="40" width="220" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="ft-prepare" value="&lt;b&gt;PREPARE_FEATURES&lt;/b&gt;&lt;div&gt;Compute averages for the 30-min accumulated sensor features and normalize the features&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" vertex="1" parent="1">
-          <mxGeometry x="1070" y="60" width="240" height="80" as="geometry" />
+        <mxCell id="ft-prepare" value="&lt;b&gt;PREPARE_FEATURES&lt;/b&gt;&lt;div&gt;Compute averages for the 30-min accumulated sensor features, compute engineered features, and normalize all input features&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" vertex="1" parent="1">
+          <mxGeometry x="1070" y="40" width="240" height="100" as="geometry" />
         </mxCell>
         <mxCell id="ft-append" value="&lt;b&gt;APPEND_FEATURES&lt;/b&gt;&lt;div&gt;Update the sliding window with the newest feature vector&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" parent="1" vertex="1">
           <mxGeometry x="1080" y="190" width="220" height="80" as="geometry" />
@@ -1141,14 +1141,14 @@
         <mxCell id="ft-wait" value="&lt;b&gt;WAIT_MINUTE&lt;/b&gt;&lt;div&gt;Pause the loop for 1 min&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
           <mxGeometry x="390" y="190" width="220" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="ft-run" value="&lt;b&gt;RUN_INFERENCE&lt;/b&gt;&lt;div&gt;Call the 1D-CNN model (exported through X-CubeAI) and denormalize and dequantize the output&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;" parent="1" vertex="1">
-          <mxGeometry x="600" y="320" width="240" height="80" as="geometry" />
+        <mxCell id="ft-run" value="&lt;b&gt;RUN_INFERENCE&lt;/b&gt;&lt;div&gt;Call the 1D-CNN model (exported through X-CubeAI) with the latest window, then denormalize and dequantize the output&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;" parent="1" vertex="1">
+          <mxGeometry x="600" y="320" width="240" height="100" as="geometry" />
         </mxCell>
         <mxCell id="ft-export" value="&lt;b&gt;EXPORT_WINDOW&lt;/b&gt;&lt;div&gt;Quantize and export the window to an int8 tensor&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;" parent="1" vertex="1">
-          <mxGeometry x="1080" y="320" width="220" height="80" as="geometry" />
+          <mxGeometry x="1080" y="320" width="220" height="100" as="geometry" />
         </mxCell>
         <mxCell id="ft-publish" value="&lt;b&gt;PUBLISH_PREDICTION&lt;/b&gt;&lt;div&gt;Make the current 12 hour prediction available to other modules through a method call and a context variable&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;" parent="1" vertex="1">
-          <mxGeometry x="350" y="320" width="220" height="80" as="geometry" />
+          <mxGeometry x="350" y="320" width="220" height="100" as="geometry" />
         </mxCell>
         <mxCell id="ft-edge-0" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-init" target="ft-bootstrap" edge="1">
           <mxGeometry relative="1" as="geometry" />
