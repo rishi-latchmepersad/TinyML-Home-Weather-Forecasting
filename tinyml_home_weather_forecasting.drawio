@@ -1016,7 +1016,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="cnn-model" name="1D CNN Model">
-    <mxGraphModel dx="2066" dy="1219" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="973" dy="674" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1024,25 +1024,31 @@
           <mxGeometry x="40" y="200" width="160" height="150" as="geometry" />
         </mxCell>
         <mxCell id="cnn-conv1" value="&lt;b&gt;1D Convolution Layer&lt;/b&gt; (filters=16, kernel size=5, padding = same, ReLU activation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="250" y="200" width="160" height="150" as="geometry" />
+          <mxGeometry x="250" y="200" width="160" height="140" as="geometry" />
         </mxCell>
         <mxCell id="cnn-conv2" value="&lt;b&gt;1D Convolution Layer&lt;/b&gt;&amp;nbsp;&lt;div&gt;(filters=16, kernel size=3, padding = same, ReLU activation)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="460" y="200" width="160" height="150" as="geometry" />
+          <mxGeometry x="460" y="200" width="160" height="140" as="geometry" />
         </mxCell>
         <mxCell id="cnn-pool" value="&lt;b&gt;1D Max Pooling Layer&lt;/b&gt;&lt;div&gt;(stride = 2)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="650" y="200" width="160" height="150" as="geometry" />
+          <mxGeometry x="650" y="200" width="160" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="_4emgZPc5BUWupdbiICC-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="cnn-sep" target="_4emgZPc5BUWupdbiICC-1">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="cnn-sep" value="&lt;b&gt;1D Separable Convolution Layer (&lt;/b&gt;filters=32, kernel size=3, ReLU activation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
           <mxGeometry x="840" y="200" width="160" height="140" as="geometry" />
         </mxCell>
         <mxCell id="cnn-gap" value="&lt;b&gt;1D Global Average Pooling Layer&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="1030" y="200" width="160" height="140" as="geometry" />
+          <mxGeometry x="1380" y="200" width="160" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="cnn-dropout" value="&lt;b&gt;Dropout Layer&lt;/b&gt;&lt;div&gt;(dropout rate=0.10)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="1220" y="200" width="160" height="130" as="geometry" />
+        <mxCell id="mk7oxJ9Y7Ej4MJ7LPMAS-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="cnn-dropout" target="mk7oxJ9Y7Ej4MJ7LPMAS-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cnn-dropout" value="&lt;b&gt;Dense Projection&amp;nbsp;&lt;/b&gt;&lt;div&gt;&lt;b&gt;Layer&lt;/b&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="1570" y="200" width="160" height="130" as="geometry" />
         </mxCell>
         <mxCell id="cnn-dense" value="&lt;b&gt;Dense Output Layer&lt;/b&gt;&lt;div&gt;(horizon vector, units=forecast_slots)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="1410" y="200" width="160" height="130" as="geometry" />
+          <mxGeometry x="1930" y="200" width="160" height="130" as="geometry" />
         </mxCell>
         <mxCell id="cnn-edge-0" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="cnn-input" target="cnn-conv1" edge="1">
           <mxGeometry relative="1" as="geometry" />
@@ -1056,191 +1062,214 @@
         <mxCell id="cnn-edge-3" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="cnn-pool" target="cnn-sep" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="cnn-edge-4" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="cnn-sep" target="cnn-gap" edge="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
         <mxCell id="cnn-edge-5" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="cnn-gap" target="cnn-dropout" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="cnn-edge-6" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="cnn-dropout" target="cnn-dense" edge="1">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="cnn-edge-6" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" target="cnn-dense" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1910" y="265" as="sourcePoint" />
+          </mxGeometry>
         </mxCell>
-        <mxCell id="nkZE1KDXsEQHUKCuNHgy-2" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_2;align=left;labelPosition=right;pointerEvents=1;rotation=-90;" vertex="1" parent="1">
+        <mxCell id="nkZE1KDXsEQHUKCuNHgy-2" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_2;align=left;labelPosition=right;pointerEvents=1;rotation=-90;" parent="1" vertex="1">
           <mxGeometry x="90" y="350" width="50" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="nkZE1KDXsEQHUKCuNHgy-3" value="Input" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" vertex="1" parent="1">
+        <mxCell id="nkZE1KDXsEQHUKCuNHgy-3" value="Input" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" parent="1" vertex="1">
           <mxGeometry x="72.5" y="430" width="85" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="nkZE1KDXsEQHUKCuNHgy-4" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_2;align=left;labelPosition=right;pointerEvents=1;rotation=-90;" vertex="1" parent="1">
+        <mxCell id="nkZE1KDXsEQHUKCuNHgy-4" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_2;align=left;labelPosition=right;pointerEvents=1;rotation=-90;" parent="1" vertex="1">
           <mxGeometry x="505" y="125" width="50" height="550" as="geometry" />
         </mxCell>
-        <mxCell id="nkZE1KDXsEQHUKCuNHgy-6" value="Convolution Block 1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" vertex="1" parent="1">
+        <mxCell id="nkZE1KDXsEQHUKCuNHgy-6" value="Convolution Block 1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" parent="1" vertex="1">
           <mxGeometry x="466.25" y="430" width="127.5" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="nkZE1KDXsEQHUKCuNHgy-7" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_2;align=left;labelPosition=right;pointerEvents=1;rotation=-90;" vertex="1" parent="1">
-          <mxGeometry x="1082.5" y="132.5" width="50" height="535" as="geometry" />
+        <mxCell id="nkZE1KDXsEQHUKCuNHgy-7" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_2;align=left;labelPosition=right;pointerEvents=1;rotation=-90;" parent="1" vertex="1">
+          <mxGeometry x="1353.44" y="-138.43" width="50" height="1076.87" as="geometry" />
         </mxCell>
-        <mxCell id="nkZE1KDXsEQHUKCuNHgy-8" value="Convolution Block 2" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" vertex="1" parent="1">
-          <mxGeometry x="1051.25" y="430" width="127.5" height="30" as="geometry" />
+        <mxCell id="nkZE1KDXsEQHUKCuNHgy-8" value="Convolution Block 2" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="1320" y="430" width="127.5" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="nkZE1KDXsEQHUKCuNHgy-9" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_2;align=left;labelPosition=right;pointerEvents=1;rotation=-90;" vertex="1" parent="1">
-          <mxGeometry x="1465" y="350" width="50" height="100" as="geometry" />
+        <mxCell id="nkZE1KDXsEQHUKCuNHgy-9" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_2;align=left;labelPosition=right;pointerEvents=1;rotation=-90;" parent="1" vertex="1">
+          <mxGeometry x="1985" y="350" width="50" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="nkZE1KDXsEQHUKCuNHgy-10" value="Output" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" vertex="1" parent="1">
-          <mxGeometry x="1447.5" y="430" width="85" height="30" as="geometry" />
+        <mxCell id="nkZE1KDXsEQHUKCuNHgy-10" value="Output" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="1967.5" y="430" width="85" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="_4emgZPc5BUWupdbiICC-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="_4emgZPc5BUWupdbiICC-1" target="_4emgZPc5BUWupdbiICC-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="_4emgZPc5BUWupdbiICC-1" value="&lt;b&gt;1D Separable Convolution Layer (&lt;/b&gt;filters=32, kernel size=3, ReLU activation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="1018.75" y="200" width="160" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="_4emgZPc5BUWupdbiICC-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="_4emgZPc5BUWupdbiICC-3" target="cnn-gap">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="_4emgZPc5BUWupdbiICC-3" value="&lt;b&gt;1D Max Pooling Layer&lt;/b&gt;&lt;div&gt;(stride = 2)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="200" width="160" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="mk7oxJ9Y7Ej4MJ7LPMAS-1" value="&lt;b&gt;Dropout Layer&lt;/b&gt;&lt;div&gt;(dropout rate=0.10)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="1750" y="200" width="160" height="130" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="forecast-temp-state" name="forecast_temp_task State Machine">
-    <mxGraphModel dx="1481" dy="778" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="ft-init" value="INIT_NETWORK setup AI buffers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+        <mxCell id="ft-init" value="INIT_NETWORK setup AI buffers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="80" y="120" width="160" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="ft-bootstrap" value="BOOTSTRAP replay SD card history" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+        <mxCell id="ft-bootstrap" value="BOOTSTRAP replay SD card history" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="80" y="220" width="160" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="ft-wait" value="WAIT_MINUTE vTaskDelayUntil tick" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+        <mxCell id="ft-wait" value="WAIT_MINUTE vTaskDelayUntil tick" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="300" y="220" width="160" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="ft-fetch" value="FETCH_SENSORS read BME280 + VEML7700" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+        <mxCell id="ft-fetch" value="FETCH_SENSORS read BME280 + VEML7700" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="520" y="220" width="160" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="ft-accum" value="ACCUMULATE_MINUTE add sample to slot sums" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+        <mxCell id="ft-accum" value="ACCUMULATE_MINUTE add sample to slot sums" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="740" y="220" width="160" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="ft-check" value="CHECK_SLOT slot complete?" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+        <mxCell id="ft-check" value="CHECK_SLOT slot complete?" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="960" y="220" width="160" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="ft-prep" value="PREPARE_FEATURES normalize slot metrics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+        <mxCell id="ft-prep" value="PREPARE_FEATURES normalize slot metrics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="1180" y="220" width="160" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="ft-append" value="APPEND_FEATURES update sliding window" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+        <mxCell id="ft-append" value="APPEND_FEATURES update sliding window" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="1400" y="220" width="160" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="ft-export" value="EXPORT_WINDOW quantize to int8 tensor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+        <mxCell id="ft-export" value="EXPORT_WINDOW quantize to int8 tensor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="1180" y="360" width="160" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="ft-run" value="RUN_INFERENCE invoke 1D-CNN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+        <mxCell id="ft-run" value="RUN_INFERENCE invoke 1D-CNN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="960" y="360" width="160" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="ft-publish" value="PUBLISH_PREDICTION cache horizon vector" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+        <mxCell id="ft-publish" value="PUBLISH_PREDICTION cache horizon vector" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="740" y="360" width="160" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-0" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-init" target="ft-bootstrap">
+        <mxCell id="ft-edge-0" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-init" target="ft-bootstrap" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-1" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-bootstrap" target="ft-wait">
+        <mxCell id="ft-edge-1" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-bootstrap" target="ft-wait" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-2" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-wait" target="ft-fetch">
+        <mxCell id="ft-edge-2" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-wait" target="ft-fetch" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-3" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-fetch" target="ft-accum">
+        <mxCell id="ft-edge-3" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-fetch" target="ft-accum" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-4" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-accum" target="ft-check">
+        <mxCell id="ft-edge-4" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-accum" target="ft-check" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-5" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-check" target="ft-prep">
+        <mxCell id="ft-edge-5" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-check" target="ft-prep" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-6" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-prep" target="ft-append">
+        <mxCell id="ft-edge-6" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-prep" target="ft-append" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-7" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-append" target="ft-export">
+        <mxCell id="ft-edge-7" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-append" target="ft-export" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-8" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-export" target="ft-run">
+        <mxCell id="ft-edge-8" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-export" target="ft-run" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-9" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-run" target="ft-publish">
+        <mxCell id="ft-edge-9" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-run" target="ft-publish" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-10" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-publish" target="ft-wait">
+        <mxCell id="ft-edge-10" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-publish" target="ft-wait" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-fail-fetch" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-fetch" target="ft-wait" value="missing sensor sample">
+        <mxCell id="ft-edge-fail-fetch" value="missing sensor sample" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-fetch" target="ft-wait">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-fail-slot" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-check" target="ft-wait" value="slot not complete">
+        <mxCell id="ft-edge-fail-slot" value="slot not complete" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-check" target="ft-wait" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-fail-window" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-append" target="ft-wait" value="window not full">
+        <mxCell id="ft-edge-fail-window" value="window not full" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-append" target="ft-wait" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-fail-export" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-export" target="ft-wait" value="tensor export failed">
+        <mxCell id="ft-edge-fail-export" value="tensor export failed" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-export" target="ft-wait" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-fail-run" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-run" target="ft-wait" value="inference failed">
+        <mxCell id="ft-edge-fail-run" value="inference failed" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-run" target="ft-wait" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="inference-logger-state" name="inference_logger_task State Machine">
-    <mxGraphModel dx="1481" dy="778" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="973" dy="674" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="lg-start" value="STARTUP mount SD card" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="120" y="160" width="160" height="50" as="geometry" />
+        <mxCell id="lg-start" value="&lt;b&gt;STARTUP&lt;/b&gt;&lt;div&gt;&amp;nbsp;Mount the SD card if it isn&#39;t mounted&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="120" y="160" width="160" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="lg-dir" value="ENSURE_DIR create /logs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="360" y="160" width="160" height="50" as="geometry" />
+        <mxCell id="lg-dir" value="&lt;b&gt;ENSURE_DIR&lt;/b&gt;&lt;div&gt;Ensure that the /logs directory on the SD card is present&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="360" y="160" width="160" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="lg-open" value="OPEN_TODAY open daily CSV" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="600" y="160" width="160" height="50" as="geometry" />
+        <mxCell id="lg-open" value="&lt;b&gt;OPEN_TODAY&amp;nbsp;&lt;/b&gt;&lt;div&gt;Open the daily inference CSV file for persisting forecasts&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="600" y="160" width="160" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="lg-run" value="RUNNING poll predictions + buffer writes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="840" y="160" width="160" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="lg-flush" value="FLUSH write buffer to FatFS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="1080" y="160" width="160" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="lg-rotate" value="ROTATE close + reopen on new date" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="840" y="320" width="160" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="lg-error" value="ERROR_BACKOFF close file, delay, retry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="600" y="320" width="160" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="lg-edge-0" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="lg-start" target="lg-dir">
+        <mxCell id="6hceAW7ay2w9gv8IYyKC-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;curved=1;" edge="1" parent="1" source="lg-run" target="lg-rotate">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="lg-edge-1" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="lg-dir" target="lg-open">
+        <mxCell id="6hceAW7ay2w9gv8IYyKC-3" value="Date rolled over&lt;div&gt;&amp;nbsp;to next day?&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="6hceAW7ay2w9gv8IYyKC-2">
+          <mxGeometry x="-0.3576" y="11" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lg-run" value="&lt;b&gt;RUNNING&lt;/b&gt;&amp;nbsp;&lt;div&gt;Sleep for 5 mins, then poll the forecast task for the current prediction and load the values onto the buffer to write to the csv&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="840" y="160" width="160" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="lg-flush" value="&lt;b&gt;FLUSH&amp;nbsp;&lt;/b&gt;&lt;div&gt;Write data from the buffer to the SD Card&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="840" y="340" width="160" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="lg-rotate" value="&lt;b&gt;ROTATE&amp;nbsp;&lt;/b&gt;&lt;div&gt;At 12AM, close and reopen a new daily csv file&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="680" y="30" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="lg-error" value="&lt;b&gt;ERROR_BACKOFF&lt;/b&gt;&amp;nbsp;&lt;div&gt;Close the file, delay for 500ms, then retry the entire process&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
+          <mxGeometry x="410" y="340" width="160" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="lg-edge-0" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="lg-start" target="lg-dir" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="lg-edge-2" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="lg-open" target="lg-run">
+        <mxCell id="lg-edge-1" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="lg-dir" target="lg-open" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="lg-edge-3" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="lg-run" target="lg-flush">
+        <mxCell id="lg-edge-2" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="lg-open" target="lg-run" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="lg-edge-4" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="lg-flush" target="lg-run">
+        <mxCell id="lg-edge-3" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="lg-run" target="lg-flush" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="lg-edge-5" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="lg-run" target="lg-rotate">
+        <mxCell id="lg-edge-4" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="lg-flush" target="lg-run" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="lg-edge-6" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="lg-rotate" target="lg-open">
+        <mxCell id="lg-edge-6" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;exitX=0;exitY=0.5;exitDx=0;exitDy=0;curved=1;entryX=0.25;entryY=0;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;" parent="1" source="lg-rotate" target="lg-open" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="730" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lg-edge-7" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;entryX=0.75;entryY=1;entryDx=0;entryDy=0;exitX=0;exitY=0.25;exitDx=0;exitDy=0;" parent="1" source="lg-error" target="lg-start" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="lg-edge-7" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="lg-error" target="lg-start">
+        <mxCell id="lg-edge-err-start" value="mount failed" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="lg-start" target="lg-error" edge="1">
+          <mxGeometry x="0.1402" y="45" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lg-edge-err-dir" value="mkdir failed" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" parent="1" source="lg-dir" target="lg-error" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="lg-edge-err-start" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="lg-start" target="lg-error" value="mount failed">
+        <mxCell id="lg-edge-err-open" value="open failed" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;entryX=0.75;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="lg-open" target="lg-error" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="lg-edge-err-dir" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="lg-dir" target="lg-error" value="mkdir failed">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="lg-edge-err-open" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="lg-open" target="lg-error" value="open failed">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="lg-edge-err-flush" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="lg-flush" target="lg-error" value="write failed">
+        <mxCell id="lg-edge-err-flush" value="write failed" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="lg-flush" target="lg-error" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
