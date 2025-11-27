@@ -1258,20 +1258,20 @@
     </mxGraphModel>
   </diagram>
   <diagram id="9ba0da9a4ebc4f189d11" name="Pruning Process Flow">
-    <mxGraphModel dx="1364" dy="889" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="980" dy="674" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="prune-step-3" value="Rank CNN filters by L1&lt;br&gt;channel importance" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="100" y="240" width="270" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="prune-step-4" value="Prune CNN&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;outputs and&lt;/span&gt;&lt;div&gt;align SeparableConv1D inputs&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+        <mxCell id="prune-step-4" value="Prune CNN&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;outputs according to per-layer keep-ratios by descending L1 rank&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
           <mxGeometry x="440" y="240" width="270" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="prune-step-5" value="Rebuild model with per-layer&#xa;keep ratios and channel mappings" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+        <mxCell id="prune-step-5" value="Rebuild model with updated CNN&amp;nbsp;channel mappings and re-aligned SeparableConv layers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="440" y="420" width="270" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="prune-step-6" value="Evaluate candidates: validation&lt;br&gt;MAE&amp;nbsp; and parameter/MAC reduction&lt;br&gt;to pick the best keep map" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+        <mxCell id="prune-step-6" value="Evaluate candidates using validation&lt;br&gt;MAE and parameter/MAC reduction&lt;br&gt;to pick the best keep map" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
           <mxGeometry x="100" y="420" width="270" height="90" as="geometry" />
         </mxCell>
         <mxCell id="prune-edge-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;" parent="1" source="prune-step-3" target="prune-step-4" edge="1">
