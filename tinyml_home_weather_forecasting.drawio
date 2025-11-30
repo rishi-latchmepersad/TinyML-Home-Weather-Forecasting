@@ -1089,7 +1089,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="forecast-temp-state" name="forecast_temp_task State Machine">
-    <mxGraphModel dx="1823" dy="674" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="2205" dy="889" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1108,7 +1108,7 @@
         <mxCell id="ft-check" value="&lt;b&gt;CHECK_SLOT&lt;/b&gt;&lt;div&gt;Check if we have sufficient samples for this 30-min window&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" parent="1" vertex="1">
           <mxGeometry x="820" y="40" width="220" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="ft-prepare" value="&lt;b&gt;PREPARE_FEATURES&lt;/b&gt;&lt;div&gt;Compute averages for the 30-min accumulated sensor features, compute engineered features, and normalize all input features&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" vertex="1" parent="1">
+        <mxCell id="ft-prepare" value="&lt;b&gt;PREPARE_FEATURES&lt;/b&gt;&lt;div&gt;Compute averages for the 30-min accumulated sensor features, compute engineered features, and normalize all input features&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" parent="1" vertex="1">
           <mxGeometry x="1070" y="40" width="240" height="100" as="geometry" />
         </mxCell>
         <mxCell id="ft-append" value="&lt;b&gt;APPEND_FEATURES&lt;/b&gt;&lt;div&gt;Update the sliding window with the newest feature vector&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" parent="1" vertex="1">
@@ -1150,7 +1150,7 @@
         <mxCell id="ft-edge-7" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-append" target="ft-export" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="KRebAaIgn4OHgCfLEDw0-2" value="if window is full" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ft-edge-7">
+        <mxCell id="KRebAaIgn4OHgCfLEDw0-2" value="if the 24-hour window is full" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ft-edge-7" vertex="1" connectable="0">
           <mxGeometry x="0.2" y="-1" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
@@ -1164,27 +1164,27 @@
         <mxCell id="ft-edge-10" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;entryX=0.25;entryY=1;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;curved=1;" parent="1" source="ft-publish" target="ft-wait" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-slot-incomplete" value="if slot not complete" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="ft-check" target="ft-wait">
+        <mxCell id="ft-edge-slot-incomplete" value="if slot not complete" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="ft-check" target="ft-wait" edge="1">
           <mxGeometry x="0.0448" y="-20" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ft-edge-window-not-full" value="if the window is not full" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" edge="1" parent="1" source="ft-append" target="ft-wait">
+        <mxCell id="ft-edge-window-not-full" value="if the 24-hour window is not full" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="ft-append" target="ft-wait" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="ft-edge-export-failed" value="if tensor export failed" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;entryX=1;entryY=0.75;entryDx=0;entryDy=0;exitX=0;exitY=0.25;exitDx=0;exitDy=0;" edge="1" parent="1" source="ft-export" target="ft-wait">
+        <mxCell id="ft-edge-export-failed" value="if tensor export failed" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;entryX=1;entryY=0.75;entryDx=0;entryDy=0;exitX=0;exitY=0.25;exitDx=0;exitDy=0;" parent="1" source="ft-export" target="ft-wait" edge="1">
           <mxGeometry x="0.2632" y="20" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ft-edge-run-failed" value="if inference failed" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;entryX=0.861;entryY=1.025;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ft-run" target="ft-wait">
+        <mxCell id="ft-edge-run-failed" value="if inference failed" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;entryX=0.861;entryY=1.025;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="ft-run" target="ft-wait" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="inference-logger-state" name="inference_logger_task State Machine">
-    <mxGraphModel dx="973" dy="674" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1355" dy="889" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1197,10 +1197,10 @@
         <mxCell id="lg-open" value="&lt;b&gt;OPEN_TODAY&amp;nbsp;&lt;/b&gt;&lt;div&gt;Open the daily inference CSV file for persisting forecasts&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
           <mxGeometry x="600" y="160" width="160" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="6hceAW7ay2w9gv8IYyKC-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;curved=1;" edge="1" parent="1" source="lg-run" target="lg-rotate">
+        <mxCell id="6hceAW7ay2w9gv8IYyKC-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;curved=1;" parent="1" source="lg-run" target="lg-rotate" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="6hceAW7ay2w9gv8IYyKC-3" value="Date rolled over&lt;div&gt;&amp;nbsp;to next day?&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="6hceAW7ay2w9gv8IYyKC-2">
+        <mxCell id="6hceAW7ay2w9gv8IYyKC-3" value="Date rolled over&lt;div&gt;&amp;nbsp;to next day?&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="6hceAW7ay2w9gv8IYyKC-2" vertex="1" connectable="0">
           <mxGeometry x="-0.3576" y="11" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
@@ -1258,7 +1258,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="9ba0da9a4ebc4f189d11" name="Pruning Process Flow">
-    <mxGraphModel dx="980" dy="674" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1355" dy="889" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
