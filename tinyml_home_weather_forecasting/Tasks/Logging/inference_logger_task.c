@@ -111,7 +111,9 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
         case INFERENCE_LOGGER_STATE_OPEN_TODAY: { // Open or create the log file corresponding to the current date.
             char ts[24]; // Buffer to hold the current timestamp in ISO-8601 format.
             if (ds3231_read_time_iso8601_utc_i2c1(ts, sizeof ts) != HAL_OK) { // Attempt to read the current time from the RTC.
-                (void)snprintf(ts, sizeof ts, "2000-01-01T00:00:00Z"); // Fall back to a safe default timestamp if the RTC read fails.
+                printf("[inference_logger] RTC read failed while opening today's file; backing off.\r\n");
+                state = INFERENCE_LOGGER_STATE_ERROR_BACKOFF; // Without a valid timestamp we cannot derive the log filename.
+                break; // Leave the OPEN_TODAY state so we can retry after the backoff.
             } // End RTC read handling.
             char date[11]; // Buffer to hold just the date component extracted from the timestamp.
             memcpy(date, ts, 10); // Copy the YYYY-MM-DD characters from the timestamp into the date buffer.
@@ -121,6 +123,7 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
                 s_poll_initialized = false; // Reset the polling scheduler so we start a fresh interval after opening the file.
                 state = INFERENCE_LOGGER_STATE_RUNNING; // Move into the running state to begin periodic logging.
             } else { // File open failed.
+                printf("[inference_logger] Failed to open log file for %s (path %s); backing off.\r\n", date, g_active_path);
                 state = INFERENCE_LOGGER_STATE_ERROR_BACKOFF; // Enter backoff to retry file operations later.
             } // End file open check.
             break; // Exit the block scope for the OPEN_TODAY state.
@@ -137,7 +140,9 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
 // -----------------------------------------------------------------------------
             char ts_now[24]; // Buffer for the current timestamp string to accompany the logged data.
             if (ds3231_read_time_iso8601_utc_i2c1(ts_now, sizeof ts_now) != HAL_OK) { // Attempt to read the current time for the log entry.
-                (void)snprintf(ts_now, sizeof ts_now, "2000-01-01T00:00:00Z"); // Use a fallback timestamp if we cannot read the RTC.
+                printf("[inference_logger] RTC read failed during RUNNING state; backing off.\r\n");
+                state = INFERENCE_LOGGER_STATE_ERROR_BACKOFF; // Without an accurate time we cannot log or rotate safely.
+                break; // Exit the RUNNING state to allow recovery.
             } // End current time retrieval.
             char date_now[11]; // Buffer to store the current date extracted from the timestamp.
             memcpy(date_now, ts_now, 10); // Copy the date portion from the timestamp for comparison with the active file date.
@@ -238,6 +243,7 @@ static bool inference_logger_flush_buffer_to_file(void) { // Helper that writes 
         FS_UNLOCK(); // Release the filesystem lock regardless of success so others are not blocked.
 // -----------------------------------------------------------------------------
         if (!g_file_open) { // If the open operation failed, we cannot flush data.
+            printf("[inference_logger] Failed to open %s for flushing (fr=%d).\r\n", g_active_path, (int)fr);
             return false; // Signal failure so the caller can enter backoff.
         } // End open failure handling.
     } // End check for unopened file.
@@ -251,6 +257,7 @@ static bool inference_logger_flush_buffer_to_file(void) { // Helper that writes 
     FS_UNLOCK(); // Release the filesystem lock so other tasks may access the SD card.
 // -----------------------------------------------------------------------------
     if (wr != FR_OK || bw != bytes_to_write) { // Verify the write and sync both succeeded.
+        printf("[inference_logger] Flush to %s failed (wr=%d, bw=%u, expected=%u).\r\n", g_active_path, (int)wr, (unsigned)bw, (unsigned)bytes_to_write);
         return false; // On failure, report back so the caller can handle the error.
     } // End write verification.
 // -----------------------------------------------------------------------------
@@ -268,16 +275,24 @@ static bool inference_logger_ensure_directory_exists(const char *dir_path) { // 
     FS_UNLOCK(); // Release the mutex once the check is complete.
 // -----------------------------------------------------------------------------
     if (fr == FR_OK) { // If f_stat succeeded, the path exists.
-        return ((fi.fattrib & AM_DIR) != 0); // Return true only if the existing path is a directory rather than a file.
+        const bool is_dir = ((fi.fattrib & AM_DIR) != 0);
+        if (!is_dir) {
+            printf("[inference_logger] %s exists but is not a directory.\r\n", dir_path);
+        }
+        return is_dir; // Return true only if the existing path is a directory rather than a file.
     } // End existing path handling.
 // -----------------------------------------------------------------------------
     if (fr == FR_NO_FILE) { // If the path does not exist, we need to create it.
         FS_LOCK(); // Acquire the filesystem mutex before creating the directory.
         fr = f_mkdir(dir_path); // Attempt to create the directory on the SD card.
         FS_UNLOCK(); // Release the mutex after the mkdir attempt.
+        if (!(fr == FR_OK || fr == FR_EXIST)) {
+            printf("[inference_logger] mkdir(%s) failed with fr=%d\r\n", dir_path, (int)fr);
+        }
         return (fr == FR_OK || fr == FR_EXIST); // Treat both successful creation and "already exists" as success to handle race conditions.
     } // End missing directory handling.
 // -----------------------------------------------------------------------------
+    printf("[inference_logger] f_stat(%s) failed with fr=%d\r\n", dir_path, (int)fr);
     return false; // For any other error, report failure so the caller can back off and retry.
 } // End of inference_logger_ensure_directory_exists helper.
 // -----------------------------------------------------------------------------
