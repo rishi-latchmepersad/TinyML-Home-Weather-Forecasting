@@ -2,5 +2,4 @@
 
 # Generated model artifacts and tuning outputs
 machine_learning/keras_tuner_dir/
-*.tflite
 *.weights.h5
