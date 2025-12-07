@@ -1465,11 +1465,11 @@ static bool forecast_temp_run_inference(
 	// Attach the input tensor buffer to the runtime descriptor.
 	g_network_inputs[0].data = AI_HANDLE_PTR(g_network_input_buffer);
 	// print the input buffer for debug
-	printf(LOG_PREFIX "[forecast] input buffer: ");
-	for (size_t i = 0; i < AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE; ++i) {
-		printf("%d ", (int) g_network_input_buffer[i]);
-	}
-	printf("\r\n");
+//	printf(LOG_PREFIX "[forecast] input buffer: ");
+//	for (size_t i = 0; i < AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE; ++i) {
+//		printf("%d ", (int) g_network_input_buffer[i]);
+//	}
+//	printf("\r\n");
 	// Attach the output tensor buffer to the runtime descriptor.
 	g_network_outputs[0].data = AI_HANDLE_PTR(g_network_output_buffer);
 	// Run a single forward pass through the model.
