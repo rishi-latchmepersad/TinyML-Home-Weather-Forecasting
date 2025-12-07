@@ -1,4 +1,5 @@
 #MicroXplorer Configuration settings - do not modify
+#Custom note: DTCM is limited to 128KB, so the linker keeps .data/.bss in AXI SRAM (0x20020000 base)
 CAD.formats=
 CAD.pinconfig=
 CAD.provider=
@@ -163,7 +164,7 @@ ProjectManager.ComputerToolchain=false
 ProjectManager.CoupleFile=false
 ProjectManager.CustomerFirmwarePackage=
 ProjectManager.DefaultFWLocation=true
-ProjectManager.DeletePrevious=true
+ProjectManager.DeletePrevious=false
 ProjectManager.DeviceId=STM32F767ZITx
 ProjectManager.FirmwarePackage=STM32Cube FW_F7 V1.17.3
 ProjectManager.FreePins=false
