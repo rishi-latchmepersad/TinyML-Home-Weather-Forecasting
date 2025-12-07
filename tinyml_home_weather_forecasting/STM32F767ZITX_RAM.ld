@@ -35,8 +35,8 @@
 /* Entry Point */
 ENTRY(Reset_Handler)
 
-/* Highest address of the user mode stack */
-_estack = ORIGIN(RAM) + LENGTH(RAM); /* end of "RAM" Ram type memory */
+/* Highest address of the user mode stack — keep the main stack in DTCM for boot reliability */
+_estack = ORIGIN(DTCMRAM) + LENGTH(DTCMRAM);
 
 _Min_Heap_Size = 0x200; /* required amount of heap */
 _Min_Stack_Size = 0x400; /* required amount of stack */
@@ -44,23 +44,28 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Memories definition */
 MEMORY
 {
-  RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 512K
-  FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 2048K
+  /* DTCM is FAST but NOT DMA-accessible (128KB) */
+  DTCMRAM (xrw)   : ORIGIN = 0x20000000, LENGTH = 128K
+
+  /* AXI/SRAM1 is DMA-visible — put .data/.bss/heap/stack and DMA buffers here (512KB) */
+  AXIRAM  (xrw)   : ORIGIN = 0x20020000, LENGTH = 512K
+
+  FLASH   (rx)    : ORIGIN = 0x08000000, LENGTH = 2048K
 }
 
 /* Sections */
 SECTIONS
 {
 
-  /* The startup code into "RAM" Ram type memory */
+  /* The startup code into "DTCMRAM" for fastest interrupt entry */
   .isr_vector :
   {
     . = ALIGN(4);
     KEEP(*(.isr_vector)) /* Startup code */
     . = ALIGN(4);
-  } >RAM
+  } >DTCMRAM
 
-  /* The program code and other data into "RAM" Ram type memory */
+  /* The program code and other data into AXI SRAM (DMA-visible when testing from RAM) */
   .text :
   {
     . = ALIGN(4);
@@ -77,23 +82,23 @@ SECTIONS
 
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
-  } >RAM
+  } >AXIRAM
 
-  /* Constant data into "RAM" Ram type memory */
+  /* Constant data into AXI SRAM (RAM build) */
   .rodata :
   {
     . = ALIGN(4);
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
     . = ALIGN(4);
-  } >RAM
+  } >AXIRAM
 
   .ARM.extab (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
     . = ALIGN(4);
     *(.ARM.extab* .gnu.linkonce.armextab.*)
     . = ALIGN(4);
-  } >RAM
+  } >AXIRAM
 
   .ARM (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
@@ -102,7 +107,7 @@ SECTIONS
     *(.ARM.exidx*)
     __exidx_end = .;
     . = ALIGN(4);
-  } >RAM
+  } >AXIRAM
 
   .preinit_array (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
@@ -111,7 +116,7 @@ SECTIONS
     KEEP (*(.preinit_array*))
     PROVIDE_HIDDEN (__preinit_array_end = .);
     . = ALIGN(4);
-  } >RAM
+  } >AXIRAM
 
   .init_array (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
@@ -121,7 +126,7 @@ SECTIONS
     KEEP (*(.init_array*))
     PROVIDE_HIDDEN (__init_array_end = .);
     . = ALIGN(4);
-  } >RAM
+  } >AXIRAM
 
   .fini_array (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
@@ -131,12 +136,20 @@ SECTIONS
     KEEP (*(.fini_array*))
     PROVIDE_HIDDEN (__fini_array_end = .);
     . = ALIGN(4);
-  } >RAM
+  } >AXIRAM
 
   /* Used by the startup to initialize data */
   _sidata = LOADADDR(.data);
 
-  /* Initialized data sections into "RAM" Ram type memory */
+  /* Place any symbol with section(".sram1") into AXI/SRAM1 */
+  .sram1 (NOLOAD) :
+  {
+    . = ALIGN(32);
+    *(.sram1*)
+    . = ALIGN(32);
+  } >AXIRAM
+
+  /* Initialized data sections into AXI SRAM (DMA-visible) */
   .data :
   {
     . = ALIGN(4);
@@ -147,9 +160,9 @@ SECTIONS
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
 
-  } >RAM
+  } >AXIRAM AT> FLASH
 
-  /* Uninitialized data section into "RAM" Ram type memory */
+  /* Uninitialized data section into AXI SRAM (DMA-visible) */
   . = ALIGN(4);
   .bss :
   {
@@ -163,9 +176,9 @@ SECTIONS
     . = ALIGN(4);
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
-  } >RAM
+  } >AXIRAM
 
-  /* User_heap_stack section, used to check that there is enough "RAM" Ram  type memory left */
+  /* User_heap_stack section, used to check that there is enough "AXIRAM" Ram  type memory left */
   ._user_heap_stack :
   {
     . = ALIGN(8);
@@ -174,7 +187,7 @@ SECTIONS
     . = . + _Min_Heap_Size;
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
-  } >RAM
+  } >AXIRAM
 
   /* Remove information from the compiler libraries */
   /DISCARD/ :
