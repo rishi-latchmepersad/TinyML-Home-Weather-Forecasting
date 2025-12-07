@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    forecast_temp_ml_model_data_params.h
   * @author  AST Embedded Analytics Research Platform
-  * @date    2025-12-07T15:48:36-0400
+  * @date    2025-12-07T16:22:34-0400
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * Copyright (c) 2025 STMicroelectronics.
@@ -28,10 +28,10 @@
 
 
 #define AI_FORECAST_TEMP_ML_MODEL_DATA_ACTIVATIONS_SIZES \
-  { 3164, }
-#define AI_FORECAST_TEMP_ML_MODEL_DATA_ACTIVATIONS_SIZE     (3164)
+  { 3152, }
+#define AI_FORECAST_TEMP_ML_MODEL_DATA_ACTIVATIONS_SIZE     (3152)
 #define AI_FORECAST_TEMP_ML_MODEL_DATA_ACTIVATIONS_COUNT    (1)
-#define AI_FORECAST_TEMP_ML_MODEL_DATA_ACTIVATION_1_SIZE    (3164)
+#define AI_FORECAST_TEMP_ML_MODEL_DATA_ACTIVATION_1_SIZE    (3152)
 
 
 
