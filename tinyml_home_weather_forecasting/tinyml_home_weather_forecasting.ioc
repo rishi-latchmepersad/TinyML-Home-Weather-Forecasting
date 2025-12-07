@@ -262,7 +262,7 @@ STMicroelectronics.X-CUBE-AI.10.2.0.ModelStructureFile-f03e5161bd59daf46ba5112f8
 STMicroelectronics.X-CUBE-AI.10.2.0.ModelType-f03e5161bd59daf46ba5112f85907dfb54e485eec0ab0ebd472536708bcce326=STM32Cube.AI MCU runtime
 STMicroelectronics.X-CUBE-AI.10.2.0.ReadyForCodeGeneration=true
 STMicroelectronics.X-CUBE-AI.10.2.0.StackSize=0x800
-STMicroelectronics.X-CUBE-AI.10.2.0.WorkingBufferStartAddrList=0xFFFFFFFF
+STMicroelectronics.X-CUBE-AI.10.2.0.WorkingBufferStartAddrList=0x20020000
 STMicroelectronics.X-CUBE-AI.10.2.0.XAaCUBEAaAICcArtificialOoIntelligenceJjCore=true
 STMicroelectronics.X-CUBE-AI.10.2.0.copyWeightToRam=false
 STMicroelectronics.X-CUBE-AI.10.2.0.copyWeightToRam-f03e5161bd59daf46ba5112f85907dfb54e485eec0ab0ebd472536708bcce326=false
