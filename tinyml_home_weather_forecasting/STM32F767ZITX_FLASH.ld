@@ -35,8 +35,8 @@
 /* Entry Point */
 ENTRY(Reset_Handler)
 
-/* Highest address of the user mode stack */
-_estack = ORIGIN(AXIRAM) + LENGTH(AXIRAM); /* end of "RAM" Ram type memory */
+/* Highest address of the user mode stack — keep the main stack in DTCM for boot reliability */
+_estack = ORIGIN(DTCMRAM) + LENGTH(DTCMRAM);
 
 _Min_Heap_Size = 0x800 ; /* required amount of heap */
 _Min_Stack_Size = 0x800 ; /* required amount of stack */
@@ -45,13 +45,17 @@ _Min_Stack_Size = 0x800 ; /* required amount of stack */
 MEMORY
 {
   /* DTCM is FAST but NOT DMA-accessible (128KB) */
-  DTCMRAM (xrw) : ORIGIN = 0x20000000, LENGTH = 512K
+  DTCMRAM (xrw) : ORIGIN = 0x20000000, LENGTH = 128K
 
-  /* AXI/SRAM1 is DMA-visible — put .data/.bss/heap/stack and DMA buffers here (384KB) */
-  AXIRAM  (xrw) : ORIGIN = 0x20020000, LENGTH = 384K
+  /* AXI/SRAM1 is DMA-visible — put .data/.bss/heap/stack and DMA buffers here (512KB) */
+  AXIRAM  (xrw) : ORIGIN = 0x20020000, LENGTH = 512K
 
   FLASH   (rx)  : ORIGIN = 0x08000000, LENGTH = 2048K
 }
+
+/* Convenience symbols for heap-limit calculations inside sysmem.c */
+__AXIRAM_start = ORIGIN(AXIRAM);
+__AXIRAM_end   = ORIGIN(AXIRAM) + LENGTH(AXIRAM);
 
 /* Sections */
 SECTIONS
@@ -160,7 +164,7 @@ SECTIONS
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
 
-  } >DTCMRAM AT> FLASH
+  } >AXIRAM AT> FLASH
 
   /* Uninitialized data section into AXI SRAM (DMA-visible) */
   . = ALIGN(4);
@@ -176,7 +180,7 @@ SECTIONS
     . = ALIGN(4);
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
-  } >DTCMRAM
+  } >AXIRAM
 
   /* User_heap_stack section, used to check that there is enough "RAM" Ram  type memory left */
   ._user_heap_stack :
