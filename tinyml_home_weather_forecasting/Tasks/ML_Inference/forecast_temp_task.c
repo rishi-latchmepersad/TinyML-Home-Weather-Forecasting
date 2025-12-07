@@ -293,14 +293,15 @@ static bool forecast_temp_finalize_slot_sample(float *temperature_c_out,
 		float *illuminance_lux_out);
 // Forward declare a helper that updates the raw history ring buffer.
 static void forecast_temp_store_slot_history(float temperature_c,
-                float pressure_pa);
+		float pressure_pa);
 // Forward declare a helper that persists or restores the partial 30-minute slot.
-static bool forecast_temp_compute_slot_key(char *slot_key_out, size_t slot_key_cap);
+static bool forecast_temp_compute_slot_key(char *slot_key_out,
+		size_t slot_key_cap);
 static void forecast_temp_restore_slot_checkpoint(void);
 static void forecast_temp_persist_slot_checkpoint(void);
 // Forward declare a helper that builds the normalized feature vector for the completed slot.
 static void forecast_temp_prepare_features(float temperature_c,
-                float humidity_pct, float pressure_pa, float illuminance_lux,
+		float humidity_pct, float pressure_pa, float illuminance_lux,
 		float out_features[FORECAST_TEMP_FEATURE_COUNT]);
 // Forward declare a helper that pushes a normalized feature vector into the sliding window.
 static void forecast_temp_append_feature_vector(
@@ -574,20 +575,20 @@ static void forecast_temp_bootstrap_process_file(const char *file_path,
 	}
 	// Declare a FatFs file object that will represent the open CSV.
 	FIL file;
-        // Take the filesystem mutex so the logger task does not race us while opening the file.
-        FS_LOCK();
-        // Attempt to open the CSV file for reading.
-        FRESULT fr = f_open(&file, file_path, FA_READ);
-        // Release the filesystem mutex immediately after the open call so other tasks
-        // are not blocked while we parse the file contents.
-        FS_UNLOCK();
-        // If the open call failed we can bail out early.
-        if (fr != FR_OK) {
-                // Emit a diagnostic so we know which file could not be opened.
-                printf(LOG_PREFIX "[forecast] bootstrap failed to open %s fr=%d\r\n", file_path,
-                                (int) fr);
-                // Nothing more we can do for this file.
-                return;
+	// Take the filesystem mutex so the logger task does not race us while opening the file.
+	FS_LOCK();
+	// Attempt to open the CSV file for reading.
+	FRESULT fr = f_open(&file, file_path, FA_READ);
+	// Release the filesystem mutex immediately after the open call so other tasks
+	// are not blocked while we parse the file contents.
+	FS_UNLOCK();
+	// If the open call failed we can bail out early.
+	if (fr != FR_OK) {
+		// Emit a diagnostic so we know which file could not be opened.
+		printf(LOG_PREFIX "[forecast] bootstrap failed to open %s fr=%d\r\n",
+				file_path, (int) fr);
+		// Nothing more we can do for this file.
+		return;
 	}
 	// Prepare a reusable bundle so we can group lines by timestamp.
 	forecast_temp_measurement_bundle_t bundle;
@@ -600,11 +601,11 @@ static void forecast_temp_bootstrap_process_file(const char *file_path,
 		// Allocate a buffer to hold one CSV line including the newline terminator.
 		char line[192] = { 0 };
 		// Read the next line from the CSV file.
-                // Serialize individual FatFs calls rather than holding the mutex for the
-                // entire file parse to avoid starving the logger task and other SD users.
-                FS_LOCK();
-                char *result = f_gets(line, (int) sizeof(line), &file);
-                FS_UNLOCK();
+		// Serialize individual FatFs calls rather than holding the mutex for the
+		// entire file parse to avoid starving the logger task and other SD users.
+		FS_LOCK();
+		char *result = f_gets(line, (int) sizeof(line), &file);
+		FS_UNLOCK();
 		// Break the loop once FatFs signals end-of-file.
 		if (result == NULL) {
 			break;
@@ -639,27 +640,27 @@ static void forecast_temp_bootstrap_process_file(const char *file_path,
 		}
 		// Convert the numeric value from ASCII into a float.
 		const float value = strtof(value_str, NULL);
-                // Derive the minute-level bucket for this reading so slightly different seconds
-                // (e.g., temperature at 00:00:01 and illuminance at 00:00:07) still merge into the
-                // same per-minute bundle.
-                if (strlen(timestamp) < 16u) {
-                        continue;
-                }
-                char minute_bucket[sizeof(bundle.timestamp_iso8601)] = { 0 };
-                (void) strncpy(minute_bucket, timestamp, 16u);
-                minute_bucket[16] = '\0';
-                // Detect when a new minute bucket begins so we can flush the previous bundle.
-                if (!bundle.in_use
-                                || (strncmp(bundle.timestamp_iso8601, minute_bucket,
-                                                sizeof(bundle.timestamp_iso8601)) != 0)) {
-                        // Submit the previous bundle before starting the new one.
-                        forecast_temp_bootstrap_submit_bundle(&bundle, slot_bucket,
-                                        minute_counter, slot_counter);
+		// Derive the minute-level bucket for this reading so slightly different seconds
+		// (e.g., temperature at 00:00:01 and illuminance at 00:00:07) still merge into the
+		// same per-minute bundle.
+		if (strlen(timestamp) < 16u) {
+			continue;
+		}
+		char minute_bucket[sizeof(bundle.timestamp_iso8601)] = { 0 };
+		(void) strncpy(minute_bucket, timestamp, 16u);
+		minute_bucket[16] = '\0';
+		// Detect when a new minute bucket begins so we can flush the previous bundle.
+		if (!bundle.in_use
+				|| (strncmp(bundle.timestamp_iso8601, minute_bucket,
+						sizeof(bundle.timestamp_iso8601)) != 0)) {
+			// Submit the previous bundle before starting the new one.
+			forecast_temp_bootstrap_submit_bundle(&bundle, slot_bucket,
+					minute_counter, slot_counter);
 			// Reset the bundle so it can hold readings for the new timestamp.
 			forecast_temp_bootstrap_reset_bundle(&bundle);
 			// Copy the new timestamp into the bundle for future comparisons.
-                        (void) strncpy(bundle.timestamp_iso8601, minute_bucket,
-                                        sizeof(bundle.timestamp_iso8601) - 1u);
+			(void) strncpy(bundle.timestamp_iso8601, minute_bucket,
+					sizeof(bundle.timestamp_iso8601) - 1u);
 			// Guarantee the stored timestamp is null-terminated.
 			bundle.timestamp_iso8601[sizeof(bundle.timestamp_iso8601) - 1u] =
 					'\0';
@@ -696,27 +697,28 @@ static void forecast_temp_bootstrap_process_file(const char *file_path,
 			continue;
 		}
 	}
-        // Submit the final bundle so the last timestamp contributes to the aggregates.
-        forecast_temp_bootstrap_submit_bundle(&bundle, slot_bucket, minute_counter,
-                        slot_counter);
-        // Close the CSV file now that parsing is complete.
-        FS_LOCK();
-        (void) f_close(&file);
-        FS_UNLOCK();
+	// Submit the final bundle so the last timestamp contributes to the aggregates.
+	forecast_temp_bootstrap_submit_bundle(&bundle, slot_bucket, minute_counter,
+			slot_counter);
+	// Close the CSV file now that parsing is complete.
+	FS_LOCK();
+	(void) f_close(&file);
+	FS_UNLOCK();
 }
 
 // Discover recent CSV logs on the SD card and replay them into the feature window.
 static void forecast_temp_bootstrap_from_sd_card(void) {
-        // Ensure the SD card is mounted so directory scans succeed after a reboot.
-        if (SD_Mount() != FR_OK) {
-                printf(LOG_PREFIX "[forecast] bootstrap failed to mount SD card for log replay\r\n");
-                return;
-        }
-        // Allocate storage for the set of measurement files we care about.
-        forecast_temp_log_file_t files[FORECAST_TEMP_BOOTSTRAP_MAX_FILES];
-        // Track how many files we actually discovered in the directory.
-        size_t file_count = 0u;
-        // Declare a FatFs directory object so we can iterate through 0:/logs.
+	// Ensure the SD card is mounted so directory scans succeed after a reboot.
+	if (SD_Mount() != FR_OK) {
+		printf(
+				LOG_PREFIX "[forecast] bootstrap failed to mount SD card for log replay\r\n");
+		return;
+	}
+	// Allocate storage for the set of measurement files we care about.
+	forecast_temp_log_file_t files[FORECAST_TEMP_BOOTSTRAP_MAX_FILES];
+	// Track how many files we actually discovered in the directory.
+	size_t file_count = 0u;
+	// Declare a FatFs directory object so we can iterate through 0:/logs.
 	DIR directory;
 	// Take the filesystem mutex before issuing FatFs calls.
 	FS_LOCK();
@@ -728,7 +730,7 @@ static void forecast_temp_bootstrap_from_sd_card(void) {
 		FS_UNLOCK();
 		// Emit a diagnostic so we know why the replay step was skipped.
 		printf(LOG_PREFIX "[forecast] bootstrap failed to open %s fr=%d\r\n",
-				FORECAST_TEMP_LOG_DIRECTORY, (int) fr);
+		FORECAST_TEMP_LOG_DIRECTORY, (int) fr);
 		// Without directory access we cannot preload anything.
 		return;
 	}
@@ -809,7 +811,8 @@ static void forecast_temp_bootstrap_from_sd_card(void) {
 	FS_UNLOCK();
 	// Abort when no measurement files were discovered.
 	if (file_count == 0u) {
-		printf(LOG_PREFIX "[forecast] bootstrap found no CSV logs to replay\r\n");
+		printf(
+				LOG_PREFIX "[forecast] bootstrap found no CSV logs to replay\r\n");
 		return;
 	}
 	// Sort the discovered files by date so we replay them chronologically.
@@ -840,7 +843,7 @@ static void forecast_temp_bootstrap_from_sd_card(void) {
 		// Build the absolute path to the CSV file on the SD card.
 		char path[96];
 		(void) snprintf(path, sizeof(path), "%s/%s",
-				FORECAST_TEMP_LOG_DIRECTORY, files[i].filename);
+		FORECAST_TEMP_LOG_DIRECTORY, files[i].filename);
 		// Process the CSV so its samples contribute to the bootstrap replay.
 		forecast_temp_bootstrap_process_file(path, &slot_bucket,
 				&minute_counter, &slot_counter);
@@ -852,7 +855,8 @@ static void forecast_temp_bootstrap_from_sd_card(void) {
 		printf(
 				"[forecast] bootstrap replayed %lu samples across %lu 30-minute slots\r\n",
 				(unsigned long) minute_counter, (unsigned long) slot_counter);
-		printf(LOG_PREFIX "[forecast] bootstrap window_count=%lu history_count=%lu\r\n",
+		printf(
+				LOG_PREFIX "[forecast] bootstrap window_count=%lu history_count=%lu\r\n",
 				(unsigned long) g_feature_window_count,
 				(unsigned long) g_slot_history_count);
 	} else {
@@ -876,19 +880,20 @@ static void forecast_temp_task_entry(void *argument) {
 		case FORECAST_TEMP_STATE_INIT_NETWORK:
 			// Initialize the neural network before the task begins processing data.
 			if (!forecast_temp_initialize_network()) {
-				printf(LOG_PREFIX "[forecast] failed to init neural network\r\n");
+				printf(
+						LOG_PREFIX "[forecast] failed to init neural network\r\n");
 			}
 			// Proceed immediately to the bootstrap phase regardless of success so the loop continues.
 			state = FORECAST_TEMP_STATE_BOOTSTRAP;
 			break;
-                case FORECAST_TEMP_STATE_BOOTSTRAP:
-                        // Replay persisted SD-card measurements so the window fills immediately.
-                        forecast_temp_bootstrap_from_sd_card();
-                        // Restore any in-progress slot accumulation so we do not restart from zero.
-                        forecast_temp_restore_slot_checkpoint();
-                        // Initialize the tick count used by vTaskDelayUntil().
-                        context.last_wake_tick = xTaskGetTickCount();
-                        // Transition into the periodic wait state.
+		case FORECAST_TEMP_STATE_BOOTSTRAP:
+			// Replay persisted SD-card measurements so the window fills immediately.
+			forecast_temp_bootstrap_from_sd_card();
+			// Restore any in-progress slot accumulation so we do not restart from zero.
+			forecast_temp_restore_slot_checkpoint();
+			// Initialize the tick count used by vTaskDelayUntil().
+			context.last_wake_tick = xTaskGetTickCount();
+			// Transition into the periodic wait state.
 			state = FORECAST_TEMP_STATE_WAIT_MINUTE;
 			break;
 		case FORECAST_TEMP_STATE_WAIT_MINUTE:
@@ -963,7 +968,8 @@ static void forecast_temp_task_entry(void *argument) {
 				state = FORECAST_TEMP_STATE_WAIT_MINUTE;
 
 			} else {
-				printf(LOG_PREFIX "[forecast] The window is full. Exporting window and proceeding with inference. ");
+				printf(
+						LOG_PREFIX "[forecast] The window is full. Exporting window and proceeding with inference. ");
 				state = FORECAST_TEMP_STATE_EXPORT_WINDOW;
 			}
 			break;
@@ -1021,13 +1027,14 @@ static bool forecast_temp_initialize_network(void) {
 			&g_forecast_network, activations_table, weights_table);
 	// Abort if the runtime failed to create the network instance.
 	if (err.type != AI_ERROR_NONE) {
-		printf(LOG_PREFIX "[forecast] create_and_init failed type=%d code=%d\r\n",
+		printf(
+				LOG_PREFIX "[forecast] create_and_init failed type=%d code=%d\r\n",
 				err.type, err.code);
 		return false;
 	}
 	// Cache the input buffer descriptors from the runtime.
 	g_network_inputs = ai_forecast_temp_ml_model_inputs_get(g_forecast_network,
-			NULL);
+	NULL);
 	// Cache the output buffer descriptors from the runtime.
 	g_network_outputs = ai_forecast_temp_ml_model_outputs_get(
 			g_forecast_network, NULL);
@@ -1125,33 +1132,33 @@ static bool forecast_temp_read_local_hour(uint8_t *hour_out) {
 
 // Add a minute-level reading into the 30-minute accumulator.
 static void forecast_temp_accumulate_minute_sample(float temperature_c,
-                float humidity_pct, float pressure_pa, float illuminance_lux) {
-        // Capture the slot key the first time we add a minute to a new accumulator.
-        if (g_slot_accumulator.sample_count == 0u) {
-                if (!forecast_temp_compute_slot_key(g_slot_accumulator_slot_key,
-                                sizeof(g_slot_accumulator_slot_key))) {
-                        g_slot_accumulator_slot_key[0] = '\0';
-                }
-        }
-        // Add the new temperature sample into the running sum.
-        g_slot_accumulator.temperature_sum += temperature_c;
-        // Add the new humidity sample into the running sum.
-        g_slot_accumulator.humidity_sum += humidity_pct;
-        // Add the new pressure sample into the running sum.
-        g_slot_accumulator.pressure_sum += pressure_pa;
-        // Add the new illuminance sample into the running sum.
-        g_slot_accumulator.illuminance_sum += illuminance_lux;
-        // Increment the sample counter so we know how many minutes have accumulated toward the 30-minute slot.
-        g_slot_accumulator.sample_count += 1u;
-        // Persist the partial slot so a reboot can resume accumulation.
-        forecast_temp_persist_slot_checkpoint();
+		float humidity_pct, float pressure_pa, float illuminance_lux) {
+	// Capture the slot key the first time we add a minute to a new accumulator.
+	if (g_slot_accumulator.sample_count == 0u) {
+		if (!forecast_temp_compute_slot_key(g_slot_accumulator_slot_key,
+				sizeof(g_slot_accumulator_slot_key))) {
+			g_slot_accumulator_slot_key[0] = '\0';
+		}
+	}
+	// Add the new temperature sample into the running sum.
+	g_slot_accumulator.temperature_sum += temperature_c;
+	// Add the new humidity sample into the running sum.
+	g_slot_accumulator.humidity_sum += humidity_pct;
+	// Add the new pressure sample into the running sum.
+	g_slot_accumulator.pressure_sum += pressure_pa;
+	// Add the new illuminance sample into the running sum.
+	g_slot_accumulator.illuminance_sum += illuminance_lux;
+	// Increment the sample counter so we know how many minutes have accumulated toward the 30-minute slot.
+	g_slot_accumulator.sample_count += 1u;
+	// Persist the partial slot so a reboot can resume accumulation.
+	forecast_temp_persist_slot_checkpoint();
 }
 
 // Convert the minute accumulator into a 30-minute average when enough data exists.
 static bool forecast_temp_finalize_slot_sample(float *temperature_c_out,
-                float *humidity_pct_out, float *pressure_pa_out,
-                float *illuminance_lux_out) {
-        // Ensure all output pointers are valid.
+		float *humidity_pct_out, float *pressure_pa_out,
+		float *illuminance_lux_out) {
+	// Ensure all output pointers are valid.
 	if ((temperature_c_out == NULL) || (humidity_pct_out == NULL)
 			|| (pressure_pa_out == NULL) || (illuminance_lux_out == NULL)) {
 		return false;
@@ -1168,140 +1175,141 @@ static bool forecast_temp_finalize_slot_sample(float *temperature_c_out,
 	*humidity_pct_out = g_slot_accumulator.humidity_sum * reciprocal;
 	// Calculate the 30-minute average pressure.
 	*pressure_pa_out = g_slot_accumulator.pressure_sum * reciprocal;
-        // Calculate the 30-minute average illuminance.
-        *illuminance_lux_out = g_slot_accumulator.illuminance_sum * reciprocal;
-        // Reset the accumulator so the next slot starts fresh.
-        memset(&g_slot_accumulator, 0, sizeof(g_slot_accumulator));
-        // Clear the slot key alongside the sums.
-        g_slot_accumulator_slot_key[0] = '\0';
-        // Remove any stale checkpoint now that the slot rolled over.
-        forecast_temp_persist_slot_checkpoint();
-        // Signal that the caller received a complete slot.
-        return true;
+	// Calculate the 30-minute average illuminance.
+	*illuminance_lux_out = g_slot_accumulator.illuminance_sum * reciprocal;
+	// Reset the accumulator so the next slot starts fresh.
+	memset(&g_slot_accumulator, 0, sizeof(g_slot_accumulator));
+	// Clear the slot key alongside the sums.
+	g_slot_accumulator_slot_key[0] = '\0';
+	// Remove any stale checkpoint now that the slot rolled over.
+	forecast_temp_persist_slot_checkpoint();
+	// Signal that the caller received a complete slot.
+	return true;
 }
 
 // Persist the in-progress 30-minute accumulator so a reboot can resume the slot.
 typedef struct {
-        uint32_t version;
-        uint32_t sample_count;
-        char slot_key[20];
-        float temperature_sum;
-        float humidity_sum;
-        float pressure_sum;
-        float illuminance_sum;
+	uint32_t version;
+	uint32_t sample_count;
+	char slot_key[20];
+	float temperature_sum;
+	float humidity_sum;
+	float pressure_sum;
+	float illuminance_sum;
 } forecast_temp_slot_checkpoint_t;
 
 // Derive the YYYY-MM-DDTHH:MM slot key from the RTC so checkpoints can be validated.
-static bool forecast_temp_compute_slot_key(char *slot_key_out, size_t slot_key_cap) {
-        if ((slot_key_out == NULL) || (slot_key_cap < 17u)) {
-                return false;
-        }
-        char timestamp[24];
-        if (ds3231_read_time_iso8601_utc_i2c1(timestamp, sizeof timestamp) != HAL_OK) {
-                return false;
-        }
-        memcpy(slot_key_out, timestamp, 16u);
-        slot_key_out[16] = '\0';
-        return true;
+static bool forecast_temp_compute_slot_key(char *slot_key_out,
+		size_t slot_key_cap) {
+	if ((slot_key_out == NULL) || (slot_key_cap < 17u)) {
+		return false;
+	}
+	char timestamp[24];
+	if (ds3231_read_time_iso8601_utc_i2c1(timestamp, sizeof timestamp)
+			!= HAL_OK) {
+		return false;
+	}
+	memcpy(slot_key_out, timestamp, 16u);
+	slot_key_out[16] = '\0';
+	return true;
 }
 
 // Write the partial slot accumulator to disk so it survives a reboot.
 static void forecast_temp_persist_slot_checkpoint(void) {
-        if (SD_Mount() != FR_OK) {
-                        return;
-        }
+	if (SD_Mount() != FR_OK) {
+		return;
+	}
 
-        forecast_temp_slot_checkpoint_t checkpoint = {
-                        .version = FORECAST_TEMP_SLOT_CACHE_VERSION,
-                        .sample_count = g_slot_accumulator.sample_count,
-                        .temperature_sum = g_slot_accumulator.temperature_sum,
-                        .humidity_sum = g_slot_accumulator.humidity_sum,
-                        .pressure_sum = g_slot_accumulator.pressure_sum,
-                        .illuminance_sum = g_slot_accumulator.illuminance_sum,
-        };
-        (void) strncpy(checkpoint.slot_key, g_slot_accumulator_slot_key,
-                        sizeof(checkpoint.slot_key) - 1u);
-        checkpoint.slot_key[sizeof(checkpoint.slot_key) - 1u] = '\0';
+	forecast_temp_slot_checkpoint_t checkpoint = { .version =
+			FORECAST_TEMP_SLOT_CACHE_VERSION, .sample_count =
+			g_slot_accumulator.sample_count, .temperature_sum =
+			g_slot_accumulator.temperature_sum, .humidity_sum =
+			g_slot_accumulator.humidity_sum, .pressure_sum =
+			g_slot_accumulator.pressure_sum, .illuminance_sum =
+			g_slot_accumulator.illuminance_sum, };
+	(void) strncpy(checkpoint.slot_key, g_slot_accumulator_slot_key,
+			sizeof(checkpoint.slot_key) - 1u);
+	checkpoint.slot_key[sizeof(checkpoint.slot_key) - 1u] = '\0';
 
-        FS_LOCK();
-        if (checkpoint.sample_count == 0u) {
-                (void) f_unlink(FORECAST_TEMP_SLOT_CACHE_PATH);
-                FS_UNLOCK();
-                return;
-        }
+	FS_LOCK();
+	if (checkpoint.sample_count == 0u) {
+		(void) f_unlink(FORECAST_TEMP_SLOT_CACHE_PATH);
+		FS_UNLOCK();
+		return;
+	}
 
-        FIL file;
-        FRESULT fr = f_open(&file, FORECAST_TEMP_SLOT_CACHE_PATH,
-                        FA_CREATE_ALWAYS | FA_WRITE);
-        bool ok = (fr == FR_OK);
-        UINT bw = 0u;
-        if (ok) {
-                fr = f_write(&file, &checkpoint, (UINT) sizeof(checkpoint), &bw);
-                ok = (fr == FR_OK) && (bw == (UINT) sizeof(checkpoint));
-        }
-        if (ok) {
-                ok = (f_sync(&file) == FR_OK);
-        }
-        (void) f_close(&file);
-        if (!ok) {
-                (void) f_unlink(FORECAST_TEMP_SLOT_CACHE_PATH);
-        }
-        FS_UNLOCK();
+	FIL file;
+	FRESULT fr = f_open(&file, FORECAST_TEMP_SLOT_CACHE_PATH,
+	FA_CREATE_ALWAYS | FA_WRITE);
+	bool ok = (fr == FR_OK);
+	UINT bw = 0u;
+	if (ok) {
+		fr = f_write(&file, &checkpoint, (UINT) sizeof(checkpoint), &bw);
+		ok = (fr == FR_OK) && (bw == (UINT) sizeof(checkpoint));
+	}
+	if (ok) {
+		ok = (f_sync(&file) == FR_OK);
+	}
+	(void) f_close(&file);
+	if (!ok) {
+		(void) f_unlink(FORECAST_TEMP_SLOT_CACHE_PATH);
+	}
+	FS_UNLOCK();
 }
 
 // Restore any cached partial slot so we do not lose progress across reboots.
 static void forecast_temp_restore_slot_checkpoint(void) {
-        if (SD_Mount() != FR_OK) {
-                return;
-        }
-        forecast_temp_slot_checkpoint_t checkpoint;
-        FS_LOCK();
-        FIL file;
-        FRESULT fr = f_open(&file, FORECAST_TEMP_SLOT_CACHE_PATH,
-                        FA_OPEN_EXISTING | FA_READ);
-        if (fr != FR_OK) {
-                FS_UNLOCK();
-                return;
-        }
-        UINT br = 0u;
-        fr = f_read(&file, &checkpoint, (UINT) sizeof(checkpoint), &br);
-        (void) f_close(&file);
-        FS_UNLOCK();
-        if ((fr != FR_OK) || (br != (UINT) sizeof(checkpoint))) {
-                return;
-        }
-        if ((checkpoint.version != FORECAST_TEMP_SLOT_CACHE_VERSION)
-                        || (checkpoint.sample_count == 0u)) {
-                FS_LOCK();
-                (void) f_unlink(FORECAST_TEMP_SLOT_CACHE_PATH);
-                FS_UNLOCK();
-                return;
-        }
+	if (SD_Mount() != FR_OK) {
+		return;
+	}
+	forecast_temp_slot_checkpoint_t checkpoint;
+	FS_LOCK();
+	FIL file;
+	FRESULT fr = f_open(&file, FORECAST_TEMP_SLOT_CACHE_PATH,
+	FA_OPEN_EXISTING | FA_READ);
+	if (fr != FR_OK) {
+		FS_UNLOCK();
+		return;
+	}
+	UINT br = 0u;
+	fr = f_read(&file, &checkpoint, (UINT) sizeof(checkpoint), &br);
+	(void) f_close(&file);
+	FS_UNLOCK();
+	if ((fr != FR_OK) || (br != (UINT) sizeof(checkpoint))) {
+		return;
+	}
+	if ((checkpoint.version != FORECAST_TEMP_SLOT_CACHE_VERSION)
+			|| (checkpoint.sample_count == 0u)) {
+		FS_LOCK();
+		(void) f_unlink(FORECAST_TEMP_SLOT_CACHE_PATH);
+		FS_UNLOCK();
+		return;
+	}
 
-        char current_slot_key[sizeof(checkpoint.slot_key)] = { 0 };
-        if (forecast_temp_compute_slot_key(current_slot_key,
-                        sizeof(current_slot_key))
-                        && (strncmp(current_slot_key, checkpoint.slot_key,
-                                        sizeof(checkpoint.slot_key)) != 0)) {
-                FS_LOCK();
-                (void) f_unlink(FORECAST_TEMP_SLOT_CACHE_PATH);
-                FS_UNLOCK();
-                return;
-        }
+	char current_slot_key[sizeof(checkpoint.slot_key)] = { 0 };
+	if (forecast_temp_compute_slot_key(current_slot_key,
+			sizeof(current_slot_key))
+			&& (strncmp(current_slot_key, checkpoint.slot_key,
+					sizeof(checkpoint.slot_key)) != 0)) {
+		FS_LOCK();
+		(void) f_unlink(FORECAST_TEMP_SLOT_CACHE_PATH);
+		FS_UNLOCK();
+		return;
+	}
 
-        g_slot_accumulator.sample_count = checkpoint.sample_count;
-        g_slot_accumulator.temperature_sum = checkpoint.temperature_sum;
-        g_slot_accumulator.humidity_sum = checkpoint.humidity_sum;
-        g_slot_accumulator.pressure_sum = checkpoint.pressure_sum;
-        g_slot_accumulator.illuminance_sum = checkpoint.illuminance_sum;
-        (void) strncpy(g_slot_accumulator_slot_key, checkpoint.slot_key,
-                        sizeof(g_slot_accumulator_slot_key) - 1u);
-        g_slot_accumulator_slot_key[sizeof(g_slot_accumulator_slot_key) - 1u] =
-                        '\0';
-        printf(LOG_PREFIX
-                        "[forecast] restored %lu/%lu minutes for the current 30-minute slot\r\n",
-                        (unsigned long) checkpoint.sample_count,
-                        (unsigned long) FORECAST_TEMP_MINUTES_PER_SLOT);
+	g_slot_accumulator.sample_count = checkpoint.sample_count;
+	g_slot_accumulator.temperature_sum = checkpoint.temperature_sum;
+	g_slot_accumulator.humidity_sum = checkpoint.humidity_sum;
+	g_slot_accumulator.pressure_sum = checkpoint.pressure_sum;
+	g_slot_accumulator.illuminance_sum = checkpoint.illuminance_sum;
+	(void) strncpy(g_slot_accumulator_slot_key, checkpoint.slot_key,
+			sizeof(g_slot_accumulator_slot_key) - 1u);
+	g_slot_accumulator_slot_key[sizeof(g_slot_accumulator_slot_key) - 1u] =
+			'\0';
+	printf(LOG_PREFIX
+	"[forecast] restored %lu/%lu minutes for the current 30-minute slot\r\n",
+			(unsigned long) checkpoint.sample_count,
+			(unsigned long) FORECAST_TEMP_MINUTES_PER_SLOT);
 }
 
 // Store the latest 30-minute temperature and pressure so deltas stay accurate.
@@ -1434,30 +1442,34 @@ static bool forecast_temp_export_window_to_network(int8_t *destination_buffer) {
 
 // Run the neural network and decode the resulting prediction vector.
 static bool forecast_temp_run_inference(
-                float predictions_out[FORECAST_TEMP_FORECAST_HORIZON_SLOTS]) {
-        // Guard against NULL output pointers.
-        if (predictions_out == NULL) {
-                return false;
-        }
-        // Only emit verbose console output at a limited cadence to avoid spamming
-        // the UART when the state machine loops quickly (for example, after
-        // bootstrap replay).
-        static TickType_t s_last_console_log_tick = 0;
-        const TickType_t now = xTaskGetTickCount();
-        const bool should_log =
-                        (s_last_console_log_tick == 0)
-                                        || ((now - s_last_console_log_tick)
-                                                        >= pdMS_TO_TICKS(
-                                                                        FORECAST_TEMP_TASK_PERIOD_MS));
-        if (should_log) {
-                s_last_console_log_tick = now;
-        }
-        // Abort when the network handle is not valid.
-        if (g_forecast_network == AI_HANDLE_NULL) {
-                return false;
-        }
+		float predictions_out[FORECAST_TEMP_FORECAST_HORIZON_SLOTS]) {
+	// Guard against NULL output pointers.
+	if (predictions_out == NULL) {
+		return false;
+	}
+	// Only emit verbose console output at a limited cadence to avoid spamming
+	// the UART when the state machine loops quickly (for example, after
+	// bootstrap replay).
+	static TickType_t s_last_console_log_tick = 0;
+	const TickType_t now = xTaskGetTickCount();
+	const bool should_log = (s_last_console_log_tick == 0)
+			|| ((now - s_last_console_log_tick)
+					>= pdMS_TO_TICKS(FORECAST_TEMP_TASK_PERIOD_MS));
+	if (should_log) {
+		s_last_console_log_tick = now;
+	}
+	// Abort when the network handle is not valid.
+	if (g_forecast_network == AI_HANDLE_NULL) {
+		return false;
+	}
 	// Attach the input tensor buffer to the runtime descriptor.
 	g_network_inputs[0].data = AI_HANDLE_PTR(g_network_input_buffer);
+	// print the input buffer for debug
+	printf(LOG_PREFIX "[forecast] input buffer: ");
+	for (size_t i = 0; i < AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE; ++i) {
+		printf("%d ", (int) g_network_input_buffer[i]);
+	}
+	printf("\r\n");
 	// Attach the output tensor buffer to the runtime descriptor.
 	g_network_outputs[0].data = AI_HANDLE_PTR(g_network_output_buffer);
 	// Run a single forward pass through the model.
@@ -1471,20 +1483,19 @@ static bool forecast_temp_run_inference(
 	}
 	// Decode the int8 outputs back into floating-point units and report each lead time.
 	for (size_t i = 0u; i < FORECAST_TEMP_FORECAST_HORIZON_SLOTS; ++i) {
-                const float dequantized = ((float) g_network_output_buffer[i]
-                                - (float) g_output_zero_point) * g_output_scale;
-                predictions_out[i] = dequantized;
-                const uint32_t lead_minutes_total = (uint32_t) ((i + 1u)
-                                * FORECAST_TEMP_MINUTES_PER_SLOT);
-                const uint32_t lead_hours = lead_minutes_total / 60u;
-                const uint32_t lead_minutes = lead_minutes_total % 60u;
-                if (should_log) {
-                        printf(LOG_PREFIX "[forecast] horizon+%02lu:%02lu %.2f C\r\n",
-                                        (unsigned long) lead_hours,
-                                        (unsigned long) lead_minutes,
-                                        (double) dequantized);
-                }
-        }
-        // Signal success to the caller.
-        return true;
+		const float dequantized = ((float) g_network_output_buffer[i]
+				- (float) g_output_zero_point) * g_output_scale;
+		predictions_out[i] = dequantized;
+		const uint32_t lead_minutes_total = (uint32_t) ((i + 1u)
+				* FORECAST_TEMP_MINUTES_PER_SLOT);
+		const uint32_t lead_hours = lead_minutes_total / 60u;
+		const uint32_t lead_minutes = lead_minutes_total % 60u;
+		if (should_log) {
+			printf(LOG_PREFIX "[forecast] horizon+%02lu:%02lu %.2f C\r\n",
+					(unsigned long) lead_hours, (unsigned long) lead_minutes,
+					(double) dequantized);
+		}
+	}
+	// Signal success to the caller.
+	return true;
 }
