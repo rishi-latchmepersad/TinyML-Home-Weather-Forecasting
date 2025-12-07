@@ -53,6 +53,10 @@ MEMORY
   FLASH   (rx)  : ORIGIN = 0x08000000, LENGTH = 2048K
 }
 
+/* Convenience symbols for heap-limit calculations inside sysmem.c */
+__AXIRAM_start = ORIGIN(AXIRAM);
+__AXIRAM_end   = ORIGIN(AXIRAM) + LENGTH(AXIRAM);
+
 /* Sections */
 SECTIONS
 {
