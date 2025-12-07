@@ -1,39 +1,39 @@
 ST Edge AI Core v2.2.0-20266 2adc00962
-Created date          : 2025-12-07 19:25:13
-Parameters            : generate --target stm32f7 --name forecast_temp_ml_model -m C:/Users/rishi_latchmepersad/Downloads/quantized_rnn_model (6).tflite --compression none --verbosity 1 --workspace C:/Users/RISHI_~1/AppData/Local/Temp/mxAI_workspace1395740376570014881523708856837344 --output C:/Users/rishi_latchmepersad/.stm32cubemx/forecast_temp_ml_model_output
+Created date          : 2025-12-07 19:34:06
+Parameters            : generate --target stm32f7 --name forecast_temp_ml_model -m C:/Users/rishi_latchmepersad/Downloads/quantized_rnn_model (7).tflite --compression none --verbosity 1 --workspace C:/Users/RISHI_~1/AppData/Local/Temp/mxAI_workspace144808020394005099869951029281667 --output C:/Users/rishi_latchmepersad/.stm32cubemx/forecast_temp_ml_model_output
 
 Exec/report summary (generate)
---------------------------------------------------------------------------------------------------------------------------------
-model file         :   C:\Users\rishi_latchmepersad\Downloads\quantized_rnn_model (6).tflite                                    
-type               :   tflite                                                                                                   
-c_name             :   forecast_temp_ml_model                                                                                   
-compression        :   none                                                                                                     
-options            :   allocate-inputs, allocate-outputs                                                                        
-optimization       :   balanced                                                                                                 
-target/series      :   stm32f7                                                                                                  
-workspace dir      :   C:\Users\RISHI_~1\AppData\Local\Temp\mxAI_workspace1395740376570014881523708856837344                    
-output dir         :   C:\Users\rishi_latchmepersad\.stm32cubemx\forecast_temp_ml_model_output                                  
-model_fmt          :   ss/ss per tensor                                                                                         
-model_name         :   quantized_rnn_model_6                                                                                    
-model_hash         :   0xbe96ab28a056a320d873d000d2aeafd4                                                                       
-params #           :   24,856 items (42.53 KiB)                                                                                 
---------------------------------------------------------------------------------------------------------------------------------
-input 1/1          :   'serving_default_ke..tensor_240', int8(1x48x9), 432 Bytes, QLinear(0.169742003,-102,int8), activations   
-output 1/1         :   'gemm_446', int8(1x24), 24 Bytes, QLinear(0.147606924,-128,int8), activations                            
-macc               :   654,128                                                                                                  
-weights (ro)       :   19,744 B (19.28 KiB) (1 segment) / -79,680(-80.1%) vs float model                                        
-activations (rw)   :   6,320 B (6.17 KiB) (1 segment) *                                                                         
-ram (total)        :   6,320 B (6.17 KiB) = 6,320 + 0 + 0                                                                       
---------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
+model file         :   C:\Users\rishi_latchmepersad\Downloads\quantized_rnn_model (7).tflite                                  
+type               :   tflite                                                                                                 
+c_name             :   forecast_temp_ml_model                                                                                 
+compression        :   none                                                                                                   
+options            :   allocate-inputs, allocate-outputs                                                                      
+optimization       :   balanced                                                                                               
+target/series      :   stm32f7                                                                                                
+workspace dir      :   C:\Users\RISHI_~1\AppData\Local\Temp\mxAI_workspace144808020394005099869951029281667                   
+output dir         :   C:\Users\rishi_latchmepersad\.stm32cubemx\forecast_temp_ml_model_output                                
+model_fmt          :   ss/ss per tensor                                                                                       
+model_name         :   quantized_rnn_model_7                                                                                  
+model_hash         :   0x4a52975b0b1f263c1a5a7f70a0857b55                                                                     
+params #           :   24,856 items (42.53 KiB)                                                                               
+------------------------------------------------------------------------------------------------------------------------------
+input 1/1          :   'serving_default_ke..tensor_300', int8(1x48x9), 432 Bytes, QLinear(0.030718522,14,int8), activations   
+output 1/1         :   'gemm_446', int8(1x24), 24 Bytes, QLinear(0.014453786,-34,int8), activations                           
+macc               :   654,128                                                                                                
+weights (ro)       :   19,744 B (19.28 KiB) (1 segment) / -79,680(-80.1%) vs float model                                      
+activations (rw)   :   6,320 B (6.17 KiB) (1 segment) *                                                                       
+ram (total)        :   6,320 B (6.17 KiB) = 6,320 + 0 + 0                                                                     
+------------------------------------------------------------------------------------------------------------------------------
 (*) 'input'/'output' buffers are allocated in the activations buffer
 
-Model name - quantized_rnn_model_6
+Model name - quantized_rnn_model_7
 ------ ----------------------------------------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ------------- ------- -------------------------------- --- ------------------ ----------------- -------------------- 
 m_id   layer (type,original)                           oshape                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             param/size       macc                     connected to   | c_size             c_macc            c_type               
 ------ ----------------------------------------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ------------- ------- -------------------------------- --- ------------------ ----------------- -------------------- 
-0      serving_default_ke..tensor_240 (Input, )        [b:1,h:48,c:9]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |                                      
+0      serving_default_ke..tensor_300 (Input, )        [b:1,h:48,c:9]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |                                      
 ------ ----------------------------------------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ------------- ------- -------------------------------- --- ------------------ ----------------- -------------------- 
-2      transpose_2 (Transpose, TRANSPOSE)              [b:48,h:1,c:9]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         4   serving_default_ke..tensor_240   |                    +212(+5300.0%)    Transpose_[2]        
+2      transpose_2 (Transpose, TRANSPOSE)              [b:48,h:1,c:9]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         4   serving_default_ke..tensor_300   |                    +212(+5300.0%)    Transpose_[2]        
 ------ ----------------------------------------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ------------- ------- -------------------------------- --- ------------------ ----------------- -------------------- 
 3      unpack_3 (Unpack, UNPACK)                       [b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9][b:1,c:9]                                                                                              transpose_2   |                                      Unpack_[3]           
 ------ ----------------------------------------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ------------- ------- -------------------------------- --- ------------------ ----------------- -------------------- 
@@ -1461,14 +1461,14 @@ model/c-model: macc=710,812/654,128 -56,684(-8.0%) weights=43,552/19,744 -23,808
 
 Generated C-graph summary
 ------------------------------------------------------------------------------------------------------------------------
-model name            : quantized_rnn_model_6
+model name            : quantized_rnn_model_7
 c-name                : forecast_temp_ml_model
 c-node #              : 438
 c-array #             : 740
 activations size      : 6320 (1 segment)
 weights size          : 19744 (1 segment)
 macc                  : 654128
-inputs                : ['serving_default_keras_tensor_240_output']
+inputs                : ['serving_default_keras_tensor_300_output']
 outputs               : ['gemm_446_output']
 
 C-Arrays (740)
@@ -2117,7 +2117,7 @@ c_id   name (*_array)                            item/size   domain/mem-pool    
 639    nl_97_output                              64/64       activations/**default**   s8                    
 640    nl_9_output                               64/64       activations/**default**   s8                    
 641    pack_246_output                           3072/3072   activations/**default**   s8                    
-642    serving_default_keras_tensor_240_output   432/432     activations/**default**   s8          /input    
+642    serving_default_keras_tensor_300_output   432/432     activations/**default**   s8          /input    
 643    transpose_2_output                        432/432     activations/**default**   s8                    
 644    unpack_252_output0                        64/64       activations/**default**   s8                    
 645    unpack_252_output10                       64/64       activations/**default**   s8                    
@@ -2221,7 +2221,7 @@ C-Layers (438)
 ------ ---------------- ----- --------------- ------ ------ -------------------------------------------- ----------------------- 
 c_id   name (*_layer)   id    layer_type      macc   rom    tensors                                      shape (array id)        
 ------ ---------------- ----- --------------- ------ ------ -------------------------------------------- ----------------------- 
-2      transpose_2      2     Transpose       216    0      I: serving_default_keras_tensor_240_output   int8(1x48x9) (642)      
+2      transpose_2      2     Transpose       216    0      I: serving_default_keras_tensor_300_output   int8(1x48x9) (642)      
                                                             O: transpose_2_output                        int8(1x48x1x9) (643)    
 ------ ---------------- ----- --------------- ------ ------ -------------------------------------------- ----------------------- 
 3      unpack_3         3     Unpack          0      0      I: transpose_2_output                        int8(1x48x1x9) (643)    
