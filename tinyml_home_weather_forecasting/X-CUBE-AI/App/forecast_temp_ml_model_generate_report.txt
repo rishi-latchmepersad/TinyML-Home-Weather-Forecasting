@@ -1,25 +1,25 @@
 ST Edge AI Core v2.2.0-20266 2adc00962
-Created date          : 2025-12-07 16:22:42
-Parameters            : generate --target stm32f7 --name forecast_temp_ml_model -m C:/Users/rishi_latchmepersad/Downloads/quantized_rnn_modelv2 (2).tflite --compression none --verbosity 1 --workspace C:/Users/RISHI_~1/AppData/Local/Temp/mxAI_workspace30202268851006623571122518660036 --output C:/Users/rishi_latchmepersad/.stm32cubemx/forecast_temp_ml_model_output
+Created date          : 2025-12-07 17:16:32
+Parameters            : generate --target stm32f7 --name forecast_temp_ml_model -m C:/Users/rishi_latchmepersad/Downloads/quantized_rnn_model_int8.tflite --compression none --verbosity 1 --workspace C:/Users/RISHI_~1/AppData/Local/Temp/mxAI_workspace625088199010011303655954489572017 --output C:/Users/rishi_latchmepersad/.stm32cubemx/forecast_temp_ml_model_output
 
 Exec/report summary (generate)
 -------------------------------------------------------------------------------------------------------------------------------
-model file         :   C:\Users\rishi_latchmepersad\Downloads\quantized_rnn_modelv2 (2).tflite                                 
+model file         :   C:\Users\rishi_latchmepersad\Downloads\quantized_rnn_model_int8.tflite                                  
 type               :   tflite                                                                                                  
 c_name             :   forecast_temp_ml_model                                                                                  
 compression        :   none                                                                                                    
 options            :   allocate-inputs, allocate-outputs                                                                       
 optimization       :   balanced                                                                                                
 target/series      :   stm32f7                                                                                                 
-workspace dir      :   C:\Users\RISHI_~1\AppData\Local\Temp\mxAI_workspace30202268851006623571122518660036                     
+workspace dir      :   C:\Users\RISHI_~1\AppData\Local\Temp\mxAI_workspace625088199010011303655954489572017                    
 output dir         :   C:\Users\rishi_latchmepersad\.stm32cubemx\forecast_temp_ml_model_output                                 
 model_fmt          :   ss/ss per tensor                                                                                        
-model_name         :   quantized_rnn_modelv2_2                                                                                 
-model_hash         :   0xbef41e6e407a818bb5da71322bf02657                                                                      
+model_name         :   quantized_rnn_model_int8                                                                                
+model_hash         :   0xd11f7c9002ff0365dd5044372410e481                                                                      
 params #           :   6,468 items (14.68 KiB)                                                                                 
 -------------------------------------------------------------------------------------------------------------------------------
 input 1/1          :   'serving_default_keras_tensor0', int8(1x48x9), 432 Bytes, QLinear(0.191042006,-101,int8), activations   
-output 1/1         :   'gemm_445', int8(1x24), 24 Bytes, QLinear(0.112291805,-128,int8), activations                           
+output 1/1         :   'gemm_445', int8(1x24), 24 Bytes, QLinear(0.112253584,-128,int8), activations                           
 macc               :   154,728                                                                                                 
 weights (ro)       :   4,184 B (4.09 KiB) (1 segment) / -21,688(-83.8%) vs float model                                         
 activations (rw)   :   3,152 B (3.08 KiB) (1 segment) *                                                                        
@@ -27,7 +27,7 @@ ram (total)        :   3,152 B (3.08 KiB) = 3,152 + 0 + 0
 -------------------------------------------------------------------------------------------------------------------------------
 (*) 'input'/'output' buffers are allocated in the activations buffer
 
-Model name - quantized_rnn_modelv2_2
+Model name - quantized_rnn_model_int8
 ------ ----------------------------------------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ------------- ------- ------------------------------- --- ----------------- ----------------- -------------------- 
 m_id   layer (type,original)                           oshape                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             param/size       macc                    connected to   | c_size            c_macc            c_type               
 ------ ----------------------------------------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ------------- ------- ------------------------------- --- ----------------- ----------------- -------------------- 
@@ -1454,7 +1454,7 @@ model/c-model: macc=180,772/154,728 -26,044(-14.4%) weights=15,036/4,184 -10,852
 
 Generated C-graph summary
 ------------------------------------------------------------------------------------------------------------------------
-model name            : quantized_rnn_modelv2_2
+model name            : quantized_rnn_model_int8
 c-name                : forecast_temp_ml_model
 c-node #              : 437
 c-array #             : 737
