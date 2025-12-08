@@ -143,14 +143,6 @@ SECTIONS
   /* Used by the startup to initialize data */
   _sidata = LOADADDR(.data);
   
-  /* Place any symbol with section(".sram1") into AXI/SRAM1 */
-.sram1 (NOLOAD) :
-{
-  . = ALIGN(32);
-  *(.sram1*)
-  . = ALIGN(32);
-} >AXIRAM
-
   /* Initialized data sections into AXI SRAM (DMA-visible) */
   .data :
   {
@@ -191,6 +183,14 @@ SECTIONS
     . = . + _Min_Heap_Size;
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
+  } >AXIRAM
+
+  /* Place any symbol with section(".sram1") into AXI/SRAM1 after the regular data/BSS layout */
+  .sram1 (NOLOAD) :
+  {
+    . = ALIGN(32);
+    *(.sram1*)
+    . = ALIGN(32);
   } >AXIRAM
 
   /* Remove information from the compiler libraries */
