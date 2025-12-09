@@ -1,4 +1,5 @@
-<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.1.2 Chrome/138.0.7204.243 Electron/37.4.0 Safari/537.36" version="28.1.2" pages="10">
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.1.2 Chrome/138.0.7204.243 Electron/37.4.0 Safari/537.36" version="28.1.2" pages="11">
   <diagram id="vM8fxDD7liS2lbMWXIOC" name="Block Diagram">
     <mxGraphModel dx="2786" dy="1257" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="1">
       <root>
@@ -943,7 +944,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="eJf9wnjb_WIUpUlEu7mn-47" value="Open today&#39;s log file" style="rounded=1;whiteSpace=wrap;html=1;shadow=0;fillColor=#ffffff;strokeColor=#b85450;fontSize=13;" vertex="1" parent="dfCqUhIheSa_VmKo72c7-36">
+        <mxCell id="eJf9wnjb_WIUpUlEu7mn-47" value="Open today's log file" style="rounded=1;whiteSpace=wrap;html=1;shadow=0;fillColor=#ffffff;strokeColor=#b85450;fontSize=13;" vertex="1" parent="dfCqUhIheSa_VmKo72c7-36">
           <mxGeometry x="330" y="70" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="eJf9wnjb_WIUpUlEu7mn-52" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="dfCqUhIheSa_VmKo72c7-36" source="eJf9wnjb_WIUpUlEu7mn-49" target="eJf9wnjb_WIUpUlEu7mn-40">
@@ -1188,7 +1189,7 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="lg-start" value="&lt;b&gt;STARTUP&lt;/b&gt;&lt;div&gt;&amp;nbsp;Mount the SD card if it isn&#39;t mounted&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+        <mxCell id="lg-start" value="&lt;b&gt;STARTUP&lt;/b&gt;&lt;div&gt;&amp;nbsp;Mount the SD card if it isn't mounted&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="120" y="160" width="160" height="100" as="geometry" />
         </mxCell>
         <mxCell id="lg-dir" value="&lt;b&gt;ENSURE_DIR&lt;/b&gt;&lt;div&gt;Ensure that the /logs directory on the SD card is present&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
@@ -1281,6 +1282,47 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="prune-edge-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;" parent="1" source="prune-step-5" target="prune-step-6" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="dqsDataPreprocessing" name="Data Preprocessing">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="1">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="Raw sensor measurements" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="40" y="320" width="170" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="Validation &amp;&#10;missing handling" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="230" y="320" width="170" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="Feature engineering&#10;(resample, rolling stats,&#10;sine/cosine time)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="420" y="320" width="170" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="Normalization" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="610" y="320" width="170" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="Train/validation split" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="800" y="320" width="170" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="Sliding windows to tensors" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cce5ff;strokeColor=#4d88ff;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="990" y="320" width="170" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="8" style="endArrow=block;html=1;rounded=0;strokeWidth=2;exitX=1;exitY=0.5;exitPerimeter=1;entryX=0;entryY=0.5;entryPerimeter=1;" parent="1" source="2" target="3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="9" style="endArrow=block;html=1;rounded=0;strokeWidth=2;exitX=1;exitY=0.5;exitPerimeter=1;entryX=0;entryY=0.5;entryPerimeter=1;" parent="1" source="3" target="4" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="10" style="endArrow=block;html=1;rounded=0;strokeWidth=2;exitX=1;exitY=0.5;exitPerimeter=1;entryX=0;entryY=0.5;entryPerimeter=1;" parent="1" source="4" target="5" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="11" style="endArrow=block;html=1;rounded=0;strokeWidth=2;exitX=1;exitY=0.5;exitPerimeter=1;entryX=0;entryY=0.5;entryPerimeter=1;" parent="1" source="5" target="6" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="12" style="endArrow=block;html=1;rounded=0;strokeWidth=2;exitX=1;exitY=0.5;exitPerimeter=1;entryX=0;entryY=0.5;entryPerimeter=1;" parent="1" source="6" target="7" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
