@@ -1,1980 +1,1230 @@
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:35:17Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (10/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:35:45Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:36:08Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (11/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:36:35Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:36:58Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:37:24Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (12/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:37:48Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:38:14Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (13/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:38:38Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:39:04Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:39:29Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (14/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 26.42 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:39:53Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:40:19Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (15/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:40:43Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:41:09Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (16/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:41:32Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:41:59Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:42:22Z.
-[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:29:44Z.
 [forecast] waiting for full 30-minute slot (17/30 minute samples)
 [MAIN_TASK] The default task is alive.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.39 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:42:49Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:30:12Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:43:11Z.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:30:34Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (18/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:43:40Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:31:02Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:44:01Z.
 [MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:44:30Z.
-[forecast] waiting for full 30-minute slot (19/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 26.42 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:44:51Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:45:20Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (20/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:45:40Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:46:10Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (21/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:46:31Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:47:00Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:47:21Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (22/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:47:49Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:48:11Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (23/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:48:39Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:49:01Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (24/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:49:28Z.
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 26.42 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:49:51Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:50:18Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (25/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:50:42Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:51:08Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (26/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:51:32Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:51:57Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:52:22Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (27/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:52:47Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:53:12Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (28/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:53:36Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:54:03Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (29/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:54:26Z.
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 26.42 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:54:53Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:55:16Z.
-[MAIN_TASK] The default task is alive.
-[FORECAST_TASK] [forecast] The window is full. Exporting window and proceeding with inference. [FORECAST_TASK] [forecast] horizon+00:30 26.57 C
-[FORECAST_TASK] [forecast] horizon+01:00 26.11 C
-[FORECAST_TASK] [forecast] horizon+01:30 25.80 C
-[FORECAST_TASK] [forecast] horizon+02:00 25.50 C
-[FORECAST_TASK] [forecast] horizon+02:30 25.34 C
-[FORECAST_TASK] [forecast] horizon+03:00 25.19 C
-[FORECAST_TASK] [forecast] horizon+03:30 24.88 C
-[FORECAST_TASK] [forecast] horizon+04:00 24.88 C
-[FORECAST_TASK] [forecast] horizon+04:30 24.73 C
-[FORECAST_TASK] [forecast] horizon+05:00 24.58 C
-[FORECAST_TASK] [forecast] horizon+05:30 24.42 C
-[FORECAST_TASK] [forecast] horizon+06:00 24.27 C
-[FORECAST_TASK] [forecast] horizon+06:30 24.27 C
-[FORECAST_TASK] [forecast] horizon+07:00 23.96 C
-[FORECAST_TASK] [forecast] horizon+07:30 23.81 C
-[FORECAST_TASK] [forecast] horizon+08:00 23.81 C
-[FORECAST_TASK] [forecast] horizon+08:30 23.96 C
-[FORECAST_TASK] [forecast] horizon+09:00 24.11 C
-[FORECAST_TASK] [forecast] horizon+09:30 24.58 C
-[FORECAST_TASK] [forecast] horizon+10:00 25.04 C
-[FORECAST_TASK] [forecast] horizon+10:30 25.50 C
-[FORECAST_TASK] [forecast] horizon+11:00 26.11 C
-[FORECAST_TASK] [forecast] horizon+11:30 26.73 C
-[FORECAST_TASK] [forecast] horizon+12:00 27.34 C
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:55:43Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:56:05Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (1/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:56:33Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:56:55Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:57:24Z.
-[forecast] waiting for full 30-minute slot (2/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:57:44Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:58:14Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (3/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:58:34Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:59:04Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (4/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:59:24Z.
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 26.57 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T09:59:53Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:00:14Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (5/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:00:43Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:01:05Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (6/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:01:33Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:01:55Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (7/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:02:22Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:02:45Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:03:12Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (8/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:03:35Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:04:01Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (9/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 26.57 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
-[MEASUREMENT_LOGGER] Flushed 503 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:04:26Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 501 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:04:51Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:05:16Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (10/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:05:41Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:06:06Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (11/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:06:30Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:06:56Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (12/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:07:20Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:07:47Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:08:09Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (13/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:08:37Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:08:59Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (14/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 26.57 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:09:27Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:09:49Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:10:17Z.
-[forecast] waiting for full 30-minute slot (15/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:10:38Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:11:08Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (16/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:11:28Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:11:58Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (17/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:12:18Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:12:47Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:13:08Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (18/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:13:37Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:13:59Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:31:24Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (19/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 26.57 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:14:26Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:31:52Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:14:49Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:32:13Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:32:42Z.
 [forecast] waiting for full 30-minute slot (20/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:15:16Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:15:39Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:33:03Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:16:06Z.
+[MEASUREMENT_LOGGER] Flushed 494 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:33:33Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (21/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:16:29Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:33:53Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:16:55Z.
+[MEASUREMENT_LOGGER] Flushed 494 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:34:23Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:34:43Z.
 [forecast] waiting for full 30-minute slot (22/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:17:20Z.
+[MAIN_TASK] The default task is alive.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.39 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:35:12Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:17:45Z.
 [MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:18:10Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:35:33Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (23/30 minute samples)
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:18:35Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:36:01Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:19:00Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:36:24Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (24/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 26.57 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:19:24Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:36:51Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:19:50Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:37:14Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:37:41Z.
 [forecast] waiting for full 30-minute slot (25/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:20:14Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:38:04Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:20:41Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:21:03Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:38:30Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (26/30 minute samples)
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:38:54Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:21:31Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:21:53Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:39:20Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (27/30 minute samples)
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:39:45Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:22:21Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:22:43Z.
-[MAIN_TASK] The default task is alive.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.39 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:23:11Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:40:10Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:40:35Z.
+[MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (28/30 minute samples)
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:23:32Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:40:59Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:41:25Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:24:02Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (29/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 26.57 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:24:22Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:41:49Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:24:52Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[FORECAST_TASK] [forecast] The window is full. Exporting window and proceeding with inference. [FORECAST_TASK] [forecast] horizon+00:30 25.34 C
-[FORECAST_TASK] [forecast] horizon+01:00 25.19 C
-[FORECAST_TASK] [forecast] horizon+01:30 25.04 C
-[FORECAST_TASK] [forecast] horizon+02:00 24.88 C
-[FORECAST_TASK] [forecast] horizon+02:30 24.88 C
-[FORECAST_TASK] [forecast] horizon+03:00 24.88 C
-[FORECAST_TASK] [forecast] horizon+03:30 24.88 C
-[FORECAST_TASK] [forecast] horizon+04:00 24.73 C
-[FORECAST_TASK] [forecast] horizon+04:30 24.58 C
-[FORECAST_TASK] [forecast] horizon+05:00 24.27 C
-[FORECAST_TASK] [forecast] horizon+05:30 23.96 C
-[FORECAST_TASK] [forecast] horizon+06:00 23.65 C
-[FORECAST_TASK] [forecast] horizon+06:30 23.50 C
-[FORECAST_TASK] [forecast] horizon+07:00 23.19 C
-[FORECAST_TASK] [forecast] horizon+07:30 23.35 C
-[FORECAST_TASK] [forecast] horizon+08:00 23.65 C
-[FORECAST_TASK] [forecast] horizon+08:30 24.27 C
-[FORECAST_TASK] [forecast] horizon+09:00 25.04 C
-[FORECAST_TASK] [forecast] horizon+09:30 25.96 C
-[FORECAST_TASK] [forecast] horizon+10:00 27.03 C
-[FORECAST_TASK] [forecast] horizon+10:30 28.11 C
-[FORECAST_TASK] [forecast] horizon+11:00 29.03 C
-[FORECAST_TASK] [forecast] horizon+11:30 29.80 C
-[FORECAST_TASK] [forecast] horizon+12:00 30.41 C
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:25:12Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:42:15Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:25:41Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:42:38Z.
+[FORECAST_TASK] [forecast] The window is full. Exporting window and proceeding with inference. [FORECAST_TASK] [forecast] horizon+00:30 25.39 C
+[FORECAST_TASK] [forecast] horizon+01:00 25.39 C
+[FORECAST_TASK] [forecast] horizon+01:30 25.53 C
+[FORECAST_TASK] [forecast] horizon+02:00 25.39 C
+[FORECAST_TASK] [forecast] horizon+02:30 24.95 C
+[FORECAST_TASK] [forecast] horizon+03:00 25.09 C
+[FORECAST_TASK] [forecast] horizon+03:30 24.95 C
+[FORECAST_TASK] [forecast] horizon+04:00 24.80 C
+[FORECAST_TASK] [forecast] horizon+04:30 24.95 C
+[FORECAST_TASK] [forecast] horizon+05:00 25.09 C
+[FORECAST_TASK] [forecast] horizon+05:30 25.39 C
+[FORECAST_TASK] [forecast] horizon+06:00 25.83 C
+[FORECAST_TASK] [forecast] horizon+06:30 26.12 C
+[FORECAST_TASK] [forecast] horizon+07:00 26.71 C
+[FORECAST_TASK] [forecast] horizon+07:30 27.74 C
+[FORECAST_TASK] [forecast] horizon+08:00 28.91 C
+[FORECAST_TASK] [forecast] horizon+08:30 30.52 C
+[FORECAST_TASK] [forecast] horizon+09:00 32.14 C
+[FORECAST_TASK] [forecast] horizon+09:30 33.61 C
+[FORECAST_TASK] [forecast] horizon+10:00 34.05 C
+[FORECAST_TASK] [forecast] horizon+10:30 34.49 C
+[FORECAST_TASK] [forecast] horizon+11:00 34.63 C
+[FORECAST_TASK] [forecast] horizon+11:30 34.63 C
+[FORECAST_TASK] [forecast] horizon+12:00 34.63 C
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:26:02Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:43:06Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:43:28Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (1/30 minute samples)
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:43:56Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:26:31Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:26:53Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:44:18Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (2/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:27:21Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:44:46Z.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.39 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:27:43Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:45:07Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:45:36Z.
 [forecast] waiting for full 30-minute slot (3/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:28:10Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:28:33Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:45:57Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:29:00Z.
+[MEASUREMENT_LOGGER] Flushed 494 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:46:27Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (4/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.34 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:29:23Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:46:47Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:29:49Z.
+[MEASUREMENT_LOGGER] Flushed 494 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:47:17Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:47:37Z.
 [forecast] waiting for full 30-minute slot (5/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:30:14Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:30:39Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:48:06Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:31:04Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:48:27Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (6/30 minute samples)
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:31:29Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:48:56Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:31:54Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:49:18Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (7/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:32:18Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:49:45Z.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.39 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:32:44Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:50:08Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:50:35Z.
 [forecast] waiting for full 30-minute slot (8/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:33:08Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:50:58Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:33:35Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:33:58Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:51:24Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (9/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.34 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:51:49Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:34:25Z.
 [MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:34:47Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:52:14Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (10/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:35:15Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:35:37Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:52:39Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:36:05Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:53:04Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:53:29Z.
+[MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (11/30 minute samples)
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:36:26Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:53:53Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:54:19Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:36:56Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (12/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:37:16Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:54:43Z.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.39 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:55:10Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:37:46Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:55:33Z.
 [forecast] waiting for full 30-minute slot (13/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:38:06Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:56:00Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:38:36Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:38:56Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:56:22Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (14/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.34 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:56:50Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:39:25Z.
 [MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:39:47Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:57:12Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (15/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:40:15Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:57:40Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:40:37Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:58:02Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:58:31Z.
 [forecast] waiting for full 30-minute slot (16/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:41:04Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:41:27Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:58:51Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:41:54Z.
+[MEASUREMENT_LOGGER] Flushed 494 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:59:21Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (17/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:42:17Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T04:59:41Z.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.39 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:42:43Z.
+[MEASUREMENT_LOGGER] Flushed 494 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:00:11Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:00:31Z.
 [forecast] waiting for full 30-minute slot (18/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:43:07Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:43:33Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:01:00Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:43:58Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:01:22Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (19/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.34 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:44:23Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:01:50Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:44:48Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:02:12Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (20/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:45:12Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:02:39Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:45:38Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:03:02Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:03:29Z.
 [forecast] waiting for full 30-minute slot (21/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:46:02Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:46:28Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:03:52Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:46:51Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:04:19Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (22/30 minute samples)
 [MAIN_TASK] The default task is alive.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.39 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:04:43Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:47:19Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:47:41Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:05:08Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (23/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:48:09Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:48:31Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:05:33Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:48:59Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:05:58Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:06:23Z.
+[MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (24/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.34 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:49:20Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:06:48Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:07:14Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:49:49Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (25/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:50:10Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:07:37Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:08:04Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:50:40Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:08:27Z.
 [forecast] waiting for full 30-minute slot (26/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:51:00Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:08:54Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:51:30Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:51:50Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:09:16Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (27/30 minute samples)
 [MAIN_TASK] The default task is alive.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.39 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:09:44Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:52:20Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:52:40Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:10:06Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (28/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:53:08Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:53:31Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:10:35Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:10:56Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:11:25Z.
 [forecast] waiting for full 30-minute slot (29/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:53:58Z.
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.34 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:54:21Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:11:45Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:54:48Z.
+[MEASUREMENT_LOGGER] Flushed 494 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:12:15Z.
 [MAIN_TASK] The default task is alive.
-[FORECAST_TASK] [forecast] The window is full. Exporting window and proceeding with inference. [FORECAST_TASK] [forecast] horizon+00:30 23.35 C
-[FORECAST_TASK] [forecast] horizon+01:00 23.19 C
-[FORECAST_TASK] [forecast] horizon+01:30 23.35 C
-[FORECAST_TASK] [forecast] horizon+02:00 23.35 C
-[FORECAST_TASK] [forecast] horizon+02:30 23.35 C
-[FORECAST_TASK] [forecast] horizon+03:00 23.50 C
-[FORECAST_TASK] [forecast] horizon+03:30 23.65 C
-[FORECAST_TASK] [forecast] horizon+04:00 23.65 C
-[FORECAST_TASK] [forecast] horizon+04:30 23.50 C
-[FORECAST_TASK] [forecast] horizon+05:00 23.19 C
-[FORECAST_TASK] [forecast] horizon+05:30 22.73 C
-[FORECAST_TASK] [forecast] horizon+06:00 22.27 C
-[FORECAST_TASK] [forecast] horizon+06:30 21.96 C
-[FORECAST_TASK] [forecast] horizon+07:00 21.81 C
-[FORECAST_TASK] [forecast] horizon+07:30 22.12 C
-[FORECAST_TASK] [forecast] horizon+08:00 22.89 C
-[FORECAST_TASK] [forecast] horizon+08:30 23.65 C
-[FORECAST_TASK] [forecast] horizon+09:00 24.88 C
-[FORECAST_TASK] [forecast] horizon+09:30 26.27 C
-[FORECAST_TASK] [forecast] horizon+10:00 27.65 C
-[FORECAST_TASK] [forecast] horizon+10:30 28.88 C
-[FORECAST_TASK] [forecast] horizon+11:00 29.95 C
-[FORECAST_TASK] [forecast] horizon+11:30 30.87 C
-[FORECAST_TASK] [forecast] horizon+12:00 31.33 C
+[FORECAST_TASK] [forecast] The window is full. Exporting window and proceeding with inference. [FORECAST_TASK] [forecast] horizon+00:30 25.53 C
+[FORECAST_TASK] [forecast] horizon+01:00 25.53 C
+[FORECAST_TASK] [forecast] horizon+01:30 25.68 C
+[FORECAST_TASK] [forecast] horizon+02:00 25.39 C
+[FORECAST_TASK] [forecast] horizon+02:30 25.09 C
+[FORECAST_TASK] [forecast] horizon+03:00 25.09 C
+[FORECAST_TASK] [forecast] horizon+03:30 24.95 C
+[FORECAST_TASK] [forecast] horizon+04:00 24.95 C
+[FORECAST_TASK] [forecast] horizon+04:30 24.80 C
+[FORECAST_TASK] [forecast] horizon+05:00 24.95 C
+[FORECAST_TASK] [forecast] horizon+05:30 25.39 C
+[FORECAST_TASK] [forecast] horizon+06:00 25.83 C
+[FORECAST_TASK] [forecast] horizon+06:30 25.97 C
+[FORECAST_TASK] [forecast] horizon+07:00 26.56 C
+[FORECAST_TASK] [forecast] horizon+07:30 27.74 C
+[FORECAST_TASK] [forecast] horizon+08:00 28.76 C
+[FORECAST_TASK] [forecast] horizon+08:30 30.38 C
+[FORECAST_TASK] [forecast] horizon+09:00 32.14 C
+[FORECAST_TASK] [forecast] horizon+09:30 33.46 C
+[FORECAST_TASK] [forecast] horizon+10:00 34.05 C
+[FORECAST_TASK] [forecast] horizon+10:30 34.49 C
+[FORECAST_TASK] [forecast] horizon+11:00 34.63 C
+[FORECAST_TASK] [forecast] horizon+11:30 34.49 C
+[FORECAST_TASK] [forecast] horizon+12:00 34.49 C
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:55:11Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:55:37Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:12:35Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 494 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:13:05Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:13:26Z.
 [forecast] waiting for full 30-minute slot (1/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:56:01Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:56:27Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:13:54Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:56:52Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:14:16Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (2/30 minute samples)
 [MAIN_TASK] The default task is alive.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.53 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:57:16Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:14:44Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:57:42Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:15:06Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (3/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:58:06Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:15:34Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:58:32Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:15:56Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:16:23Z.
 [forecast] waiting for full 30-minute slot (4/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:58:56Z.
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 23.35 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:59:22Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:16:47Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T10:59:45Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:17:13Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (5/30 minute samples)
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:17:37Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:00:13Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:00:35Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:18:03Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (6/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:01:03Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:01:24Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:18:27Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:01:53Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:18:52Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:19:18Z.
+[MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (7/30 minute samples)
 [MAIN_TASK] The default task is alive.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.53 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:02:14Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:19:42Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:20:08Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:02:43Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (8/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:03:04Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:20:32Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:20:58Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:03:34Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:21:21Z.
 [forecast] waiting for full 30-minute slot (9/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:03:54Z.
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 23.35 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:21:48Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:04:24Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:04:44Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:22:11Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (10/30 minute samples)
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:22:39Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:05:13Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:05:34Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:23:01Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (11/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:06:02Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:06:24Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:23:29Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:23:50Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:24:19Z.
 [forecast] waiting for full 30-minute slot (12/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:06:52Z.
+[MAIN_TASK] The default task is alive.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.53 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:24:40Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:07:15Z.
 [MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:07:42Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:25:10Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (13/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:08:05Z.
+[MEASUREMENT_LOGGER] Flushed 494 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:25:30Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:08:31Z.
+[MEASUREMENT_LOGGER] Flushed 494 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:26:00Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:26:20Z.
 [forecast] waiting for full 30-minute slot (14/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 23.35 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:08:55Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:09:21Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:26:49Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:09:45Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:27:10Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (15/30 minute samples)
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:10:10Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:27:39Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:10:36Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:28:01Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (16/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:11:00Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:28:28Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:11:26Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:28:51Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:29:18Z.
 [forecast] waiting for full 30-minute slot (17/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:11:50Z.
+[MAIN_TASK] The default task is alive.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.53 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:29:41Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:12:16Z.
 [MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:12:39Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:30:07Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (18/30 minute samples)
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:30:31Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:13:07Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:13:29Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:30:57Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (19/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 23.35 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:13:57Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:14:19Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:31:22Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:14:47Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:31:47Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:32:12Z.
+[MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (20/30 minute samples)
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:15:08Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:32:36Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:33:02Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:15:37Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (21/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:15:58Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:33:26Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:33:52Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:16:28Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:34:16Z.
 [forecast] waiting for full 30-minute slot (22/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:16:48Z.
+[MAIN_TASK] The default task is alive.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.53 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:34:43Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:17:18Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:17:38Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:35:05Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (23/30 minute samples)
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:35:33Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:18:07Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:18:28Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:35:55Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (24/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 23.35 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:18:56Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:19:19Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:36:23Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:36:44Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:37:13Z.
 [forecast] waiting for full 30-minute slot (25/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:19:46Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:20:09Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:37:34Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:20:36Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:38:04Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (26/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:20:59Z.
+[MEASUREMENT_LOGGER] Flushed 494 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:38:24Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:21:25Z.
+[MEASUREMENT_LOGGER] Flushed 494 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:38:54Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:39:14Z.
 [forecast] waiting for full 30-minute slot (27/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:21:49Z.
+[MAIN_TASK] The default task is alive.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.53 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:39:43Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:22:15Z.
 [MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:22:40Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:40:04Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (28/30 minute samples)
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:23:05Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:40:33Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:23:30Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:40:55Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (29/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 23.35 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:23:54Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:41:22Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:24:20Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:41:45Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[FORECAST_TASK] [forecast] The window is full. Exporting window and proceeding with inference. [FORECAST_TASK] [forecast] horizon+00:30 24.58 C
-[FORECAST_TASK] [forecast] horizon+01:00 24.42 C
-[FORECAST_TASK] [forecast] horizon+01:30 24.42 C
-[FORECAST_TASK] [forecast] horizon+02:00 24.27 C
-[FORECAST_TASK] [forecast] horizon+02:30 24.27 C
-[FORECAST_TASK] [forecast] horizon+03:00 24.42 C
-[FORECAST_TASK] [forecast] horizon+03:30 24.42 C
-[FORECAST_TASK] [forecast] horizon+04:00 24.42 C
-[FORECAST_TASK] [forecast] horizon+04:30 24.27 C
-[FORECAST_TASK] [forecast] horizon+05:00 23.96 C
-[FORECAST_TASK] [forecast] horizon+05:30 23.50 C
-[FORECAST_TASK] [forecast] horizon+06:00 23.19 C
-[FORECAST_TASK] [forecast] horizon+06:30 23.04 C
-[FORECAST_TASK] [forecast] horizon+07:00 22.89 C
-[FORECAST_TASK] [forecast] horizon+07:30 22.89 C
-[FORECAST_TASK] [forecast] horizon+08:00 23.35 C
-[FORECAST_TASK] [forecast] horizon+08:30 23.96 C
-[FORECAST_TASK] [forecast] horizon+09:00 24.88 C
-[FORECAST_TASK] [forecast] horizon+09:30 25.80 C
-[FORECAST_TASK] [forecast] horizon+10:00 26.88 C
-[FORECAST_TASK] [forecast] horizon+10:30 27.95 C
-[FORECAST_TASK] [forecast] horizon+11:00 29.03 C
-[FORECAST_TASK] [forecast] horizon+11:30 29.64 C
-[FORECAST_TASK] [forecast] horizon+12:00 30.26 C
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:24:44Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:42:12Z.
+[FORECAST_TASK] [forecast] The window is full. Exporting window and proceeding with inference. [FORECAST_TASK] [forecast] horizon+00:30 25.53 C
+[FORECAST_TASK] [forecast] horizon+01:00 25.68 C
+[FORECAST_TASK] [forecast] horizon+01:30 25.68 C
+[FORECAST_TASK] [forecast] horizon+02:00 25.39 C
+[FORECAST_TASK] [forecast] horizon+02:30 25.09 C
+[FORECAST_TASK] [forecast] horizon+03:00 24.95 C
+[FORECAST_TASK] [forecast] horizon+03:30 24.80 C
+[FORECAST_TASK] [forecast] horizon+04:00 24.65 C
+[FORECAST_TASK] [forecast] horizon+04:30 24.65 C
+[FORECAST_TASK] [forecast] horizon+05:00 24.80 C
+[FORECAST_TASK] [forecast] horizon+05:30 25.09 C
+[FORECAST_TASK] [forecast] horizon+06:00 25.53 C
+[FORECAST_TASK] [forecast] horizon+06:30 25.83 C
+[FORECAST_TASK] [forecast] horizon+07:00 26.27 C
+[FORECAST_TASK] [forecast] horizon+07:30 27.44 C
+[FORECAST_TASK] [forecast] horizon+08:00 28.62 C
+[FORECAST_TASK] [forecast] horizon+08:30 30.23 C
+[FORECAST_TASK] [forecast] horizon+09:00 31.99 C
+[FORECAST_TASK] [forecast] horizon+09:30 33.46 C
+[FORECAST_TASK] [forecast] horizon+10:00 34.05 C
+[FORECAST_TASK] [forecast] horizon+10:30 34.49 C
+[FORECAST_TASK] [forecast] horizon+11:00 34.63 C
+[FORECAST_TASK] [forecast] horizon+11:30 34.63 C
+[FORECAST_TASK] [forecast] horizon+12:00 34.63 C
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:25:10Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:42:35Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:25:33Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:43:02Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (1/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:26:01Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:43:25Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:26:23Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:43:51Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (2/30 minute samples)
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:44:16Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:26:51Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:27:13Z.
-[MAIN_TASK] The default task is alive.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.53 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:27:41Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:44:41Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:45:06Z.
+[MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (3/30 minute samples)
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:28:02Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:45:31Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:45:56Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:28:31Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (4/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 24.58 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:28:52Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:46:20Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:46:47Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:29:22Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:47:10Z.
 [forecast] waiting for full 30-minute slot (5/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:29:42Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:47:37Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:30:12Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:30:32Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:47:59Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (6/30 minute samples)
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:48:27Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:31:01Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:31:22Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:48:49Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (7/30 minute samples)
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:49:17Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:31:50Z.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.53 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:32:12Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:49:39Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:50:08Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (8/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:32:40Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:33:03Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:50:28Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:33:30Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:50:58Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (9/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 24.58 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:33:53Z.
+[MEASUREMENT_LOGGER] Flushed 494 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:51:18Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:34:19Z.
+[MEASUREMENT_LOGGER] Flushed 494 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:51:48Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:52:08Z.
 [forecast] waiting for full 30-minute slot (10/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:34:43Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:35:09Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:52:37Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:35:33Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:52:59Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (11/30 minute samples)
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:35:59Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:53:27Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:36:24Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:53:49Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (12/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:36:48Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:54:17Z.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.53 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:37:14Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:54:39Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:55:06Z.
 [forecast] waiting for full 30-minute slot (13/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:37:38Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:38:04Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:55:29Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:38:27Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:55:56Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (14/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 24.58 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:38:54Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:56:20Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:39:17Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:56:46Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (15/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:39:45Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:40:07Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:57:10Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:40:35Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:57:35Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:58:00Z.
+[MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (16/30 minute samples)
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:40:56Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:58:25Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:58:51Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:41:25Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (17/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:41:46Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:59:14Z.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.53 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T05:59:41Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:42:15Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:00:04Z.
 [forecast] waiting for full 30-minute slot (18/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:42:36Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:00:31Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:43:06Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:43:26Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:00:54Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (19/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 24.58 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:01:21Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:43:55Z.
 [MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:44:16Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:01:43Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (20/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:44:44Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:45:06Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:02:12Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:02:33Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:03:02Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (21/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:45:34Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:45:57Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:03:23Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:46:24Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:03:52Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (22/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:46:47Z.
+[MEASUREMENT_LOGGER] Flushed 494 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:04:12Z.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.53 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:47:13Z.
+[MEASUREMENT_LOGGER] Flushed 494 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:04:42Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:05:02Z.
 [forecast] waiting for full 30-minute slot (23/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:47:37Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:48:03Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:05:32Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:48:27Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:05:53Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (24/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 24.58 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:48:53Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:06:21Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:49:18Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:06:43Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (25/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:49:42Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:07:11Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:50:08Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:07:33Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:08:01Z.
 [forecast] waiting for full 30-minute slot (26/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:50:32Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:50:58Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:08:24Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:51:21Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:08:50Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (27/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:51:48Z.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.53 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:09:14Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:52:11Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:09:40Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (28/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:52:39Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:53:01Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:10:04Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:53:29Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:10:29Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:10:54Z.
+[MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (29/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 24.58 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:53:50Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:11:19Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:11:45Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[FORECAST_TASK] [forecast] The window is full. Exporting window and proceeding with inference. [FORECAST_TASK] [forecast] horizon+00:30 25.53 C
+[FORECAST_TASK] [forecast] horizon+01:00 25.68 C
+[FORECAST_TASK] [forecast] horizon+01:30 25.68 C
+[FORECAST_TASK] [forecast] horizon+02:00 25.39 C
+[FORECAST_TASK] [forecast] horizon+02:30 25.09 C
+[FORECAST_TASK] [forecast] horizon+03:00 24.95 C
+[FORECAST_TASK] [forecast] horizon+03:30 24.80 C
+[FORECAST_TASK] [forecast] horizon+04:00 24.65 C
+[FORECAST_TASK] [forecast] horizon+04:30 24.65 C
+[FORECAST_TASK] [forecast] horizon+05:00 24.80 C
+[FORECAST_TASK] [forecast] horizon+05:30 25.09 C
+[FORECAST_TASK] [forecast] horizon+06:00 25.53 C
+[FORECAST_TASK] [forecast] horizon+06:30 25.83 C
+[FORECAST_TASK] [forecast] horizon+07:00 26.27 C
+[FORECAST_TASK] [forecast] horizon+07:30 27.44 C
+[FORECAST_TASK] [forecast] horizon+08:00 28.62 C
+[FORECAST_TASK] [forecast] horizon+08:30 30.23 C
+[FORECAST_TASK] [forecast] horizon+09:00 31.99 C
+[FORECAST_TASK] [forecast] horizon+09:30 33.46 C
+[FORECAST_TASK] [forecast] horizon+10:00 34.05 C
+[FORECAST_TASK] [forecast] horizon+10:30 34.49 C
+[FORECAST_TASK] [forecast] horizon+11:00 34.63 C
+[FORECAST_TASK] [forecast] horizon+11:30 34.63 C
+[FORECAST_TASK] [forecast] horizon+12:00 34.63 C
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:12:09Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:12:35Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:54:19Z.
-[MAIN_TASK] The default task is alive.
-[FORECAST_TASK] [forecast] The window is full. Exporting window and proceeding with inference. [FORECAST_TASK] [forecast] horizon+00:30 23.96 C
-[FORECAST_TASK] [forecast] horizon+01:00 23.81 C
-[FORECAST_TASK] [forecast] horizon+01:30 23.81 C
-[FORECAST_TASK] [forecast] horizon+02:00 23.81 C
-[FORECAST_TASK] [forecast] horizon+02:30 23.81 C
-[FORECAST_TASK] [forecast] horizon+03:00 23.96 C
-[FORECAST_TASK] [forecast] horizon+03:30 23.96 C
-[FORECAST_TASK] [forecast] horizon+04:00 23.96 C
-[FORECAST_TASK] [forecast] horizon+04:30 23.81 C
-[FORECAST_TASK] [forecast] horizon+05:00 23.50 C
-[FORECAST_TASK] [forecast] horizon+05:30 23.19 C
-[FORECAST_TASK] [forecast] horizon+06:00 22.73 C
-[FORECAST_TASK] [forecast] horizon+06:30 22.58 C
-[FORECAST_TASK] [forecast] horizon+07:00 22.43 C
-[FORECAST_TASK] [forecast] horizon+07:30 22.58 C
-[FORECAST_TASK] [forecast] horizon+08:00 23.04 C
-[FORECAST_TASK] [forecast] horizon+08:30 23.65 C
-[FORECAST_TASK] [forecast] horizon+09:00 24.58 C
-[FORECAST_TASK] [forecast] horizon+09:30 25.80 C
-[FORECAST_TASK] [forecast] horizon+10:00 26.88 C
-[FORECAST_TASK] [forecast] horizon+10:30 28.11 C
-[FORECAST_TASK] [forecast] horizon+11:00 29.03 C
-[FORECAST_TASK] [forecast] horizon+11:30 29.80 C
-[FORECAST_TASK] [forecast] horizon+12:00 30.41 C
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:54:40Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:55:10Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:12:58Z.
 [forecast] waiting for full 30-minute slot (1/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:55:30Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:13:25Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:56:00Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:56:20Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:13:48Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (2/30 minute samples)
 [MAIN_TASK] The default task is alive.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.53 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:14:16Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:56:49Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:57:10Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:14:38Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (3/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:57:39Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:58:00Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:15:06Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:15:27Z.
+[MAIN_TASK] The default task is alive.
+[MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:15:56Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (4/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:58:28Z.
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 23.96 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:58:51Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:16:17Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:59:18Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:16:46Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (5/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T11:59:41Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:17:06Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:00:07Z.
+[MEASUREMENT_LOGGER] Flushed 494 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:17:36Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:17:57Z.
 [forecast] waiting for full 30-minute slot (6/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:00:31Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:00:57Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:18:26Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:01:21Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:18:47Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (7/30 minute samples)
 [MAIN_TASK] The default task is alive.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.53 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:01:47Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:19:15Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:02:12Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:19:37Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (8/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:02:36Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:20:05Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:03:02Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:20:28Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:20:55Z.
 [forecast] waiting for full 30-minute slot (9/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:03:26Z.
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 23.96 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:03:52Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:21:18Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:04:15Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:21:44Z.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (10/30 minute samples)
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:04:42Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:22:08Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:05:05Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:22:34Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [forecast] waiting for full 30-minute slot (11/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:05:33Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:22:58Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:05:55Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:23:24Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:23:49Z.
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:06:23Z.
 [forecast] waiting for full 30-minute slot (12/30 minute samples)
 [MAIN_TASK] The default task is alive.
+[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 25.53 C
+[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-09.csv
 [MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:06:44Z.
+[MEASUREMENT_LOGGER] Flushed 500 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:24:13Z.
 [MAIN_TASK] The default task is alive.
 [MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:07:13Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (13/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:07:34Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:08:03Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (14/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 23.96 C
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:08:24Z.
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:08:53Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:09:14Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (15/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:09:43Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:10:04Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (16/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:10:32Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:10:54Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (17/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:11:22Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:11:44Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:12:12Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (18/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:12:35Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:13:01Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (19/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 23.96 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:13:25Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:13:51Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:14:15Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (20/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:14:40Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:15:05Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (21/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:15:30Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:15:56Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (22/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:16:20Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:16:46Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:17:09Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (23/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:17:36Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:17:59Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (24/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 23.96 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:18:26Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:18:49Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:19:17Z.
-[forecast] waiting for full 30-minute slot (25/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:19:38Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:20:07Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (26/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:20:28Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:20:57Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (27/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:21:17Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 497 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:21:47Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:22:08Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (28/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:22:37Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:22:58Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (29/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 23.96 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:23:26Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:23:48Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[FORECAST_TASK] [forecast] The window is full. Exporting window and proceeding with inference. [FORECAST_TASK] [forecast] horizon+00:30 24.11 C
-[FORECAST_TASK] [forecast] horizon+01:00 23.96 C
-[FORECAST_TASK] [forecast] horizon+01:30 23.96 C
-[FORECAST_TASK] [forecast] horizon+02:00 23.96 C
-[FORECAST_TASK] [forecast] horizon+02:30 23.96 C
-[FORECAST_TASK] [forecast] horizon+03:00 23.96 C
-[FORECAST_TASK] [forecast] horizon+03:30 23.96 C
-[FORECAST_TASK] [forecast] horizon+04:00 23.96 C
-[FORECAST_TASK] [forecast] horizon+04:30 23.81 C
-[FORECAST_TASK] [forecast] horizon+05:00 23.65 C
-[FORECAST_TASK] [forecast] horizon+05:30 23.35 C
-[FORECAST_TASK] [forecast] horizon+06:00 22.89 C
-[FORECAST_TASK] [forecast] horizon+06:30 22.73 C
-[FORECAST_TASK] [forecast] horizon+07:00 22.58 C
-[FORECAST_TASK] [forecast] horizon+07:30 22.73 C
-[FORECAST_TASK] [forecast] horizon+08:00 23.04 C
-[FORECAST_TASK] [forecast] horizon+08:30 23.65 C
-[FORECAST_TASK] [forecast] horizon+09:00 24.42 C
-[FORECAST_TASK] [forecast] horizon+09:30 25.50 C
-[FORECAST_TASK] [forecast] horizon+10:00 26.42 C
-[FORECAST_TASK] [forecast] horizon+10:30 27.49 C
-[FORECAST_TASK] [forecast] horizon+11:00 28.42 C
-[FORECAST_TASK] [forecast] horizon+11:30 29.18 C
-[FORECAST_TASK] [forecast] horizon+12:00 29.80 C
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:24:16Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:24:38Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:25:06Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (1/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:25:29Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:25:55Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (2/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:26:19Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:26:45Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:27:09Z.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (3/30 minute samples)
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:27:34Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:27:59Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (4/30 minute samples)
-[INFERENCE_LOGGER] We successfully got a 24-slot prediction vector. First slot: 24.11 C
-[INFERENCE_LOGGER] Flushed 262 bytes to inference log 0:/logs/inference_2025-12-07.csv
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:28:24Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 504 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:28:50Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[forecast] waiting for full 30-minute slot (5/30 minute samples)
-[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T12:29:14Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[RAIN_SENSOR] [RAIN] INIT: state=DRY (t=0 ms)
-[BME280_TASK] Initializing BME280...
-0x20020800
-[SD_CARD] === FatFs Debug Info ===
-[SD_CARD] _VOLUMES: 1
-[SD_CARD] disk.nbr: 1
-[SD_CARD] Drive 0: drv=0x2000000c, lun=0, init=0
-[SD_CARD] ========================
-[SD_SPI_LL] SPI probe after select: 0x[BME280_DRIVER] Chip ID read by driver: 0x60
-[BME280_DRIVER] Chip ID read by driver: 0x[MAIN_TASK] The default task is alive.
-[SD_SPI_LL] SPI probe after select: 0x00
-[USER_DISKIO] CMD0(after handshake) R1=0x01
-[USER_DISKIO] CMD8 R1=0x01
-[SD_CARD] f_mount('0:/') -> 0 (try 1/5)
-[MEASUREMENT_LOGGER] SD card mounted successfully!
-[SD_CARD] 
-=== Testing FATFS functionality ===
-[SD_CARD] text.txt deleted successfully
-[SD_CARD] Data written successfully (31 bytes)
-[SD_CARD] Data read successfully (31 bytes): Hello from STM32 and SD card!
-[MEASUREMENT_LOGGER] Stack watermark after SD self-test: 3355 words
-[MEASUREMENT_LOGGER] The DS3231 seems to be responding. 
-[MEASUREMENT_LOGGER] PATH len=35: 30 3A 2F 6C 6F 67 73 2F 6D 65 61 73 75 72 65 6D 65 6E 74 73 5F 32 30 32 35 2D 31 32 2D 30 37 2E 63 73 76 
-[MEASUREMENT_LOGGER] DIRCHECK f_stat(0:/logs) -> fr=0 attr=0x10
-[MEASUREMENT_LOGGER] PRESCAN f_stat(0:/logs/measurements_2025-12-07.csv) -> fr=0 size=905486
-[MEASUREMENT_LOGGER] Daily log ready: 0:/logs/measurements_2025-12-07.csv size=905486
-[MEASUREMENT_LOGGER] Current time: 2025-12-07T13:35:06Z 
-[MEASUREMENT_LOGGER] Current open file: 0:/logs/measurements_2025-12-07.csv 
-[MEASUREMENT_LOGGER] Flushed 50 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T13:35:06Z.
-[INFERENCE_LOGGER] We couldn't get a prediction. 
-[MAIN_TASK] The default task is alive.
-[FORECAST_TASK] [forecast] horizon+00:30 19.35 C
-[FORECAST_TASK] [forecast] horizon+01:00 19.35 C
-[FORECAST_TASK] [forecast] horizon+01:30 19.35 C
-[FORECAST_TASK] [forecast] horizon+02:00 19.51 C
-[FORECAST_TASK] [forecast] horizon+02:30 19.66 C
-[FORECAST_TASK] [forecast] horizon+03:00 19.97 C
-[FORECAST_TASK] [forecast] horizon+03:30 20.27 C
-[FORECAST_TASK] [forecast] horizon+04:00 20.43 C
-[FORECAST_TASK] [forecast] horizon+04:30 20.74 C
-[FORECAST_TASK] [forecast] horizon+05:00 20.74 C
-[FORECAST_TASK] [forecast] horizon+05:30 20.58 C
-[FORECAST_TASK] [forecast] horizon+06:00 20.58 C
-[FORECAST_TASK] [forecast] horizon+06:30 20.43 C
-[FORECAST_TASK] [forecast] horizon+07:00 20.27 C
-[FORECAST_TASK] [forecast] horizon+07:30 20.27 C
-[FORECAST_TASK] [forecast] horizon+08:00 20.43 C
-[FORECAST_TASK] [forecast] horizon+08:30 20.74 C
-[FORECAST_TASK] [forecast] horizon+09:00 21.20 C
-[FORECAST_TASK] [forecast] horizon+09:30 21.66 C
-[FORECAST_TASK] [forecast] horizon+10:00 22.27 C
-[FORECAST_TASK] [forecast] horizon+10:30 22.89 C
-[FORECAST_TASK] [forecast] horizon+11:00 23.50 C
-[FORECAST_TASK] [forecast] horizon+11:30 24.11 C
-[FORECAST_TASK] [forecast] horizon+12:00 24.42 C
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 506 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T13:35:23Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 505 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T13:35:53Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 506 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T13:36:13Z.
-[FORECAST_TASK] [forecast] horizon+00:30 19.35 C
-[FORECAST_TASK] [forecast] horizon+01:00 19.51 C
-[FORECAST_TASK] [forecast] horizon+01:30 19.51 C
-[FORECAST_TASK] [forecast] horizon+02:00 19.66 C
-[FORECAST_TASK] [forecast] horizon+02:30 19.97 C
-[FORECAST_TASK] [forecast] horizon+03:00 20.27 C
-[FORECAST_TASK] [forecast] horizon+03:30 20.74 C
-[FORECAST_TASK] [forecast] horizon+04:00 21.20 C
-[FORECAST_TASK] [forecast] horizon+04:30 21.66 C
-[FORECAST_TASK] [forecast] horizon+05:00 22.12 C
-[FORECAST_TASK] [forecast] horizon+05:30 22.58 C
-[FORECAST_TASK] [forecast] horizon+06:00 22.89 C
-[FORECAST_TASK] [forecast] horizon+06:30 23.35 C
-[FORECAST_TASK] [forecast] horizon+07:00 23.65 C
-[FORECAST_TASK] [forecast] horizon+07:30 23.81 C
-[FORECAST_TASK] [forecast] horizon+08:00 23.81 C
-[FORECAST_TASK] [forecast] horizon+08:30 23.96 C
-[FORECAST_TASK] [forecast] horizon+09:00 23.96 C
-[FORECAST_TASK] [forecast] horizon+09:30 24.11 C
-[FORECAST_TASK] [forecast] horizon+10:00 24.27 C
-[FORECAST_TASK] [forecast] horizon+10:30 24.27 C
-[FORECAST_TASK] [forecast] horizon+11:00 24.42 C
-[FORECAST_TASK] [forecast] horizon+11:30 24.58 C
-[FORECAST_TASK] [forecast] horizon+12:00 24.58 C
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 505 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T13:36:42Z.
-[MAIN_TASK] The default task is alive.
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 506 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T13:37:04Z.
-[MAIN_TASK] The default task is alive.
-[FORECAST_TASK] [forecast] horizon+00:30 19.05 C
-[FORECAST_TASK] [forecast] horizon+01:00 19.05 C
-[FORECAST_TASK] [forecast] horizon+01:30 18.89 C
-[FORECAST_TASK] [forecast] horizon+02:00 18.89 C
-[FORECAST_TASK] [forecast] horizon+02:30 18.89 C
-[FORECAST_TASK] [forecast] horizon+03:00 18.74 C
-[FORECAST_TASK] [forecast] horizon+03:30 18.74 C
-[FORECAST_TASK] [forecast] horizon+04:00 18.89 C
-[FORECAST_TASK] [forecast] horizon+04:30 19.05 C
-[FORECAST_TASK] [forecast] horizon+05:00 19.20 C
-[FORECAST_TASK] [forecast] horizon+05:30 19.66 C
-[FORECAST_TASK] [forecast] horizon+06:00 20.27 C
-[FORECAST_TASK] [forecast] horizon+06:30 21.04 C
-[FORECAST_TASK] [forecast] horizon+07:00 21.81 C
-[FORECAST_TASK] [forecast] horizon+07:30 22.73 C
-[FORECAST_TASK] [forecast] horizon+08:00 23.65 C
-[FORECAST_TASK] [forecast] horizon+08:30 24.42 C
-[FORECAST_TASK] [forecast] horizon+09:00 25.04 C
-[FORECAST_TASK] [forecast] horizon+09:30 25.50 C
-[FORECAST_TASK] [forecast] horizon+10:00 25.80 C
-[FORECAST_TASK] [forecast] horizon+10:30 25.80 C
-[FORECAST_TASK] [forecast] horizon+11:00 25.80 C
-[FORECAST_TASK] [forecast] horizon+11:30 25.65 C
-[FORECAST_TASK] [forecast] horizon+12:00 25.50 C
-[MAIN_TASK] The default task is alive.
-[MEASUREMENT_LOGGER] Flushed 505 bytes to file 0:/logs/measurements_2025-12-07.csv on 2025-12-07T13:37:32Z.
+[MEASUREMENT_LOGGER] Flushed 502 bytes to file 0:/logs/measurements_2025-12-09.csv on 2025-12-09T06:24:39Z.
 [MAIN_TASK] The default task is alive.
