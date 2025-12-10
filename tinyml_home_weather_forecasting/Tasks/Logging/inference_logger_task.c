@@ -48,6 +48,7 @@ static bool inference_logger_write_header(FIL *file); // Forward declaration for
 static size_t inference_logger_format_csv_line(const char *timestamp_iso8601, // Forward declaration for formatting an individual CSV log line.
                                                const float *predicted_temperatures_c, // Parameter describing the predicted temperature vector we want to store.
                                                size_t prediction_count, // Number of forecast slots carried in the vector.
+                                               uint32_t inference_time_ms, // Duration of the inference in milliseconds.
                                                char *out_line, // Pointer to the destination buffer where the formatted line will be written.
                                                size_t out_capacity); // Capacity of the destination buffer to prevent overruns.
 // -----------------------------------------------------------------------------
@@ -153,7 +154,8 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
             } // End date change check.
 // -----------------------------------------------------------------------------
             float predicted_temperatures_c[FORECAST_TEMP_FORECAST_HORIZON_SLOTS] = {0.0f}; // Buffer to hold the latest predicted temperature vector.
-            if (forecast_temp_get_latest_prediction(predicted_temperatures_c, FORECAST_TEMP_FORECAST_HORIZON_SLOTS)) { // Attempt to retrieve a new prediction from the forecasting module.
+            uint32_t inference_time_ms = 0u; // Track the runtime of the most recent inference.
+            if (forecast_temp_get_latest_prediction(predicted_temperatures_c, FORECAST_TEMP_FORECAST_HORIZON_SLOTS, &inference_time_ms)) { // Attempt to retrieve a new prediction from the forecasting module.
                 const double first_slot = (FORECAST_TEMP_FORECAST_HORIZON_SLOTS > 0u) ? (double)predicted_temperatures_c[0] : 0.0;
                 printf(LOG_PREFIX "We successfully got a %lu-slot prediction vector. First slot: %.2f C\n",
                        (unsigned long)FORECAST_TEMP_FORECAST_HORIZON_SLOTS,
@@ -162,6 +164,7 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
                 size_t len = // Variable capturing the number of bytes in the formatted log entry.
                     inference_logger_format_csv_line(ts_now, predicted_temperatures_c,
                                                       FORECAST_TEMP_FORECAST_HORIZON_SLOTS,
+                                                      inference_time_ms,
                                                       line, sizeof line); // Provide the destination buffer and its capacity to prevent overflow.
                 if (len > 0u) { // Ensure the formatted line is valid before attempting to buffer it.
                     if (len > sizeof g_write_buffer) { // Refuse to log entries that can never fit in the buffer.
@@ -311,7 +314,7 @@ static bool inference_logger_write_header(FIL *file) { // Helper that writes the
     }
     char header[1024]; // Buffer to assemble the header line with all horizon columns.
     size_t used = 0u; // Track how many bytes of the buffer have been populated so far.
-    int written = snprintf(header, sizeof header, "timestamp_iso8601"); // Seed the header with the timestamp column.
+    int written = snprintf(header, sizeof header, "timestamp_iso8601,inference_time_ms"); // Seed the header with the timestamp and inference duration columns.
     if (written <= 0 || (size_t)written >= sizeof header) { // Validate the snprintf result for errors or truncation.
         return false;
     }
@@ -441,13 +444,14 @@ static bool inference_logger_open_today_file(const char *date_yyyy_mm_dd) { // O
 static size_t inference_logger_format_csv_line(const char *timestamp_iso8601, // Format a log line from the provided timestamp and prediction vector.
                                                const float *predicted_temperatures_c, // Temperature predictions to include in the log line.
                                                size_t prediction_count, // Number of predictions contained in the vector.
+                                               uint32_t inference_time_ms, // Duration of the inference in milliseconds.
                                                char *out_line, // Buffer where the formatted CSV line should be placed.
                                                size_t out_capacity) { // Size of the destination buffer to prevent overruns.
     if ((out_line == NULL) || (out_capacity == 0u) || (predicted_temperatures_c == NULL)) { // Validate inputs before formatting.
         return 0u;
     }
     const char *timestamp = (timestamp_iso8601 != NULL) ? timestamp_iso8601 : "TIME?"; // Provide a fallback label for missing timestamps.
-    int n = snprintf(out_line, out_capacity, "%s", timestamp); // Start the line with the timestamp column.
+    int n = snprintf(out_line, out_capacity, "%s,%lu", timestamp, (unsigned long)inference_time_ms); // Start the line with the timestamp and inference duration columns.
     if (n <= 0 || (size_t) n >= out_capacity) { // Abort when snprintf fails or truncates the output.
         return 0u;
     }

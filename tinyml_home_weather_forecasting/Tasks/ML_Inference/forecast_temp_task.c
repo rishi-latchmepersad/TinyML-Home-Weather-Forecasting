@@ -161,9 +161,11 @@ static osThreadId_t g_forecast_thread_id = NULL;
 static osMutexId_t g_prediction_mutex = NULL;
 // Remember the most recent prediction vector so other modules can use it.
 static float g_latest_prediction_c[FORECAST_TEMP_FORECAST_HORIZON_SLOTS] = {
-		0.0f };
+                0.0f };
 // Track whether we have produced a prediction yet.
 static bool g_latest_prediction_valid = false;
+// Track the most recent inference runtime in milliseconds.
+static uint32_t g_latest_inference_time_ms = 0u;
 
 // Keep the neural network handle returned by X-CUBE-AI.
 static ai_handle g_forecast_network = AI_HANDLE_NULL;
@@ -251,10 +253,12 @@ typedef struct {
 	float slot_pressure_pa;
 	// Cache the averaged 30-minute illuminance during the CHECK_SLOT step.
 	float slot_illuminance_lux;
-	// Hold the normalized features generated for the current slot.
-	float normalized_features[FORECAST_TEMP_FEATURE_COUNT];
-	// Hold the most recent neural-network prediction vector prior to publication.
-	float predicted_temperatures_c[FORECAST_TEMP_FORECAST_HORIZON_SLOTS];
+        // Hold the normalized features generated for the current slot.
+        float normalized_features[FORECAST_TEMP_FEATURE_COUNT];
+        // Hold the most recent neural-network prediction vector prior to publication.
+        float predicted_temperatures_c[FORECAST_TEMP_FORECAST_HORIZON_SLOTS];
+        // Track how long the most recent inference took in milliseconds.
+        uint32_t inference_time_ms;
 } forecast_temp_task_context_t;
 
 // Store the raw 30-minute temperature history so delta computations are easy.
@@ -310,7 +314,8 @@ static void forecast_temp_append_feature_vector(
 static bool forecast_temp_export_window_to_network(int8_t *destination_buffer);
 // Forward declare a helper that runs the model once the window is full.
 static bool forecast_temp_run_inference(
-		float predictions_out[FORECAST_TEMP_FORECAST_HORIZON_SLOTS]);
+                float predictions_out[FORECAST_TEMP_FORECAST_HORIZON_SLOTS],
+                uint32_t *elapsed_time_ms_out);
 // Forward declare a helper that replays persisted CSV data into the sliding window.
 static void forecast_temp_bootstrap_from_sd_card(void);
 // Forward declare a helper that resets a measurement bundle back to an empty state.
@@ -361,12 +366,13 @@ bool forecast_temp_task_start(void) {
 
 // Allow other modules to fetch the latest predicted temperature vector.
 bool forecast_temp_get_latest_prediction(float *temperatures_c_out,
-		size_t temperatures_capacity) {
-	// Guard against NULL pointers or undersized output buffers from the caller.
-	if ((temperatures_c_out == NULL)
-			|| (temperatures_capacity < FORECAST_TEMP_FORECAST_HORIZON_SLOTS)) {
-		return false;
-	}
+                size_t temperatures_capacity,
+                uint32_t *inference_time_ms_out) {
+        // Guard against NULL pointers or undersized output buffers from the caller.
+        if ((temperatures_c_out == NULL)
+                        || (temperatures_capacity < FORECAST_TEMP_FORECAST_HORIZON_SLOTS)) {
+                return false;
+        }
 	// Assume the prediction is unavailable until proven otherwise.
 	bool has_prediction = false;
 	// Acquire the mutex before touching the shared state.
@@ -374,11 +380,16 @@ bool forecast_temp_get_latest_prediction(float *temperatures_c_out,
 		(void) osMutexAcquire(g_prediction_mutex, osWaitForever);
 	}
 	// Copy the prediction vector when we have emitted one already.
-	if (g_latest_prediction_valid) {
-		memcpy(temperatures_c_out, g_latest_prediction_c,
-				sizeof(float) * FORECAST_TEMP_FORECAST_HORIZON_SLOTS);
-		has_prediction = true;
-	}
+        if (g_latest_prediction_valid) {
+                memcpy(temperatures_c_out, g_latest_prediction_c,
+                                sizeof(float) * FORECAST_TEMP_FORECAST_HORIZON_SLOTS);
+                if (inference_time_ms_out != NULL) {
+                        *inference_time_ms_out = g_latest_inference_time_ms;
+                }
+                has_prediction = true;
+        } else if (inference_time_ms_out != NULL) {
+                *inference_time_ms_out = 0u;
+        }
 	// Release the mutex now that we are done.
 	if (g_prediction_mutex != NULL) {
 		(void) osMutexRelease(g_prediction_mutex);
@@ -502,22 +513,24 @@ static void forecast_temp_bootstrap_finalize_slot(
 	// Check whether the window has enough history to satisfy the model.
 	if (g_feature_window_count >= FORECAST_TEMP_WINDOW_LENGTH) {
 		// Attempt to export the normalized window into the quantized network buffer.
-		if (forecast_temp_export_window_to_network(g_network_input_buffer)) {
-			// Prepare storage to hold the predicted temperature vector.
-			float predicted[FORECAST_TEMP_FORECAST_HORIZON_SLOTS] = { 0.0f };
-			// Invoke the neural network to obtain a prediction vector.
-			if (forecast_temp_run_inference(predicted)) {
-				// Acquire the mutex before updating the shared prediction state.
-				if (g_prediction_mutex != NULL) {
-					(void) osMutexAcquire(g_prediction_mutex, osWaitForever);
-				}
-				// Store the freshly predicted temperatures.
-				memcpy(g_latest_prediction_c, predicted,
-						sizeof(float) * FORECAST_TEMP_FORECAST_HORIZON_SLOTS);
-				// Flag that a prediction is now available.
-				g_latest_prediction_valid = true;
-				// Release the mutex once the shared state is updated.
-				if (g_prediction_mutex != NULL) {
+                if (forecast_temp_export_window_to_network(g_network_input_buffer)) {
+                        // Prepare storage to hold the predicted temperature vector.
+                        float predicted[FORECAST_TEMP_FORECAST_HORIZON_SLOTS] = { 0.0f };
+                        uint32_t inference_time_ms = 0u;
+                        // Invoke the neural network to obtain a prediction vector.
+                        if (forecast_temp_run_inference(predicted, &inference_time_ms)) {
+                                // Acquire the mutex before updating the shared prediction state.
+                                if (g_prediction_mutex != NULL) {
+                                        (void) osMutexAcquire(g_prediction_mutex, osWaitForever);
+                                }
+                                // Store the freshly predicted temperatures.
+                                memcpy(g_latest_prediction_c, predicted,
+                                                sizeof(float) * FORECAST_TEMP_FORECAST_HORIZON_SLOTS);
+                                g_latest_inference_time_ms = inference_time_ms;
+                                // Flag that a prediction is now available.
+                                g_latest_prediction_valid = true;
+                                // Release the mutex once the shared state is updated.
+                                if (g_prediction_mutex != NULL) {
 					(void) osMutexRelease(g_prediction_mutex);
 				}
 			}
@@ -982,25 +995,27 @@ static void forecast_temp_task_entry(void *argument) {
 				state = FORECAST_TEMP_STATE_RUN_INFERENCE;
 			}
 			break;
-		case FORECAST_TEMP_STATE_RUN_INFERENCE:
-			// Run the neural network and capture the predicted vector.
-			if (!forecast_temp_run_inference(
-					context.predicted_temperatures_c)) {
-				state = FORECAST_TEMP_STATE_WAIT_MINUTE;
-			} else {
-				state = FORECAST_TEMP_STATE_PUBLISH_PREDICTION;
+                case FORECAST_TEMP_STATE_RUN_INFERENCE:
+                        // Run the neural network and capture the predicted vector.
+                        if (!forecast_temp_run_inference(
+                                        context.predicted_temperatures_c,
+                                        &context.inference_time_ms)) {
+                                state = FORECAST_TEMP_STATE_WAIT_MINUTE;
+                        } else {
+                                state = FORECAST_TEMP_STATE_PUBLISH_PREDICTION;
 			}
 			break;
 		case FORECAST_TEMP_STATE_PUBLISH_PREDICTION:
 			// Publish the prediction under the mutex so other modules can read it.
 			if (g_prediction_mutex != NULL) {
 				(void) osMutexAcquire(g_prediction_mutex, osWaitForever);
-			}
-			memcpy(g_latest_prediction_c, context.predicted_temperatures_c,
-					sizeof(context.predicted_temperatures_c));
-			g_latest_prediction_valid = true;
-			if (g_prediction_mutex != NULL) {
-				(void) osMutexRelease(g_prediction_mutex);
+                        }
+                        memcpy(g_latest_prediction_c, context.predicted_temperatures_c,
+                                        sizeof(context.predicted_temperatures_c));
+                        g_latest_inference_time_ms = context.inference_time_ms;
+                        g_latest_prediction_valid = true;
+                        if (g_prediction_mutex != NULL) {
+                                (void) osMutexRelease(g_prediction_mutex);
 			}
 			// Return to the wait state so the cycle repeats on the next minute.
 			state = FORECAST_TEMP_STATE_WAIT_MINUTE;
@@ -1442,11 +1457,12 @@ static bool forecast_temp_export_window_to_network(int8_t *destination_buffer) {
 
 // Run the neural network and decode the resulting prediction vector.
 static bool forecast_temp_run_inference(
-		float predictions_out[FORECAST_TEMP_FORECAST_HORIZON_SLOTS]) {
-	// Guard against NULL output pointers.
-	if (predictions_out == NULL) {
-		return false;
-	}
+                float predictions_out[FORECAST_TEMP_FORECAST_HORIZON_SLOTS],
+                uint32_t *elapsed_time_ms_out) {
+        // Guard against NULL output pointers.
+        if (predictions_out == NULL) {
+                return false;
+        }
 	// Only emit verbose console output at a limited cadence to avoid spamming
 	// the UART when the state machine loops quickly (for example, after
 	// bootstrap replay).
@@ -1459,11 +1475,12 @@ static bool forecast_temp_run_inference(
 		s_last_console_log_tick = now;
 	}
 	// Abort when the network handle is not valid.
-	if (g_forecast_network == AI_HANDLE_NULL) {
-		return false;
-	}
-	// Attach the input tensor buffer to the runtime descriptor.
-	g_network_inputs[0].data = AI_HANDLE_PTR(g_network_input_buffer);
+        if (g_forecast_network == AI_HANDLE_NULL) {
+                return false;
+        }
+        const TickType_t start_tick = xTaskGetTickCount();
+        // Attach the input tensor buffer to the runtime descriptor.
+        g_network_inputs[0].data = AI_HANDLE_PTR(g_network_input_buffer);
 	// print the input buffer for debug
 //	printf(LOG_PREFIX "[forecast] input buffer: ");
 //	for (size_t i = 0; i < AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE; ++i) {
@@ -1473,18 +1490,28 @@ static bool forecast_temp_run_inference(
 	// Attach the output tensor buffer to the runtime descriptor.
 	g_network_outputs[0].data = AI_HANDLE_PTR(g_network_output_buffer);
 	// Run a single forward pass through the model.
-	const ai_i32 batch_count = ai_forecast_temp_ml_model_run(g_forecast_network,
-			g_network_inputs, g_network_outputs);
-	// Verify that the runtime processed exactly one batch.
-	if (batch_count != 1) {
-		printf(LOG_PREFIX "[forecast] inference failed batch_count=%ld\r\n",
-				(long) batch_count);
-		return false;
-	}
-	// Decode the int8 outputs back into floating-point units and report each lead time.
-	for (size_t i = 0u; i < FORECAST_TEMP_FORECAST_HORIZON_SLOTS; ++i) {
-		const float dequantized = ((float) g_network_output_buffer[i]
-				- (float) g_output_zero_point) * g_output_scale;
+        const ai_i32 batch_count = ai_forecast_temp_ml_model_run(g_forecast_network,
+                        g_network_inputs, g_network_outputs);
+        // Verify that the runtime processed exactly one batch.
+        if (batch_count != 1) {
+                printf(LOG_PREFIX "[forecast] inference failed batch_count=%ld\r\n",
+                                (long) batch_count);
+                return false;
+        }
+        const TickType_t end_tick = xTaskGetTickCount();
+        const TickType_t elapsed_ticks = end_tick - start_tick;
+        const uint32_t elapsed_ms = (uint32_t) elapsed_ticks * (uint32_t) portTICK_PERIOD_MS;
+        if (elapsed_time_ms_out != NULL) {
+                *elapsed_time_ms_out = elapsed_ms;
+        }
+        if (should_log) {
+                printf(LOG_PREFIX "[forecast] inference runtime %lu ms\r\n",
+                                (unsigned long) elapsed_ms);
+        }
+        // Decode the int8 outputs back into floating-point units and report each lead time.
+        for (size_t i = 0u; i < FORECAST_TEMP_FORECAST_HORIZON_SLOTS; ++i) {
+                const float dequantized = ((float) g_network_output_buffer[i]
+                                - (float) g_output_zero_point) * g_output_scale;
 		predictions_out[i] = dequantized;
 		const uint32_t lead_minutes_total = (uint32_t) ((i + 1u)
 				* FORECAST_TEMP_MINUTES_PER_SLOT);
