@@ -45,9 +45,12 @@ static bool inference_logger_ensure_directory_exists(const char *dir_path); // F
 static bool inference_logger_open_today_file(const char *date_yyyy_mm_dd); // Forward declaration for opening the daily log file based on the current date.
 static bool inference_logger_flush_buffer_to_file(void); // Forward declaration for writing the buffered log data out to the SD card.
 static bool inference_logger_write_header(FIL *file); // Forward declaration for emitting the CSV header with lead-time columns.
+static bool inference_logger_header_needs_upgrade(const char *path); // Forward declaration to detect legacy headers missing the inference time column.
+static bool inference_logger_upgrade_file_header(const char *path); // Forward declaration to insert the inference time column into existing logs.
 static size_t inference_logger_format_csv_line(const char *timestamp_iso8601, // Forward declaration for formatting an individual CSV log line.
                                                const float *predicted_temperatures_c, // Parameter describing the predicted temperature vector we want to store.
                                                size_t prediction_count, // Number of forecast slots carried in the vector.
+                                               uint32_t inference_time_ms, // Duration of the inference in milliseconds.
                                                char *out_line, // Pointer to the destination buffer where the formatted line will be written.
                                                size_t out_capacity); // Capacity of the destination buffer to prevent overruns.
 // -----------------------------------------------------------------------------
@@ -153,7 +156,8 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
             } // End date change check.
 // -----------------------------------------------------------------------------
             float predicted_temperatures_c[FORECAST_TEMP_FORECAST_HORIZON_SLOTS] = {0.0f}; // Buffer to hold the latest predicted temperature vector.
-            if (forecast_temp_get_latest_prediction(predicted_temperatures_c, FORECAST_TEMP_FORECAST_HORIZON_SLOTS)) { // Attempt to retrieve a new prediction from the forecasting module.
+            uint32_t inference_time_ms = 0u; // Track the runtime of the most recent inference.
+            if (forecast_temp_get_latest_prediction(predicted_temperatures_c, FORECAST_TEMP_FORECAST_HORIZON_SLOTS, &inference_time_ms)) { // Attempt to retrieve a new prediction from the forecasting module.
                 const double first_slot = (FORECAST_TEMP_FORECAST_HORIZON_SLOTS > 0u) ? (double)predicted_temperatures_c[0] : 0.0;
                 printf(LOG_PREFIX "We successfully got a %lu-slot prediction vector. First slot: %.2f C\n",
                        (unsigned long)FORECAST_TEMP_FORECAST_HORIZON_SLOTS,
@@ -162,6 +166,7 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
                 size_t len = // Variable capturing the number of bytes in the formatted log entry.
                     inference_logger_format_csv_line(ts_now, predicted_temperatures_c,
                                                       FORECAST_TEMP_FORECAST_HORIZON_SLOTS,
+                                                      inference_time_ms,
                                                       line, sizeof line); // Provide the destination buffer and its capacity to prevent overflow.
                 if (len > 0u) { // Ensure the formatted line is valid before attempting to buffer it.
                     if (len > sizeof g_write_buffer) { // Refuse to log entries that can never fit in the buffer.
@@ -311,7 +316,7 @@ static bool inference_logger_write_header(FIL *file) { // Helper that writes the
     }
     char header[1024]; // Buffer to assemble the header line with all horizon columns.
     size_t used = 0u; // Track how many bytes of the buffer have been populated so far.
-    int written = snprintf(header, sizeof header, "timestamp_iso8601"); // Seed the header with the timestamp column.
+    int written = snprintf(header, sizeof header, "timestamp_iso8601,inference_time_ms"); // Seed the header with the timestamp and inference duration columns.
     if (written <= 0 || (size_t)written >= sizeof header) { // Validate the snprintf result for errors or truncation.
         return false;
     }
@@ -343,6 +348,103 @@ static bool inference_logger_write_header(FIL *file) { // Helper that writes the
     fr = f_sync(file); // Flush the header so it is not lost on power failure.
     return (fr == FR_OK); // Report whether flushing succeeded.
 } // End of inference_logger_write_header helper.
+// -----------------------------------------------------------------------------
+static bool inference_logger_header_needs_upgrade(const char *path) { // Check whether an existing log file is missing the inference time column.
+    if (path == NULL) { // Guard against NULL path pointers.
+        return false;
+    }
+    FIL file; // Allocate a temporary file object for reading.
+    bool missing_column = true; // Assume we need to upgrade until proven otherwise.
+    FS_LOCK(); // Acquire the filesystem mutex before touching the SD card.
+    const FRESULT open_result = f_open(&file, path, FA_READ); // Try to open the existing file for inspection.
+    if (open_result != FR_OK) { // If we cannot open the file, leave the decision to the caller.
+        FS_UNLOCK(); // Release the mutex before returning.
+        return false;
+    }
+    char line[256]; // Buffer to hold the header line.
+    if (f_gets(line, sizeof line, &file) != NULL) { // Read the first line from the file.
+        if (strstr(line, "inference_time_ms") != NULL) { // Look for the new column marker.
+            missing_column = false; // Header already contains the inference time column.
+        }
+    }
+    (void)f_close(&file); // Close the file before releasing the mutex.
+    FS_UNLOCK(); // Release the filesystem mutex so other tasks can access the SD card.
+    return missing_column; // Report whether an upgrade is required.
+} // End of inference_logger_header_needs_upgrade helper.
+// -----------------------------------------------------------------------------
+static bool inference_logger_upgrade_file_header(const char *path) { // Insert the inference time column into an existing log file.
+    if (path == NULL) { // Guard against NULL path pointers.
+        return false;
+    }
+    if (!inference_logger_header_needs_upgrade(path)) { // Skip work when the file already has the correct header.
+        return true;
+    }
+    char temp_path[sizeof g_active_path]; // Build a temporary path for the upgraded file.
+    int written = snprintf(temp_path, sizeof temp_path, "%s.tmp", path); // Append a .tmp suffix.
+    if (written <= 0 || (size_t)written >= sizeof temp_path) { // Abort if the temp path would overflow.
+        return false;
+    }
+    FIL src; // File object for the existing log.
+    FIL dst; // File object for the upgraded log.
+    FS_LOCK(); // Hold the filesystem mutex for the duration of the upgrade to avoid concurrent access.
+    FRESULT fr_src = f_open(&src, path, FA_READ); // Open the current file for reading.
+    if (fr_src != FR_OK) { // Abort when the source cannot be opened.
+        FS_UNLOCK();
+        return false;
+    }
+    FRESULT fr_dst = f_open(&dst, temp_path, FA_CREATE_ALWAYS | FA_WRITE); // Create the temporary destination file.
+    if (fr_dst != FR_OK) { // Abort when the destination cannot be created.
+        (void)f_close(&src);
+        FS_UNLOCK();
+        return false;
+    }
+    bool ok = inference_logger_write_header(&dst); // Emit the new header with the inference time column.
+    if (!ok) { // Bail out if header emission fails.
+        (void)f_close(&src);
+        (void)f_close(&dst);
+        (void)f_unlink(temp_path);
+        FS_UNLOCK();
+        return false;
+    }
+    char line[512]; // Buffer for reading existing CSV lines.
+    bool first_line = true; // Track whether we are processing the old header line.
+    while (f_gets(line, sizeof line, &src) != NULL) { // Walk each line in the existing file.
+        if (first_line) { // Skip the legacy header row because we already wrote a new one.
+            first_line = false;
+            continue;
+        }
+        char *first_comma = strchr(line, ','); // Find the timestamp delimiter.
+        if (first_comma == NULL) { // If the line is malformed, skip it to avoid corrupting the upgraded file.
+            continue;
+        }
+        const size_t timestamp_len = (size_t)(first_comma - line); // Measure the timestamp portion.
+        const char *rest = first_comma + 1; // Point to the data after the timestamp.
+        char rewritten[sizeof line + 16]; // Build the upgraded line with an empty inference time column.
+        written = snprintf(rewritten, sizeof rewritten, "%.*s,,%s", (int)timestamp_len, line, rest); // Insert a blank inference time entry after the timestamp.
+        if (written <= 0 || (size_t)written >= sizeof rewritten) { // Skip lines that would overflow the buffer.
+            continue;
+        }
+        UINT bw = 0u; // Track how many bytes were written.
+        fr_dst = f_write(&dst, rewritten, (UINT)written, &bw); // Append the upgraded line to the destination file.
+        if ((fr_dst != FR_OK) || (bw != (UINT)written)) { // Abort if the write fails.
+            ok = false;
+            break;
+        }
+    }
+    if (ok) { // Flush the destination file so it is durable before swapping.
+        ok = (f_sync(&dst) == FR_OK);
+    }
+    (void)f_close(&src); // Close the source file now that we have read it entirely.
+    (void)f_close(&dst); // Close the destination file before manipulating paths.
+    if (ok) { // Replace the original file with the upgraded version when all writes succeeded.
+        (void)f_unlink(path); // Remove the old file.
+        ok = (f_rename(temp_path, path) == FR_OK); // Rename the upgraded file into place.
+    } else { // Clean up the temporary file on failure.
+        (void)f_unlink(temp_path);
+    }
+    FS_UNLOCK(); // Release the filesystem mutex regardless of success.
+    return ok; // Report whether the upgrade completed successfully.
+} // End of inference_logger_upgrade_file_header helper.
 // -----------------------------------------------------------------------------
 static bool inference_logger_ensure_directory_exists(const char *dir_path) { // Ensure the specified logging directory is present on the filesystem.
     FILINFO fi; // Structure used by FatFS to receive file/directory information.
@@ -380,6 +482,10 @@ static bool inference_logger_open_today_file(const char *date_yyyy_mm_dd) { // O
     FS_UNLOCK(); // Release the filesystem mutex after the status check.
 // -----------------------------------------------------------------------------
     if (fr == FR_OK) { // File already exists, so open it for appending.
+        if (!inference_logger_upgrade_file_header(path)) { // Upgrade legacy headers so the inference time column is present.
+            printf(LOG_PREFIX "Failed to upgrade inference log header for %s\r\n", path);
+            return false;
+        }
         FS_LOCK(); // Acquire the filesystem mutex before opening the file.
         fr = f_open(&g_active_file, path, FA_OPEN_EXISTING | FA_WRITE); // Open the existing file with write access to append data.
         if (fr == FR_OK) { // If the file opened successfully, move the pointer to the end for appending.
@@ -441,13 +547,14 @@ static bool inference_logger_open_today_file(const char *date_yyyy_mm_dd) { // O
 static size_t inference_logger_format_csv_line(const char *timestamp_iso8601, // Format a log line from the provided timestamp and prediction vector.
                                                const float *predicted_temperatures_c, // Temperature predictions to include in the log line.
                                                size_t prediction_count, // Number of predictions contained in the vector.
+                                               uint32_t inference_time_ms, // Duration of the inference in milliseconds.
                                                char *out_line, // Buffer where the formatted CSV line should be placed.
                                                size_t out_capacity) { // Size of the destination buffer to prevent overruns.
     if ((out_line == NULL) || (out_capacity == 0u) || (predicted_temperatures_c == NULL)) { // Validate inputs before formatting.
         return 0u;
     }
     const char *timestamp = (timestamp_iso8601 != NULL) ? timestamp_iso8601 : "TIME?"; // Provide a fallback label for missing timestamps.
-    int n = snprintf(out_line, out_capacity, "%s", timestamp); // Start the line with the timestamp column.
+    int n = snprintf(out_line, out_capacity, "%s,%lu", timestamp, (unsigned long)inference_time_ms); // Start the line with the timestamp and inference duration columns.
     if (n <= 0 || (size_t) n >= out_capacity) { // Abort when snprintf fails or truncates the output.
         return 0u;
     }
