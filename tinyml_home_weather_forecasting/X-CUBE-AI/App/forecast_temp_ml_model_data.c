@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    forecast_temp_ml_model_data.c
   * @author  AST Embedded Analytics Research Platform
-  * @date    2025-12-08T09:44:06-0400
+  * @date    2025-12-11T06:36:42-0400
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * @attention
@@ -21,13 +21,13 @@
 AI_API_DECLARE_BEGIN
 ai_buffer g_forecast_temp_ml_model_data_map_activations[AI_FORECAST_TEMP_ML_MODEL_DATA_ACTIVATIONS_COUNT] = {
   AI_BUFFER_INIT(AI_FLAG_NONE,  AI_BUFFER_FORMAT_U8,
-    AI_BUFFER_SHAPE_INIT(AI_SHAPE_BCWH, 4, 1, 6320, 1, 1),
-    6320, NULL, NULL),    /* heap_overlay_pool */
+    AI_BUFFER_SHAPE_INIT(AI_SHAPE_BCWH, 4, 1, 4292, 1, 1),
+    4292, NULL, NULL),    /* heap_overlay_pool */
   };
 ai_buffer g_forecast_temp_ml_model_data_map_weights[AI_FORECAST_TEMP_ML_MODEL_DATA_WEIGHTS_COUNT] = {
   AI_BUFFER_INIT(AI_FLAG_NONE,  AI_BUFFER_FORMAT_U8,
-    AI_BUFFER_SHAPE_INIT(AI_SHAPE_BCWH, 4, 1, 19744, 1, 1),
-    19744, NULL, s_forecast_temp_ml_model_weights_array_u64),   /* weights_array */
+    AI_BUFFER_SHAPE_INIT(AI_SHAPE_BCWH, 4, 1, 12664, 1, 1),
+    12664, NULL, s_forecast_temp_ml_model_weights_array_u64),   /* weights_array */
   };
 
 
