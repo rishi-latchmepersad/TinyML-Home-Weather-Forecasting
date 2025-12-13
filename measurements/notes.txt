@@ -4,4 +4,5 @@ V3 CNN up till 2nd dec
 V1 RNN from 3rd dec-6th dec
 V3 CNN 6th-7th
 V2 RNN Dec 8th-11th
-V4 CNN 11th-
+V4 CNN 11th-13th
+RNN V3 13th-
