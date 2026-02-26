@@ -4,14 +4,10 @@
 #include "FreeRTOS.h"
 // Pull in the FreeRTOS task API for vTaskDelayUntil().
 #include "task.h"
-// Pull in the math library so we can calculate sine waves for the hour feature.
-#include <math.h>
 // Pull in string helpers for memset and friends.
 #include <string.h>
 // Pull in stdio so we can log simple diagnostic messages.
 #include <stdio.h>
-// Pull in ctype so we can validate digits when parsing the RTC timestamp.
-#include <ctype.h>
 // Pull in stdint so we can handle quantization zero-points with explicit widths.
 #include <stdint.h>
 // Pull in our BME280 task interface to read the latest environmental sample.
@@ -34,12 +30,6 @@
 #include <stdlib.h>
 
 #define LOG_PREFIX "[FORECAST_TASK] "
-
-// Provide a fallback for M_PI when the math library does not define it.
-#ifndef M_PI
-// Define M_PI as a float literal so our sine calculation has a sensible value.
-#define M_PI 3.14159265358979323846f
-#endif
 
 // Declare the filesystem mutex so we can coordinate with the logger task.
 extern osMutexId_t g_fs_mutex;
@@ -98,6 +88,10 @@ extern osMutexId_t g_fs_mutex;
 #error "Model input tensor must encode exactly 48 30-minute slots to match the live window"
 #endif
 
+#if (FORECAST_TEMP_FEATURE_COUNT != 4u)
+#error "This ablation firmware path expects exactly 4 raw input features"
+#endif
+
 // Define a small struct that records a measurement log filename and its date key.
 typedef struct {
 	// Store the basename of the CSV file discovered on the SD card.
@@ -147,13 +141,14 @@ typedef struct {
 } forecast_temp_slot_bucket_t;
 
 // Store the feature means calculated during the data-preparation phase.
-static const float g_feature_means[FORECAST_TEMP_FEATURE_COUNT] = { 28.884267f,
-		86.161369f, 101063.070000f, 4378.142890f, 0.000344062f, 0.337969f,
-		0.005951f };
+// IMPORTANT: these values must match the StandardScaler in the training notebook
+// for the deployed model and feature order.
+// Current order: [temperature, humidity, pressure, illuminance_lux]
+static const float g_feature_means[FORECAST_TEMP_FEATURE_COUNT] = {
+		28.884267f, 86.161369f, 101063.070000f, 4378.142890f };
 // Store the feature standard deviations so we can normalize each component.
-static const float g_feature_stds[FORECAST_TEMP_FEATURE_COUNT] =
-		{ 4.121619f, 12.275329f, 167.728468f, 6739.249270f, 0.584310f,
-				200.182002f, 0.706334f };
+static const float g_feature_stds[FORECAST_TEMP_FEATURE_COUNT] = {
+		4.121619f, 12.275329f, 167.728468f, 6739.249270f };
 
 // Hold the FreeRTOS thread handle so we do not start the task twice.
 static osThreadId_t g_forecast_thread_id = NULL;
@@ -286,8 +281,6 @@ static bool forecast_temp_initialize_network(void);
 // Forward declare a helper that extracts quantization info for a buffer.
 static void forecast_temp_extract_quantization(const ai_buffer *buffer,
 		float *scale_out, int32_t *zero_point_out);
-// Forward declare a helper that reads the RTC and converts to local hour-of-day.
-static bool forecast_temp_read_local_hour(uint8_t *hour_out);
 // Forward declare a helper that drops minute samples into the 30-minute accumulator.
 static void forecast_temp_accumulate_minute_sample(float temperature_c,
 		float humidity_pct, float pressure_pa, float illuminance_lux);
@@ -1105,46 +1098,6 @@ static void forecast_temp_extract_quantization(const ai_buffer *buffer,
 	}
 }
 
-// Read the RTC and return the local hour-of-day (0-23).
-static bool forecast_temp_read_local_hour(uint8_t *hour_out) {
-	// Guard against NULL output pointers.
-	if (hour_out == NULL) {
-		return false;
-	}
-	// Allocate a small buffer for the ISO-8601 timestamp returned by the driver.
-	char iso_buffer[24] = { 0 };
-	// Query the DS3231 over I2C to get the current UTC timestamp.
-	const HAL_StatusTypeDef status = ds3231_read_time_iso8601_utc_i2c1(
-			iso_buffer, sizeof(iso_buffer));
-	// Abort when the RTC read fails.
-	if (status != HAL_OK) {
-		return false;
-	}
-	// Validate that the hour characters are digits before converting them.
-	if (!(isdigit((unsigned char ) iso_buffer[11])
-			&& isdigit((unsigned char ) iso_buffer[12]))) {
-		return false;
-	}
-	// Convert the UTC hour from ASCII into an integer.
-	int utc_hour = ((iso_buffer[11] - '0') * 10) + (iso_buffer[12] - '0');
-	// Adjust the UTC hour to local time (America/Port_of_Spain is UTC-4).
-	int local_hour = utc_hour - 4;
-	// Wrap the hour into the 0-23 range when subtracting crosses midnight.
-	if (local_hour < 0) {
-		local_hour += 24;
-	}
-	// Clamp the hour to a valid range just in case.
-	if (local_hour < 0) {
-		local_hour = 0;
-	} else if (local_hour > 23) {
-		local_hour = 23;
-	}
-	// Return the computed hour to the caller.
-	*hour_out = (uint8_t) local_hour;
-	// Signal success to the caller.
-	return true;
-}
-
 // Add a minute-level reading into the 30-minute accumulator.
 static void forecast_temp_accumulate_minute_sample(float temperature_c,
 		float humidity_pct, float pressure_pa, float illuminance_lux) {
@@ -1351,42 +1304,16 @@ static void forecast_temp_store_slot_history(float temperature_c,
 static void forecast_temp_prepare_features(float temperature_c,
 		float humidity_pct, float pressure_pa, float illuminance_lux,
 		float out_features[FORECAST_TEMP_FEATURE_COUNT]) {
-	// Compute the temperature delta relative to the previous slot when possible.
-	float delta_temperature = 0.0f;
-	// Compute the pressure delta relative to twelve hours prior (24 slots) when possible.
-	float delta_pressure = 0.0f;
-	// Only compute the temperature delta when at least one previous slot exists.
-	if (g_slot_history_count >= FORECAST_TEMP_DELTA_T_LAG_SLOTS) {
-		const size_t previous_index = (g_slot_history_head
-				+ g_slot_history_count - 1u) % FORECAST_TEMP_HISTORY_CAPACITY;
-		const float previous_temperature =
-				g_slot_temperature_history[previous_index];
-		delta_temperature = temperature_c - previous_temperature;
-	}
-	// Only compute the pressure delta when the history is deep enough.
-	if (g_slot_history_count >= FORECAST_TEMP_DELTA_P_LAG_SLOTS) {
-		const size_t lag_index = (g_slot_history_head + g_slot_history_count
-				- FORECAST_TEMP_DELTA_P_LAG_SLOTS)
-				% FORECAST_TEMP_HISTORY_CAPACITY;
-		const float lag_pressure = g_slot_pressure_history[lag_index];
-		delta_pressure = pressure_pa - lag_pressure;
-	}
-	// Read the local hour so we can generate the cyclical sine feature.
-	uint8_t local_hour = 0u;
-	float sin_hour = 0.0f;
-	if (forecast_temp_read_local_hour(&local_hour)) {
-		sin_hour = sinf((2.0f * (float) M_PI * (float) local_hour) / 24.0f);
-	}
 	// Populate the raw feature vector in the same order used during training.
+	// This ablation model intentionally uses only raw sensor features.
 	const float raw_features[FORECAST_TEMP_FEATURE_COUNT] = { temperature_c,
-			humidity_pct, pressure_pa, illuminance_lux, delta_temperature,
-			delta_pressure, sin_hour };
+			humidity_pct, pressure_pa, illuminance_lux };
 	// Normalize each feature using the stored StandardScaler parameters.
 	for (size_t i = 0u; i < FORECAST_TEMP_FEATURE_COUNT; ++i) {
 		out_features[i] = (raw_features[i] - g_feature_means[i])
 				/ g_feature_stds[i];
 	}
-	// Store the raw values for delta computations in future iterations.
+	// Keep history updates unchanged so other task diagnostics remain consistent.
 	forecast_temp_store_slot_history(temperature_c, pressure_pa);
 }
 
