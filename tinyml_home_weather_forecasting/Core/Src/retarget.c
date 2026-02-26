@@ -13,8 +13,13 @@ extern UART_HandleTypeDef huart3;
 extern osMutexId_t printfMutexHandle;
 
 /**
- * Redirect stdout and stderr to our UART3 debug
+ * Redirect stdout and stderr to our UART3 debug.
+ *
+ * X-CUBE-AI's aiTestUtility.c provides its own _write() implementation when
+ * UNITY_TEST builds are enabled. Guard this implementation to avoid duplicate
+ * symbol errors at link time.
  */
+#if !defined(UNITY_TEST)
 int _write(int fd, char *ptr, int len) {
   if (!(fd == 1 || fd == 2)) return -1;
 
@@ -33,3 +38,4 @@ int _write(int fd, char *ptr, int len) {
   }
   return -1;
 }
+#endif
