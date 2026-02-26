@@ -71,6 +71,8 @@ extern osMutexId_t g_fs_mutex;
 #define FORECAST_TEMP_SLOT_CACHE_PATH       "0:/logs/forecast_minute_cache.bin"
 // Declare a version tag so we can invalidate stale cache files when the layout changes.
 #define FORECAST_TEMP_SLOT_CACHE_VERSION    (1u)
+// Declare pi locally so angle math does not depend on libc extensions.
+#define FORECAST_TEMP_PI                    (3.14159265358979323846f)
 
 // Sanity-check that our feature count divides cleanly into the network input
 // tensor so we can stride through the flattened buffer without overruns.
@@ -89,8 +91,16 @@ extern osMutexId_t g_fs_mutex;
 #error "Model input tensor must encode exactly 48 30-minute slots to match the live window"
 #endif
 
-#if (FORECAST_TEMP_FEATURE_COUNT != 4u)
-#error "This ablation firmware path expects exactly 4 raw input features"
+#if ((FORECAST_TEMP_FEATURE_COUNT != 4u) && (FORECAST_TEMP_FEATURE_COUNT != 9u))
+#error "Forecast task currently supports only 4-feature ablation or 9-feature engineered models"
+#endif
+
+#if (FORECAST_TEMP_FEATURE_COUNT == 4u)
+#define FORECAST_TEMP_MODEL_VARIANT_NAME    "ablation (4-feature raw)"
+#elif (FORECAST_TEMP_FEATURE_COUNT == 9u)
+#define FORECAST_TEMP_MODEL_VARIANT_NAME    "full (9-feature engineered)"
+#else
+#define FORECAST_TEMP_MODEL_VARIANT_NAME    "unsupported"
 #endif
 
 // Define a small struct that records a measurement log filename and its date key.
@@ -144,12 +154,23 @@ typedef struct {
 // Store the feature means calculated during the data-preparation phase.
 // IMPORTANT: these values must match the StandardScaler in the training notebook
 // for the deployed model and feature order.
-// Current order: [temperature, humidity, pressure, illuminance_lux]
-static const float g_feature_means[FORECAST_TEMP_FEATURE_COUNT] = { 28.884267f,
-		86.161369f, 101063.070000f, 4378.142890f };
+// Current order for 4-feature ablation: [temperature, humidity, pressure, illuminance_lux]
+// Current order for 9-feature model:
+// [temperature, humidity, pressure, illuminance_lux, delta_T, temp_mean_6h,
+//  humidity_mean_6h, sin_hour, cos_hour]
+static const float g_feature_means[FORECAST_TEMP_FEATURE_COUNT] = {
+		28.884267f, 86.161369f, 101063.070000f, 4378.142890f,
+#if (FORECAST_TEMP_FEATURE_COUNT == 9u)
+		0.0f, 28.884267f, 86.161369f, 0.0f, 0.0f,
+#endif
+};
 // Store the feature standard deviations so we can normalize each component.
-static const float g_feature_stds[FORECAST_TEMP_FEATURE_COUNT] = { 4.121619f,
-		12.275329f, 167.728468f, 6739.249270f };
+static const float g_feature_stds[FORECAST_TEMP_FEATURE_COUNT] = {
+		4.121619f, 12.275329f, 167.728468f, 6739.249270f,
+#if (FORECAST_TEMP_FEATURE_COUNT == 9u)
+		1.0f, 4.121619f, 12.275329f, 0.707107f, 0.707107f,
+#endif
+};
 
 // Hold the FreeRTOS thread handle so we do not start the task twice.
 static osThreadId_t g_forecast_thread_id = NULL;
@@ -1056,6 +1077,10 @@ static bool forecast_temp_initialize_network(void) {
 	// Extract quantization info for the output tensor so we can decode results correctly.
 	forecast_temp_extract_quantization(&g_network_outputs[0], &g_output_scale,
 			&g_output_zero_point);
+	printf(LOG_PREFIX "[forecast] model variant: %s, input tensor=%lux%lu\r\n",
+			FORECAST_TEMP_MODEL_VARIANT_NAME,
+			(unsigned long) FORECAST_TEMP_NETWORK_WINDOW_SLOTS,
+			(unsigned long) FORECAST_TEMP_FEATURE_COUNT);
 	// Return success now that the runtime is ready.
 	return true;
 }
@@ -1303,10 +1328,68 @@ static void forecast_temp_store_slot_history(float temperature_c,
 static void forecast_temp_prepare_features(float temperature_c,
 		float humidity_pct, float pressure_pa, float illuminance_lux,
 		float out_features[FORECAST_TEMP_FEATURE_COUNT]) {
+	float raw_features[FORECAST_TEMP_FEATURE_COUNT] = { 0.0f };
+	float delta_t = 0.0f;
+	float temperature_mean_6h = temperature_c;
+	float humidity_mean_6h = humidity_pct;
+	float sin_hour = 0.0f;
+	float cos_hour = 1.0f;
+
+	if (g_slot_history_count > 0u) {
+		const size_t latest_index = (g_slot_history_head + g_slot_history_count - 1u)
+				% FORECAST_TEMP_HISTORY_CAPACITY;
+		delta_t = temperature_c - g_slot_temperature_history[latest_index];
+	}
+
+	if (g_slot_history_count > 0u) {
+		const size_t sample_count =
+				(g_slot_history_count < 11u) ? g_slot_history_count : 11u;
+		float temperature_sum = temperature_c;
+		for (size_t i = 0u; i < sample_count; ++i) {
+			const size_t history_index = (g_slot_history_head + g_slot_history_count
+					- 1u - i) % FORECAST_TEMP_HISTORY_CAPACITY;
+			temperature_sum += g_slot_temperature_history[history_index];
+		}
+		temperature_mean_6h = temperature_sum / (float) (sample_count + 1u);
+	}
+
+	if (g_feature_window_count > 0u) {
+		const size_t sample_count =
+				(g_feature_window_count < 11u) ? g_feature_window_count : 11u;
+		float humidity_sum = humidity_pct;
+		for (size_t i = 0u; i < sample_count; ++i) {
+			const size_t feature_index = (g_feature_window_head + g_feature_window_count
+					- 1u - i) % FORECAST_TEMP_WINDOW_LENGTH;
+			humidity_sum += g_feature_window[feature_index][1u] * g_feature_stds[1u]
+					+ g_feature_means[1u];
+		}
+		humidity_mean_6h = humidity_sum / (float) (sample_count + 1u);
+	}
+
+	char timestamp[24] = { 0 };
+	if (ds3231_read_time_iso8601_utc_i2c1(timestamp, sizeof timestamp)
+			== DS3231_STATUS_OK) {
+		int hour = -1;
+		if (sscanf(timestamp, "%*4d-%*2d-%*2dT%2d", &hour) == 1) {
+			const float hour_angle = (2.0f * FORECAST_TEMP_PI * (float) hour)
+					/ 24.0f;
+			sin_hour = sinf(hour_angle);
+			cos_hour = cosf(hour_angle);
+		}
+	}
+
 	// Populate the raw feature vector in the same order used during training.
-	// This ablation model intentionally uses only raw sensor features.
-	const float raw_features[FORECAST_TEMP_FEATURE_COUNT] = { temperature_c,
-			humidity_pct, pressure_pa, illuminance_lux };
+	raw_features[0] = temperature_c;
+	raw_features[1] = humidity_pct;
+	raw_features[2] = pressure_pa;
+	raw_features[3] = illuminance_lux;
+#if (FORECAST_TEMP_FEATURE_COUNT == 9u)
+	raw_features[4] = delta_t;
+	raw_features[5] = temperature_mean_6h;
+	raw_features[6] = humidity_mean_6h;
+	raw_features[7] = sin_hour;
+	raw_features[8] = cos_hour;
+#endif
 	// Normalize each feature using the stored StandardScaler parameters.
 	for (size_t i = 0u; i < FORECAST_TEMP_FEATURE_COUNT; ++i) {
 		out_features[i] = (raw_features[i] - g_feature_means[i])
