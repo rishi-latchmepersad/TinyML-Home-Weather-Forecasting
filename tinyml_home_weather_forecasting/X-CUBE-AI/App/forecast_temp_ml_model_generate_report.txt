@@ -1,25 +1,25 @@
 ST Edge AI Core v2.2.0-20266 2adc00962
-Created date          : 2026-02-26 12:44:42
-Parameters            : generate --target stm32f7 --name forecast_temp_ml_model -m C:/Users/rishi_latchmepersad/Downloads/ablation_v1.tflite --compression none --verbosity 1 --workspace C:/Users/RISHI_~1/AppData/Local/Temp/mxAI_workspace75048969754010015657749414299478027 --output C:/Users/rishi_latchmepersad/.stm32cubemx/forecast_temp_ml_model_output
+Created date          : 2026-02-26 16:45:27
+Parameters            : generate --target stm32f7 --name forecast_temp_ml_model -m C:/Users/rishi_latchmepersad/Downloads/pruned_int8.tflite --compression none --verbosity 1 --workspace C:/Users/RISHI_~1/AppData/Local/Temp/mxAI_workspace7649457658200003168755983689980455 --output C:/Users/rishi_latchmepersad/.stm32cubemx/forecast_temp_ml_model_output
 
 Exec/report summary (generate)
 ------------------------------------------------------------------------------------------------------------------------------
-model file         :   C:\Users\rishi_latchmepersad\Downloads\ablation_v1.tflite                                              
+model file         :   C:\Users\rishi_latchmepersad\Downloads\pruned_int8.tflite                                              
 type               :   tflite                                                                                                 
 c_name             :   forecast_temp_ml_model                                                                                 
 compression        :   none                                                                                                   
 options            :   allocate-inputs, allocate-outputs                                                                      
 optimization       :   balanced                                                                                               
 target/series      :   stm32f7                                                                                                
-workspace dir      :   C:\Users\RISHI_~1\AppData\Local\Temp\mxAI_workspace75048969754010015657749414299478027                 
+workspace dir      :   C:\Users\RISHI_~1\AppData\Local\Temp\mxAI_workspace7649457658200003168755983689980455                  
 output dir         :   C:\Users\rishi_latchmepersad\.stm32cubemx\forecast_temp_ml_model_output                                
 model_fmt          :   sa/sa per tensor                                                                                       
-model_name         :   ablation_v1                                                                                            
-model_hash         :   0x4001d82a47f0371caed2865e874d18e4                                                                     
+model_name         :   pruned_int8                                                                                            
+model_hash         :   0xd75cbafa53cbab174d7b0c6847058dbc                                                                     
 params #           :   11,726 items (12.36 KiB)                                                                               
 ------------------------------------------------------------------------------------------------------------------------------
-input 1/1          :   'serving_default_pr..del_input0', int8(1x48x9), 432 Bytes, QLinear(0.072563879,-8,int8), activations   
-output 1/1         :   'gemm_22', int8(1x24), 24 Bytes, QLinear(0.141408280,-128,int8), activations                           
+input 1/1          :   'serving_default_pr..del_input0', int8(1x48x9), 432 Bytes, QLinear(0.072559968,-8,int8), activations   
+output 1/1         :   'gemm_22', int8(1x24), 24 Bytes, QLinear(0.161767051,-128,int8), activations                           
 macc               :   167,319                                                                                                
 weights (ro)       :   12,664 B (12.37 KiB) (1 segment) / -34,240(-73.0%) vs float model                                      
 activations (rw)   :   4,292 B (4.19 KiB) (1 segment) *                                                                       
@@ -27,7 +27,7 @@ ram (total)        :   4,292 B (4.19 KiB) = 4,292 + 0 + 0
 ------------------------------------------------------------------------------------------------------------------------------
 (*) 'input'/'output' buffers are allocated in the activations buffer
 
-Model name - ablation_v1
+Model name - pruned_int8
 ------ ------------------------------------------ --------------------- ------------- -------- -------------------------------- --- --------------- ----------------- -------------------- 
 m_id   layer (type,original)                      oshape                param/size        macc                     connected to   | c_size          c_macc            c_type               
 ------ ------------------------------------------ --------------------- ------------- -------- -------------------------------- --- --------------- ----------------- -------------------- 
@@ -98,7 +98,7 @@ model/c-model: macc=171,463/167,319 -4,144(-2.4%) weights=12,659/12,664 +5(+0.0%
 
 Generated C-graph summary
 ------------------------------------------------------------------------------------------------------------------------
-model name            : ablation_v1
+model name            : pruned_int8
 c-name                : forecast_temp_ml_model
 c-node #              : 13
 c-array #             : 38

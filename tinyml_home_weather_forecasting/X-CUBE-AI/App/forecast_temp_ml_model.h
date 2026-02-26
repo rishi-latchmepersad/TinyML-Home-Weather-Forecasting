@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    forecast_temp_ml_model.h
   * @author  AST Embedded Analytics Research Platform
-  * @date    2026-02-26T12:44:41-0400
+  * @date    2026-02-26T16:45:26-0400
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * @attention
@@ -23,7 +23,7 @@
 
 /******************************************************************************/
 #define AI_FORECAST_TEMP_ML_MODEL_MODEL_NAME          "forecast_temp_ml_model"
-#define AI_FORECAST_TEMP_ML_MODEL_ORIGIN_MODEL_NAME   "ablation_v1"
+#define AI_FORECAST_TEMP_ML_MODEL_ORIGIN_MODEL_NAME   "pruned_int8"
 
 /******************************************************************************/
 #define AI_FORECAST_TEMP_ML_MODEL_ACTIVATIONS_ALIGNMENT   (4)
