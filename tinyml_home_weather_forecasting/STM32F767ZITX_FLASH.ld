@@ -45,7 +45,7 @@ _Min_Stack_Size = 0x800 ; /* required amount of stack */
 MEMORY
 {
   /* DTCM is FAST but NOT DMA-accessible (128KB) */
-  DTCMRAM (xrw) : ORIGIN = 0x20000000, LENGTH = 128K
+  DTCMRAM (xrw) : ORIGIN = 0x20000000, LENGTH = 512K
 
   /* AXI/SRAM1 is DMA-visible — put .data/.bss/heap/stack and DMA buffers here (512KB) */
   AXIRAM  (xrw) : ORIGIN = 0x20020000, LENGTH = 512K
@@ -156,7 +156,7 @@ SECTIONS
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
 
-  } >AXIRAM AT> FLASH
+  } >DTCMRAM AT> FLASH
 
   /* Uninitialized data section into AXI SRAM (DMA-visible) */
   . = ALIGN(4);
@@ -172,7 +172,7 @@ SECTIONS
     . = ALIGN(4);
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
-  } >AXIRAM
+  } >DTCMRAM
 
   /* User_heap_stack section, used to check that there is enough "RAM" Ram  type memory left */
   ._user_heap_stack :
