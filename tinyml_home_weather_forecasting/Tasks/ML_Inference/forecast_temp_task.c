@@ -158,19 +158,19 @@ typedef struct {
 // Current order for 9-feature model:
 // [temperature, humidity, pressure, illuminance_lux, delta_T, temp_mean_6h,
 //  humidity_mean_6h, sin_hour, cos_hour]
-static const float g_feature_means[FORECAST_TEMP_FEATURE_COUNT] = {
-		28.884267f, 86.161369f, 101063.070000f, 4378.142890f,
+static const float g_feature_means[FORECAST_TEMP_FEATURE_COUNT] = { 28.884267f,
+		86.161369f, 101063.070000f, 4378.142890f,
 #if (FORECAST_TEMP_FEATURE_COUNT == 9u)
 		0.0f, 28.884267f, 86.161369f, 0.0f, 0.0f,
 #endif
-};
+		};
 // Store the feature standard deviations so we can normalize each component.
-static const float g_feature_stds[FORECAST_TEMP_FEATURE_COUNT] = {
-		4.121619f, 12.275329f, 167.728468f, 6739.249270f,
+static const float g_feature_stds[FORECAST_TEMP_FEATURE_COUNT] = { 4.121619f,
+		12.275329f, 167.728468f, 6739.249270f,
 #if (FORECAST_TEMP_FEATURE_COUNT == 9u)
 		1.0f, 4.121619f, 12.275329f, 0.707107f, 0.707107f,
 #endif
-};
+		};
 
 // Hold the FreeRTOS thread handle so we do not start the task twice.
 static osThreadId_t g_forecast_thread_id = NULL;
@@ -1078,7 +1078,7 @@ static bool forecast_temp_initialize_network(void) {
 	forecast_temp_extract_quantization(&g_network_outputs[0], &g_output_scale,
 			&g_output_zero_point);
 	printf(LOG_PREFIX "[forecast] model variant: %s, input tensor=%lux%lu\r\n",
-			FORECAST_TEMP_MODEL_VARIANT_NAME,
+	FORECAST_TEMP_MODEL_VARIANT_NAME,
 			(unsigned long) FORECAST_TEMP_NETWORK_WINDOW_SLOTS,
 			(unsigned long) FORECAST_TEMP_FEATURE_COUNT);
 	// Return success now that the runtime is ready.
@@ -1336,8 +1336,8 @@ static void forecast_temp_prepare_features(float temperature_c,
 	float cos_hour = 1.0f;
 
 	if (g_slot_history_count > 0u) {
-		const size_t latest_index = (g_slot_history_head + g_slot_history_count - 1u)
-				% FORECAST_TEMP_HISTORY_CAPACITY;
+		const size_t latest_index = (g_slot_history_head + g_slot_history_count
+				- 1u) % FORECAST_TEMP_HISTORY_CAPACITY;
 		delta_t = temperature_c - g_slot_temperature_history[latest_index];
 	}
 
@@ -1346,8 +1346,9 @@ static void forecast_temp_prepare_features(float temperature_c,
 				(g_slot_history_count < 11u) ? g_slot_history_count : 11u;
 		float temperature_sum = temperature_c;
 		for (size_t i = 0u; i < sample_count; ++i) {
-			const size_t history_index = (g_slot_history_head + g_slot_history_count
-					- 1u - i) % FORECAST_TEMP_HISTORY_CAPACITY;
+			const size_t history_index = (g_slot_history_head
+					+ g_slot_history_count - 1u - i)
+					% FORECAST_TEMP_HISTORY_CAPACITY;
 			temperature_sum += g_slot_temperature_history[history_index];
 		}
 		temperature_mean_6h = temperature_sum / (float) (sample_count + 1u);
@@ -1358,17 +1359,18 @@ static void forecast_temp_prepare_features(float temperature_c,
 				(g_feature_window_count < 11u) ? g_feature_window_count : 11u;
 		float humidity_sum = humidity_pct;
 		for (size_t i = 0u; i < sample_count; ++i) {
-			const size_t feature_index = (g_feature_window_head + g_feature_window_count
-					- 1u - i) % FORECAST_TEMP_WINDOW_LENGTH;
-			humidity_sum += g_feature_window[feature_index][1u] * g_feature_stds[1u]
-					+ g_feature_means[1u];
+			const size_t feature_index = (g_feature_window_head
+					+ g_feature_window_count - 1u - i)
+					% FORECAST_TEMP_WINDOW_LENGTH;
+			humidity_sum += g_feature_window[feature_index][1u]
+					* g_feature_stds[1u] + g_feature_means[1u];
 		}
 		humidity_mean_6h = humidity_sum / (float) (sample_count + 1u);
 	}
 
 	char timestamp[24] = { 0 };
 	if (ds3231_read_time_iso8601_utc_i2c1(timestamp, sizeof timestamp)
-			== DS3231_STATUS_OK) {
+			== HAL_OK) {
 		int hour = -1;
 		if (sscanf(timestamp, "%*4d-%*2d-%*2dT%2d", &hour) == 1) {
 			const float hour_angle = (2.0f * FORECAST_TEMP_PI * (float) hour)
