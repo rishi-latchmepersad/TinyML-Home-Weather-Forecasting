@@ -38,6 +38,7 @@
 #include "veml7700_task.h"
 #include "lm393_task.h"
 #include "forecast_temp_task.h"
+#include "baseline_forecast_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -213,6 +214,8 @@ int main(void) {
 	lm393_init_and_start_task();
 	// start the inference task so it can consume the cached sensor readings
 	(void) forecast_temp_task_start();
+	// start a seasonal-naive baseline task for side-by-side comparison with CNN forecasts
+	(void) baseline_forecast_task_start();
 	/* USER CODE END RTOS_THREADS */
 
 	/* USER CODE BEGIN RTOS_EVENTS */
