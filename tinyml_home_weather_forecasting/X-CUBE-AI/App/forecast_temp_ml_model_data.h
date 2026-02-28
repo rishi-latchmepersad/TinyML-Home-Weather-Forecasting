@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    forecast_temp_ml_model_data.h
   * @author  AST Embedded Analytics Research Platform
-  * @date    2026-02-26T16:45:26-0400
+  * @date    2026-02-26T20:23:29-0400
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * Copyright (c) 2026 STMicroelectronics.
@@ -32,7 +32,7 @@ AI_DEPRECATED
 AI_API_DECLARE_BEGIN
 
 
-extern const ai_u64 s_forecast_temp_ml_model_weights_array_u64[1583];
+extern const ai_u64 s_forecast_temp_ml_model_weights_array_u64[1577];
 
 
 
