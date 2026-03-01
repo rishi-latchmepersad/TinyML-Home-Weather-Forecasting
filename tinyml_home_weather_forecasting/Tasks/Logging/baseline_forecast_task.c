@@ -50,7 +50,11 @@ static char g_last_logged_timestamp[24] = {0};
 
 static void baseline_forecast_task_entry(void *argument);
 static bool baseline_collect_recent_temperature_slots(float *slots_out, size_t slots_capacity, size_t *slots_count_out);
-static bool baseline_write_forecast_log_line(const char *timestamp_iso8601, const float *forecast_slots, size_t forecast_count, size_t history_slots);
+static bool baseline_write_forecast_log_line(const char *timestamp_iso8601,
+                                             uint32_t inference_time_ms,
+                                             const float *forecast_slots,
+                                             size_t forecast_count,
+                                             size_t history_slots);
 static bool baseline_ensure_logs_directory(void);
 static bool baseline_write_header_if_needed(FIL *file, size_t forecast_count);
 static int baseline_compare_file_desc(const void *a, const void *b);
@@ -116,6 +120,7 @@ static void baseline_forecast_task_entry(void *argument) {
         }
 
         float forecast_slots[BASELINE_FORECAST_HORIZON_SLOTS] = {0.0f};
+        const TickType_t inference_start_tick = xTaskGetTickCount();
         for (size_t horizon_index = 0u; horizon_index < BASELINE_FORECAST_HORIZON_SLOTS; ++horizon_index) {
             /*
              * Seasonal-naive with 24h period: y_hat(t+h) = y(t+h-48 slots).
@@ -128,16 +133,20 @@ static void baseline_forecast_task_entry(void *argument) {
                 forecast_slots[horizon_index] = history_slots[history_count - 1u];
             }
         }
+        const TickType_t inference_end_tick = xTaskGetTickCount();
+        const uint32_t inference_time_ms = (uint32_t)((inference_end_tick - inference_start_tick) * portTICK_PERIOD_MS);
 
         if (baseline_write_forecast_log_line(timestamp,
+                                             inference_time_ms,
                                              forecast_slots,
                                              BASELINE_FORECAST_HORIZON_SLOTS,
                                              history_count)) {
             (void)strncpy(g_last_logged_timestamp, timestamp, sizeof(g_last_logged_timestamp) - 1u);
             g_last_logged_timestamp[sizeof(g_last_logged_timestamp) - 1u] = '\0';
-            printf(LOG_PREFIX "Logged seasonal baseline at %s using %lu slots\r\n",
+            printf(LOG_PREFIX "Logged seasonal baseline at %s using %lu slots (%lu ms)\r\n",
                    timestamp,
-                   (unsigned long)history_count);
+                   (unsigned long)history_count,
+                   (unsigned long)inference_time_ms);
         }
 
         vTaskDelayUntil(&last_wake_tick, pdMS_TO_TICKS(BASELINE_TASK_PERIOD_MS));
@@ -339,7 +348,7 @@ static bool baseline_write_header_if_needed(FIL *file, size_t forecast_count) {
     char header[768];
     size_t used = 0u;
     int n = snprintf(header, sizeof(header),
-                     "timestamp_iso8601,method,history_slots,season_length_slots");
+                     "timestamp_iso8601,inference_time_ms,method,history_slots,season_length_slots");
     if (n <= 0 || (size_t)n >= sizeof(header)) {
         return false;
     }
@@ -371,7 +380,11 @@ static bool baseline_write_header_if_needed(FIL *file, size_t forecast_count) {
     return (fr == FR_OK);
 }
 
-static bool baseline_write_forecast_log_line(const char *timestamp_iso8601, const float *forecast_slots, size_t forecast_count, size_t history_slots) {
+static bool baseline_write_forecast_log_line(const char *timestamp_iso8601,
+                                             uint32_t inference_time_ms,
+                                             const float *forecast_slots,
+                                             size_t forecast_count,
+                                             size_t history_slots) {
     if ((timestamp_iso8601 == NULL) || (forecast_slots == NULL) || (forecast_count == 0u)) {
         return false;
     }
@@ -397,8 +410,9 @@ static bool baseline_write_forecast_log_line(const char *timestamp_iso8601, cons
     }
 
     char line[768];
-    int n = snprintf(line, sizeof(line), "%s,seasonal_naive_24h,%lu,%u",
+    int n = snprintf(line, sizeof(line), "%s,%lu,seasonal_naive_24h,%lu,%u",
                      timestamp_iso8601,
+                     (unsigned long)inference_time_ms,
                      (unsigned long)history_slots,
                      (unsigned int)BASELINE_SEASON_LENGTH_SLOTS);
     size_t used = 0u;
