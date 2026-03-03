@@ -39118,3 +39118,5 @@ timestamp_iso8601,sensor,quantity,value,unit
 2026-02-26T17:40:52Z,bme280,temperature_c,30.212772,degC
 2026-02-26T17:40:52Z,bme280,pressure_pa,101304.625000,Pa
 2026-02-26T17:40:52Z,bme280,humidity_pct,52.773743,pct
+2026-02-26T17:43:33Z,veml7700,lux_lx,67.199997,lx
+2026-02-26T17:47:26Z,veml7700,lux_lx,0.537600,lx
