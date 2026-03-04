@@ -280,8 +280,8 @@ static bool baseline_collect_recent_temperature_slots(float *slots_out, size_t s
         FIL file;
         FS_LOCK();
         fr = f_open(&file, path, FA_READ);
-        FS_UNLOCK();
         if (fr != FR_OK) {
+            FS_UNLOCK();
             printf(LOG_PREFIX "Skipping %s (open failed fr=%d)\r\n", path, (int)fr);
             continue;
         }
@@ -289,9 +289,7 @@ static bool baseline_collect_recent_temperature_slots(float *slots_out, size_t s
         bool header_skipped = false;
         while (1) {
             char line[192];
-            FS_LOCK();
             char *line_ptr = f_gets(line, (int)sizeof(line), &file);
-            FS_UNLOCK();
             if (line_ptr == NULL) {
                 break;
             }
@@ -351,7 +349,6 @@ static bool baseline_collect_recent_temperature_slots(float *slots_out, size_t s
             file_temperature_rows++;
         }
 
-        FS_LOCK();
         (void)f_close(&file);
         FS_UNLOCK();
 #if BASELINE_DEBUG_LOGS
