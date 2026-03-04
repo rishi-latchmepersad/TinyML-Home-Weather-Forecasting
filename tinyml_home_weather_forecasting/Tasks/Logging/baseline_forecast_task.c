@@ -14,6 +14,7 @@
 #include "sd_card.h"
 #include "ds3231.h"
 #include "forecast_temp_task.h"
+#include "measurement_logger_task.h"
 
 #define LOG_PREFIX "[BASELINE_FORECAST] "
 
@@ -26,6 +27,10 @@
 #define BASELINE_FORECAST_HORIZON_SLOTS   (24u)
 #define BASELINE_MAX_FILES                (4u)
 #define BASELINE_MAX_SLOT_HISTORY         (128u)
+#define BASELINE_PRE_READ_SYNC_WAIT_MS    (400u)
+#ifndef BASELINE_DEBUG_LOGS
+#define BASELINE_DEBUG_LOGS               (1u)
+#endif
 
 #if (FORECAST_TEMP_FORECAST_HORIZON_SLOTS != BASELINE_FORECAST_HORIZON_SLOTS)
 #error "Baseline horizon must remain aligned to 12 hours (24 slots) to match CNN output"
@@ -98,10 +103,25 @@ static void baseline_forecast_task_entry(void *argument) {
             continue;
         }
 
+#if BASELINE_DEBUG_LOGS
+        printf(LOG_PREFIX "Cycle start ts=%s last_logged=%s\r\n",
+               timestamp,
+               (g_last_logged_timestamp[0] != '\0') ? g_last_logged_timestamp : "<none>");
+#endif
         if (strncmp(timestamp, g_last_logged_timestamp, sizeof(g_last_logged_timestamp) - 1u) == 0) {
+#if BASELINE_DEBUG_LOGS
+            printf(LOG_PREFIX "Skipping cycle because timestamp is unchanged\r\n");
+#endif
             vTaskDelayUntil(&last_wake_tick, pdMS_TO_TICKS(BASELINE_TASK_PERIOD_MS));
             continue;
         }
+
+        /* Flush measurement CSV updates before reading baseline history. */
+#if BASELINE_DEBUG_LOGS
+        printf(LOG_PREFIX "Requesting measurement logger sync before history read\r\n");
+#endif
+        measurement_logger_request_sync();
+        vTaskDelay(pdMS_TO_TICKS(BASELINE_PRE_READ_SYNC_WAIT_MS));
 
         float history_slots[BASELINE_MAX_SLOT_HISTORY] = {0.0f};
         size_t history_count = 0u;
@@ -111,6 +131,12 @@ static void baseline_forecast_task_entry(void *argument) {
             continue;
         }
 
+#if BASELINE_DEBUG_LOGS
+        printf(LOG_PREFIX "Collected history slots=%lu first=%.3f last=%.3f\r\n",
+               (unsigned long)history_count,
+               history_slots[0],
+               history_slots[history_count - 1u]);
+#endif
         if (history_count < BASELINE_SEASON_LENGTH_SLOTS) {
             printf(LOG_PREFIX "Not enough history for baseline: have %lu slots need %u\r\n",
                    (unsigned long)history_count,
@@ -120,13 +146,15 @@ static void baseline_forecast_task_entry(void *argument) {
         }
 
         float forecast_slots[BASELINE_FORECAST_HORIZON_SLOTS] = {0.0f};
+        const size_t source_start_index = history_count - BASELINE_SEASON_LENGTH_SLOTS;
+        const size_t source_end_index = source_start_index + BASELINE_FORECAST_HORIZON_SLOTS - 1u;
         const TickType_t inference_start_tick = xTaskGetTickCount();
         for (size_t horizon_index = 0u; horizon_index < BASELINE_FORECAST_HORIZON_SLOTS; ++horizon_index) {
             /*
              * Seasonal-naive with 24h period: y_hat(t+h) = y(t+h-48 slots).
-             * With h starting at 1, the first forecast maps to history_count-47.
+             * With h starting at 1, the first forecast maps to history_count-48.
              */
-            const size_t source_index = (history_count - BASELINE_SEASON_LENGTH_SLOTS + 1u) + horizon_index;
+            const size_t source_index = (history_count - BASELINE_SEASON_LENGTH_SLOTS) + horizon_index;
             if (source_index < history_count) {
                 forecast_slots[horizon_index] = history_slots[source_index];
             } else {
@@ -136,6 +164,13 @@ static void baseline_forecast_task_entry(void *argument) {
         const TickType_t inference_end_tick = xTaskGetTickCount();
         const uint32_t inference_time_ms = (uint32_t)((inference_end_tick - inference_start_tick) * portTICK_PERIOD_MS);
 
+#if BASELINE_DEBUG_LOGS
+        printf(LOG_PREFIX "Forecast source idx=[%lu..%lu] yhat+30m=%.3f yhat+12h=%.3f\r\n",
+               (unsigned long)source_start_index,
+               (unsigned long)source_end_index,
+               forecast_slots[0],
+               forecast_slots[BASELINE_FORECAST_HORIZON_SLOTS - 1u]);
+#endif
         if (baseline_write_forecast_log_line(timestamp,
                                              inference_time_ms,
                                              forecast_slots,
@@ -147,6 +182,8 @@ static void baseline_forecast_task_entry(void *argument) {
                    timestamp,
                    (unsigned long)history_count,
                    (unsigned long)inference_time_ms);
+        } else {
+            printf(LOG_PREFIX "Failed to write baseline forecast log line at %s\r\n", timestamp);
         }
 
         vTaskDelayUntil(&last_wake_tick, pdMS_TO_TICKS(BASELINE_TASK_PERIOD_MS));
@@ -214,10 +251,20 @@ static bool baseline_collect_recent_temperature_slots(float *slots_out, size_t s
     FS_UNLOCK();
 
     if (file_count == 0u) {
+        printf(LOG_PREFIX "No measurement files found under %s\r\n", BASELINE_BASE_DIR);
         return false;
     }
 
     qsort(files, file_count, sizeof(files[0]), baseline_compare_file_desc);
+#if BASELINE_DEBUG_LOGS
+    printf(LOG_PREFIX "History scan selected %lu file(s)\r\n", (unsigned long)file_count);
+    for (size_t i = 0u; i < file_count; ++i) {
+        printf(LOG_PREFIX "  file[%lu]=%s date_key=%lu\r\n",
+               (unsigned long)i,
+               files[i].filename,
+               (unsigned long)files[i].date_key);
+    }
+#endif
 
     baseline_slot_accumulator_t slot_accumulators[BASELINE_MAX_SLOT_HISTORY] = {0};
     char slot_keys[BASELINE_MAX_SLOT_HISTORY][17];
@@ -227,12 +274,15 @@ static bool baseline_collect_recent_temperature_slots(float *slots_out, size_t s
     for (int32_t file_index = (int32_t)file_count - 1; file_index >= 0; --file_index) {
         char path[96];
         (void)snprintf(path, sizeof(path), BASELINE_BASE_DIR "/%s", files[file_index].filename);
+        size_t file_temperature_rows = 0u;
+        const size_t slot_count_before_file = slot_count;
 
         FIL file;
         FS_LOCK();
         fr = f_open(&file, path, FA_READ);
         FS_UNLOCK();
         if (fr != FR_OK) {
+            printf(LOG_PREFIX "Skipping %s (open failed fr=%d)\r\n", path, (int)fr);
             continue;
         }
 
@@ -298,11 +348,19 @@ static bool baseline_collect_recent_temperature_slots(float *slots_out, size_t s
 
             slot_accumulators[slot_index].sum += strtof(value_str, NULL);
             slot_accumulators[slot_index].count++;
+            file_temperature_rows++;
         }
 
         FS_LOCK();
         (void)f_close(&file);
         FS_UNLOCK();
+#if BASELINE_DEBUG_LOGS
+        printf(LOG_PREFIX "Parsed %s: temp_rows=%lu new_slots=%lu total_slots=%lu\r\n",
+               path,
+               (unsigned long)file_temperature_rows,
+               (unsigned long)(slot_count - slot_count_before_file),
+               (unsigned long)slot_count);
+#endif
     }
 
     size_t written = 0u;
@@ -317,6 +375,16 @@ static bool baseline_collect_recent_temperature_slots(float *slots_out, size_t s
     }
 
     *slots_count_out = written;
+#if BASELINE_DEBUG_LOGS
+    if (written > 0u) {
+        printf(LOG_PREFIX "Aggregated history written=%lu first=%.3f last=%.3f\r\n",
+               (unsigned long)written,
+               slots_out[0],
+               slots_out[written - 1u]);
+    } else {
+        printf(LOG_PREFIX "Aggregated history has no usable slots\r\n");
+    }
+#endif
     return (written > 0u);
 }
 
