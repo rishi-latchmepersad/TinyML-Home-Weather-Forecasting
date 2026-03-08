@@ -33,7 +33,14 @@ Our models were able to forecast the temperature with a MAE of 1.8C for the RNN,
 
 ## Research and Writing
 
-We have submitted the paper for this project to the West Indian Journal Of Engineering, and we are currently reviewing the paper. Please check back soon for updates.
+We initially submitted the paper to the West Indian Journal of Engineering for review. However, our paper was rejected, with some excellent points given as feedback. We had another opportunity to submit the paper for a more industrial-related journal a month later.
+
+Unfortunately, when we reviewed the feedback given, it turned out that our entire hypothesis for the paper was off. We therefore chose instead to accept the learnings, and apply them to new research ideas in the future. In a nutshell, the review notes were:
+- Establish a baseline first, to measure the output label with some method not involving NNs.
+- Establish at least one ablation model, to show the impact of adding additional features.
+- Therefore, when the full model is ready, we have at least two points of comparison.
+
+In this case, when we did this, we realized that our model performed the worst among the 3 models. In the future, we will be sure to start with the baseline, and use that as a reference, so that our hypothesis is valid.
 
 ## Diagrams
 
