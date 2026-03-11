@@ -1,0 +1,32 @@
+[project]
+name = "local-cnn"
+version = "0.1.0"
+description = "Local Python pipeline for the microclimate CNN forecaster"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+authors = [{ name = "OpenAI Codex", email = "codex@openai.com" }]
+dependencies = [
+    "numpy==2.0.2",
+    "scipy==1.16.2",
+    "tensorflow (==2.19.*)",
+    "keras==3.10.*",
+    "keras-tuner==1.4.7",
+    "pandas>=2.2.3,<3.0.0",
+    "matplotlib>=3.10.1,<4.0.0",
+    "requests>=2.32.3,<3.0.0",
+    "scikit-learn>=1.6.1,<2.0.0",
+]
+
+[project.scripts]
+local-cnn-train = "local_cnn.train:main"
+local-cnn-eval-measurements = "local_cnn.evaluate_vs_measurements:main"
+
+[tool.poetry]
+packages = [{ include = "local_cnn", from = "src" }]
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.5"
+
+[build-system]
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"

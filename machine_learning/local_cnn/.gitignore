@@ -1,0 +1,5 @@
+.venv/
+artifacts/
+keras_tuner_dir/
+__pycache__/
+*.pyc
