@@ -71,17 +71,38 @@ def engineer_features(
             window=12,
             min_periods=1,
         ).mean()
+        engineered_dataframe["temp_mean_24h"] = engineered_dataframe["temperature"].rolling(
+            window=48,
+            min_periods=1,
+        ).mean()
+        engineered_dataframe["temp_std_3h"] = engineered_dataframe["temperature"].rolling(
+            window=6,
+            min_periods=1,
+        ).std()
     else:
         engineered_dataframe["delta_T"] = np.nan
         engineered_dataframe["temp_mean_6h"] = np.nan
+        engineered_dataframe["temp_mean_24h"] = np.nan
+        engineered_dataframe["temp_std_3h"] = np.nan
 
     if "humidity" in engineered_dataframe.columns:
         engineered_dataframe["humidity_mean_6h"] = engineered_dataframe["humidity"].rolling(
             window=12,
             min_periods=1,
         ).mean()
+        engineered_dataframe["humidity_delta"] = (
+            engineered_dataframe["humidity"] - engineered_dataframe["humidity"].shift(1)
+        )
     else:
         engineered_dataframe["humidity_mean_6h"] = np.nan
+        engineered_dataframe["humidity_delta"] = np.nan
+
+    if "pressure" in engineered_dataframe.columns:
+        engineered_dataframe["pressure_delta"] = (
+            engineered_dataframe["pressure"] - engineered_dataframe["pressure"].shift(1)
+        )
+    else:
+        engineered_dataframe["pressure_delta"] = np.nan
 
     hour_of_day = engineered_dataframe.index.hour
     engineered_dataframe["sin_hour"] = np.sin(2 * np.pi * hour_of_day / 24)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from pathlib import Path
 
 import pandas as pd
@@ -9,6 +10,7 @@ import requests
 from .config import PipelineConfig
 
 logger = logging.getLogger(__name__)
+MEASUREMENT_FILENAME_PATTERN = re.compile(r"measurements_(\d{4}-\d{2}-\d{2})\.csv$")
 
 
 def _read_measurement_csv(csv_path: Path) -> pd.DataFrame:
@@ -38,11 +40,45 @@ def _read_measurement_csv(csv_path: Path) -> pd.DataFrame:
 def load_local_sensor_measurements(
     measurements_directory: str | Path,
     resample_frequency: str,
+    measurement_recent_days: int | None = None,
 ) -> pd.DataFrame:
     measurements_path = Path(measurements_directory)
     csv_files = sorted(measurements_path.glob("measurements_*.csv"))
     if not csv_files:
         raise FileNotFoundError(f"No measurement CSV files found in {measurements_path}")
+
+    if measurement_recent_days is not None:
+        dated_csv_files: list[tuple[Path, pd.Timestamp]] = []
+        undated_csv_files: list[Path] = []
+        for csv_path in csv_files:
+            match = MEASUREMENT_FILENAME_PATTERN.fullmatch(csv_path.name)
+            if match is None:
+                undated_csv_files.append(csv_path)
+                continue
+            dated_csv_files.append((csv_path, pd.Timestamp(match.group(1))))
+
+        if dated_csv_files:
+            latest_date = max(file_date for _, file_date in dated_csv_files)
+            cutoff_date = latest_date - pd.Timedelta(days=measurement_recent_days - 1)
+            csv_files = [
+                csv_path
+                for csv_path, file_date in dated_csv_files
+                if file_date >= cutoff_date
+            ]
+            logger.info(
+                "Using %d recent measurement files from %s onward (requested recent_days=%d).",
+                len(csv_files),
+                cutoff_date.date(),
+                measurement_recent_days,
+            )
+        else:
+            csv_files = undated_csv_files
+            logger.warning(
+                "measurement_recent_days=%d was requested, but no dated measurement filenames matched the expected pattern.",
+                measurement_recent_days,
+            )
+    else:
+        logger.info("Using all %d measurement files.", len(csv_files))
 
     daily_frames: list[pd.DataFrame] = []
     for csv_path in csv_files:
@@ -214,6 +250,7 @@ def build_weather_dataframe(config: PipelineConfig) -> pd.DataFrame:
     local_dataframe = load_local_sensor_measurements(
         measurements_directory=config.measurements_directory,
         resample_frequency=config.resample_frequency,
+        measurement_recent_days=config.measurement_recent_days,
     )
     logger.info(
         "Loaded local measurements: shape=%s coverage=%s to %s",

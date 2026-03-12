@@ -129,8 +129,17 @@ def evaluate_tflite_regression_mae(
 
 
 def evaluate_keras_mae(keras_model: keras.Model, X: np.ndarray, y: np.ndarray) -> float:
-    _, mae_value = keras_model.evaluate(X, y, verbose=0)
-    return float(mae_value)
+    evaluation = keras_model.evaluate(X, y, verbose=0, return_dict=True)
+    if "mae" in evaluation:
+        return float(evaluation["mae"])
+    if "mean_absolute_error" in evaluation:
+        return float(evaluation["mean_absolute_error"])
+
+    for metric_name, metric_value in evaluation.items():
+        if metric_name.endswith("mae") and metric_name != "horizon_60m_mae":
+            return float(metric_value)
+
+    raise ValueError(f"Could not find a scalar MAE metric in evaluation results: {evaluation}")
 
 
 def build_representative_dataset(

@@ -15,7 +15,11 @@ DEFAULT_FEATURE_COLUMNS = (
     "illuminance_lux",
     "delta_T",
     "temp_mean_6h",
+    "temp_mean_24h",
+    "temp_std_3h",
     "humidity_mean_6h",
+    "humidity_delta",
+    "pressure_delta",
     "sin_hour",
     "cos_hour",
 )
@@ -36,6 +40,7 @@ class PipelineConfig:
     target_column_name: str = "temperature"
     historical_window_slots: int = 48
     forecast_horizon_slots: int = 24
+    measurement_recent_days: int | None = None
     train_fraction: float = 0.70
     validation_fraction: float = 0.15
     latitude: float = 10.4236

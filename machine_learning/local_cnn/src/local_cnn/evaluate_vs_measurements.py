@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
+from .calibration import apply_horizon_bias_calibration, load_horizon_bias_calibration
 from .config import DEFAULT_MEASUREMENTS_DIRECTORY, DEFAULT_OUTPUT_DIRECTORY, PipelineConfig
 from .data import _read_measurement_csv, build_weather_dataframe
 from .features import prepare_dataset
@@ -43,6 +44,12 @@ def build_argument_parser() -> argparse.ArgumentParser:
         help="Directory for replay outputs.",
     )
     parser.add_argument(
+        "--bias-calibration-path",
+        type=Path,
+        default=None,
+        help="Optional per-horizon bias calibration artifact to subtract from predictions.",
+    )
+    parser.add_argument(
         "--horizon-minutes",
         type=int,
         default=60,
@@ -59,6 +66,12 @@ def build_argument_parser() -> argparse.ArgumentParser:
         choices=["all", "train", "validate", "test"],
         default="test",
         help="Dataset split to replay.",
+    )
+    parser.add_argument(
+        "--feature-column",
+        action="append",
+        dest="feature_columns",
+        help="Optional explicit feature list to use when rebuilding the dataset for this model.",
     )
     parser.add_argument(
         "--sensor",
@@ -214,6 +227,8 @@ def main() -> int:
         output_directory=args.output_dir,
         include_open_meteo=False,
     )
+    if args.feature_columns:
+        config.selected_feature_columns = tuple(args.feature_columns)
     weather_dataframe = build_weather_dataframe(config)
     dataset = prepare_dataset(weather_dataframe, config)
 
@@ -254,6 +269,8 @@ def main() -> int:
         compile=False,
     )
     predictions = model.predict(dataset.input_sequences[replay_indices], verbose=0)
+    bias_calibration = load_horizon_bias_calibration(args.bias_calibration_path)
+    predictions = apply_horizon_bias_calibration(predictions, bias_calibration)
 
     resample_delta = pd.Timedelta(config.resample_frequency)
     horizon_delta = pd.Timedelta(minutes=args.horizon_minutes)
@@ -343,6 +360,8 @@ def main() -> int:
         "merge_tolerance_minutes": args.merge_tolerance_minutes,
         "baseline_log": str(args.baseline_log),
         "model_path": str(args.model_path),
+        "bias_calibration_path": str(args.bias_calibration_path) if bias_calibration is not None else None,
+        "bias_calibration_applied": bias_calibration is not None,
         "replay_sample_count": len(replay_dataframe),
         "paired_rows": len(aligned_df),
         "mae_c": mae,

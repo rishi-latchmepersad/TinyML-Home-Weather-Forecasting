@@ -40,21 +40,34 @@ def prune_conv1d_layer(
     original_conv_layer: layers.Conv1D,
     channel_keep_ratio: float,
     previous_layer_kept_output_indices: np.ndarray | None = None,
-) -> tuple[layers.Conv1D, np.ndarray]:
+) -> tuple[layers.Conv1D, np.ndarray | None]:
     weight_tensor, bias_vector = original_conv_layer.get_weights()
 
     if previous_layer_kept_output_indices is not None:
         weight_tensor = weight_tensor[:, previous_layer_kept_output_indices, :]
 
-    kept_output_indices = l1_ranked_channel_indices(
-        weight_tensor=weight_tensor,
-        channel_keep_ratio=channel_keep_ratio,
-    )
-    pruned_weight_tensor = weight_tensor[:, :, kept_output_indices]
-    pruned_bias_vector = bias_vector[kept_output_indices] if bias_vector is not None else None
+    if channel_keep_ratio < 1.0:
+        kept_output_indices = l1_ranked_channel_indices(
+            weight_tensor=weight_tensor,
+            channel_keep_ratio=channel_keep_ratio,
+        )
+        pruned_weight_tensor = weight_tensor[:, :, kept_output_indices]
+        pruned_bias_vector = bias_vector[kept_output_indices] if bias_vector is not None else None
+        filters = len(kept_output_indices)
+        layer_name = f"{original_conv_layer.name}_pruned"
+    else:
+        kept_output_indices = None
+        pruned_weight_tensor = weight_tensor
+        pruned_bias_vector = bias_vector
+        filters = original_conv_layer.filters
+        layer_name = (
+            f"{original_conv_layer.name}_aligned"
+            if previous_layer_kept_output_indices is not None
+            else original_conv_layer.name
+        )
 
     new_pruned_conv_layer = layers.Conv1D(
-        filters=len(kept_output_indices),
+        filters=filters,
         kernel_size=original_conv_layer.kernel_size[0],
         strides=original_conv_layer.strides[0],
         padding=original_conv_layer.padding,
@@ -62,7 +75,7 @@ def prune_conv1d_layer(
         groups=original_conv_layer.groups,
         use_bias=original_conv_layer.use_bias,
         activation=original_conv_layer.activation,
-        name=f"{original_conv_layer.name}_pruned",
+        name=layer_name,
     )
 
     if pruned_bias_vector is not None:
@@ -73,10 +86,20 @@ def prune_conv1d_layer(
     return new_pruned_conv_layer, kept_output_indices
 
 
-def align_separable_conv1d_inputs(
+def l1_ranked_separable_output_indices(pointwise_kernel: np.ndarray, channel_keep_ratio: float) -> np.ndarray:
+    per_output_channel_l1 = np.sum(np.abs(pointwise_kernel), axis=(0, 1))
+    number_of_output_channels = per_output_channel_l1.shape[0]
+    number_to_keep = max(1, int(round(channel_keep_ratio * number_of_output_channels)))
+    kept_indices = np.argsort(per_output_channel_l1)[-number_to_keep:]
+    kept_indices.sort()
+    return kept_indices
+
+
+def prune_or_align_separable_conv1d_layer(
     original_sep_layer: layers.SeparableConv1D,
-    previous_layer_kept_output_indices: np.ndarray,
-) -> layers.SeparableConv1D:
+    channel_keep_ratio: float,
+    previous_layer_kept_output_indices: np.ndarray | None,
+) -> tuple[layers.SeparableConv1D, np.ndarray | None]:
     weights_list = original_sep_layer.get_weights()
     depthwise_kernel = weights_list[0]
     pointwise_kernel = weights_list[1]
@@ -84,20 +107,37 @@ def align_separable_conv1d_inputs(
     bias_vector = weights_list[2] if has_bias else None
     depth_multiplier = original_sep_layer.depth_multiplier
 
-    depthwise_kernel = depthwise_kernel[:, previous_layer_kept_output_indices, :]
-    pointwise_input_indices = np.concatenate(
-        [
-            np.arange(
-                channel_index * depth_multiplier,
-                channel_index * depth_multiplier + depth_multiplier,
-            )
-            for channel_index in previous_layer_kept_output_indices
-        ]
-    )
-    pointwise_kernel = pointwise_kernel[:, pointwise_input_indices, :]
+    if previous_layer_kept_output_indices is not None:
+        depthwise_kernel = depthwise_kernel[:, previous_layer_kept_output_indices, :]
+        pointwise_input_indices = np.concatenate(
+            [
+                np.arange(
+                    channel_index * depth_multiplier,
+                    channel_index * depth_multiplier + depth_multiplier,
+                )
+                for channel_index in previous_layer_kept_output_indices
+            ]
+        )
+        pointwise_kernel = pointwise_kernel[:, pointwise_input_indices, :]
+
+    if channel_keep_ratio < 1.0:
+        kept_output_indices = l1_ranked_separable_output_indices(pointwise_kernel, channel_keep_ratio)
+        pointwise_kernel = pointwise_kernel[:, :, kept_output_indices]
+        if bias_vector is not None:
+            bias_vector = bias_vector[kept_output_indices]
+        filters = len(kept_output_indices)
+        layer_name = f"{original_sep_layer.name}_pruned"
+    else:
+        kept_output_indices = None
+        filters = original_sep_layer.filters
+        layer_name = (
+            f"{original_sep_layer.name}_aligned"
+            if previous_layer_kept_output_indices is not None
+            else original_sep_layer.name
+        )
 
     new_aligned_sep_layer = layers.SeparableConv1D(
-        filters=original_sep_layer.filters,
+        filters=filters,
         kernel_size=original_sep_layer.kernel_size[0],
         strides=original_sep_layer.strides[0],
         padding=original_sep_layer.padding,
@@ -105,7 +145,7 @@ def align_separable_conv1d_inputs(
         depth_multiplier=depth_multiplier,
         use_bias=has_bias,
         activation=original_sep_layer.activation,
-        name=f"{original_sep_layer.name}_aligned",
+        name=layer_name,
     )
 
     if has_bias:
@@ -116,7 +156,21 @@ def align_separable_conv1d_inputs(
         )
     else:
         new_aligned_sep_layer._init_weights = (depthwise_kernel, pointwise_kernel)  # type: ignore[attr-defined]
-    return new_aligned_sep_layer
+    new_aligned_sep_layer._out_keep_indices = kept_output_indices  # type: ignore[attr-defined]
+    return new_aligned_sep_layer, kept_output_indices
+
+
+def _keras_history_layer_name(tensor: keras.KerasTensor) -> str:
+    history = tensor._keras_history  # type: ignore[attr-defined]
+    if hasattr(history, "operation"):
+        return history.operation.name
+    return history[0].name
+
+
+def _as_tensor_list(tensor_or_tensors):
+    if isinstance(tensor_or_tensors, (list, tuple)):
+        return list(tensor_or_tensors)
+    return [tensor_or_tensors]
 
 
 def rebuild_pruned_with_align(
@@ -128,53 +182,59 @@ def rebuild_pruned_with_align(
         shape=original_model.inputs[0].shape[1:],
         name="pruned_model_input",
     )
-    running_tensor = new_pruned_model_input_tensor
     old_to_new_layer: dict[str, layers.Layer] = {}
-    previous_layer_kept_output_indices: np.ndarray | None = None
+    kept_output_indices_by_layer_name: dict[str, np.ndarray] = {}
+    new_tensor_by_original_tensor_id: dict[int, keras.KerasTensor] = {
+        id(original_model.inputs[0]): new_pruned_model_input_tensor
+    }
 
     for original_layer in original_model.layers[1:]:
+        original_inputs = _as_tensor_list(original_layer.input)
+        new_inputs = [new_tensor_by_original_tensor_id[id(tensor)] for tensor in original_inputs]
+        inbound_layer_name = _keras_history_layer_name(original_inputs[0]) if len(original_inputs) == 1 else None
+        inbound_kept_indices = (
+            kept_output_indices_by_layer_name.get(inbound_layer_name)
+            if inbound_layer_name is not None
+            else None
+        )
+        channel_keep_ratio = layer_keep_ratio_map.get(
+            original_layer.name,
+            default_channel_keep_ratio,
+        )
+
         if isinstance(original_layer, layers.Conv1D):
-            channel_keep_ratio = layer_keep_ratio_map.get(
-                original_layer.name,
-                default_channel_keep_ratio,
+            new_layer, kept_output_indices = prune_conv1d_layer(
+                original_conv_layer=original_layer,
+                channel_keep_ratio=channel_keep_ratio,
+                previous_layer_kept_output_indices=inbound_kept_indices,
             )
-            if channel_keep_ratio < 1.0:
-                new_layer, previous_layer_kept_output_indices = prune_conv1d_layer(
-                    original_conv_layer=original_layer,
-                    channel_keep_ratio=channel_keep_ratio,
-                    previous_layer_kept_output_indices=previous_layer_kept_output_indices,
-                )
-            else:
-                new_layer = original_layer.__class__.from_config(original_layer.get_config())
-                previous_layer_kept_output_indices = None
         elif isinstance(original_layer, layers.SeparableConv1D):
-            if previous_layer_kept_output_indices is not None:
-                new_layer = align_separable_conv1d_inputs(
-                    original_sep_layer=original_layer,
-                    previous_layer_kept_output_indices=previous_layer_kept_output_indices,
-                )
-            else:
-                new_layer = original_layer.__class__.from_config(original_layer.get_config())
-            previous_layer_kept_output_indices = None
+            new_layer, kept_output_indices = prune_or_align_separable_conv1d_layer(
+                original_sep_layer=original_layer,
+                channel_keep_ratio=channel_keep_ratio,
+                previous_layer_kept_output_indices=inbound_kept_indices,
+            )
         else:
             new_layer = original_layer.__class__.from_config(original_layer.get_config())
-            if isinstance(
-                original_layer,
-                (
-                    layers.Dense,
-                    layers.Flatten,
-                    layers.GlobalAveragePooling1D,
-                    layers.GlobalMaxPooling1D,
-                ),
-            ):
-                previous_layer_kept_output_indices = None
+            kept_output_indices = None
 
-        running_tensor = new_layer(running_tensor)
+        new_output = new_layer(new_inputs[0] if len(new_inputs) == 1 else new_inputs)
         old_to_new_layer[original_layer.name] = new_layer
 
+        original_outputs = _as_tensor_list(original_layer.output)
+        new_outputs = _as_tensor_list(new_output)
+        for original_tensor, new_tensor in zip(original_outputs, new_outputs):
+            new_tensor_by_original_tensor_id[id(original_tensor)] = new_tensor
+
+        if kept_output_indices is not None:
+            kept_output_indices_by_layer_name[original_layer.name] = kept_output_indices
+        else:
+            kept_output_indices_by_layer_name.pop(original_layer.name, None)
+
+    mapped_outputs = [new_tensor_by_original_tensor_id[id(tensor)] for tensor in original_model.outputs]
     pruned_model = keras.Model(
         inputs=new_pruned_model_input_tensor,
-        outputs=running_tensor,
+        outputs=mapped_outputs[0] if len(mapped_outputs) == 1 else mapped_outputs,
         name=f"{original_model.name}_pruned",
     )
 

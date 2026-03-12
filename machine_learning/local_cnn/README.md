@@ -4,7 +4,7 @@ This folder converts the `machine_learning/microclimate_forecast_model.ipynb` no
 
 ## Environment
 
-TensorFlow 2.19 does not support Python 3.13, so this project is pinned to Python 3.12.
+TensorFlow 2.20 still requires Python 3.12 for this project setup, so the environment remains pinned to Python 3.12.
 
 ```powershell
 cd machine_learning/local_cnn

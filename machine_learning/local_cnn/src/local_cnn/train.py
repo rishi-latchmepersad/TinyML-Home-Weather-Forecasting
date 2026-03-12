@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import logging
+import sys
+from datetime import datetime
 from pathlib import Path
 
 from .config import (
@@ -9,17 +11,21 @@ from .config import (
     DEFAULT_OUTPUT_DIRECTORY,
     PipelineConfig,
 )
-from .modeling import configure_tensorflow_runtime
-from .pipeline import run_pipeline
+
+
+def _stderr_marker(message: str) -> None:
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{timestamp}] {message}", file=sys.stderr, flush=True)
 
 
 def apply_fast_profile(config: PipelineConfig) -> PipelineConfig:
     config.tuner_max_trials = 1
     config.tuner_executions_per_trial = 1
-    config.tuner_epochs = 8
+    config.tuner_epochs = 10
     config.tuner_patience = 2
-    config.fine_tune_epochs = 4
+    config.fine_tune_epochs = 6
     config.fine_tune_batch_size = 64
+    config.measurement_recent_days = 120
     config.skip_pruning = True
     config.skip_quantization = True
     config.enable_op_determinism = False
@@ -71,6 +77,11 @@ def build_argument_parser() -> argparse.ArgumentParser:
         help="Skip TFLite export and save only the trained Keras artifacts.",
     )
     parser.add_argument(
+        "--measurement-recent-days",
+        type=int,
+        help="Restrict training to the most recent N dated measurement files.",
+    )
+    parser.add_argument(
         "--fast",
         action="store_true",
         help="Use a faster training profile for iterative experiments.",
@@ -96,13 +107,16 @@ def build_argument_parser() -> argparse.ArgumentParser:
 
 
 def main() -> int:
+    _stderr_marker("train.py entered")
     parser = build_argument_parser()
     args = parser.parse_args()
+    _stderr_marker("Arguments parsed")
 
     logging.basicConfig(
         level=getattr(logging, args.log_level),
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
+    _stderr_marker("Logging configured")
 
     plot_path = args.output_dir / "weather_features.png" if args.plot else None
     config = PipelineConfig(
@@ -116,13 +130,28 @@ def main() -> int:
         device_preference=args.device,
         gpu_memory_growth=not args.disable_gpu_memory_growth,
         plot_path=plot_path,
+        measurement_recent_days=args.measurement_recent_days,
     )
     if args.fast:
         config = apply_fast_profile(config)
+        if args.measurement_recent_days is not None:
+            config.measurement_recent_days = args.measurement_recent_days
+
+    _stderr_marker("Importing TensorFlow runtime helpers")
+    from .runtime import configure_tensorflow_runtime
+
+    _stderr_marker("Configuring TensorFlow runtime")
     configure_tensorflow_runtime(config)
+
+    _stderr_marker("Importing pipeline")
+    from .pipeline import run_pipeline
+
+    _stderr_marker("Starting pipeline")
     artifacts = run_pipeline(config)
     logging.getLogger(__name__).info("Saved Keras model to %s", artifacts.keras_model_path)
+    logging.getLogger(__name__).info("Saved bias calibration to %s", artifacts.bias_calibration_path)
     logging.getLogger(__name__).info("Saved summary to %s", artifacts.summary_path)
+    _stderr_marker("Training completed")
     return 0
 
 

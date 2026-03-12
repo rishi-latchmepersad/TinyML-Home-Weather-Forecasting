@@ -5,6 +5,7 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
+from .calibration import compute_horizon_bias_calibration, save_horizon_bias_calibration
 from .config import PipelineConfig
 from .data import build_weather_dataframe
 from .features import PreparedDataset, plot_weather_features, prepare_dataset
@@ -33,6 +34,7 @@ class PipelineArtifacts:
     pruning: PruningResult
     quantization: QuantizationResult
     keras_model_path: Path
+    bias_calibration_path: Path
     scaler_path: Path
     summary_path: Path
 
@@ -54,8 +56,11 @@ def _save_summary(
     training: TrainingResult,
     pruning: PruningResult,
     quantization: QuantizationResult,
+    bias_calibration: object,
+    bias_calibration_path: Path,
     output_path: Path,
 ) -> Path:
+    bias_vector = list(map(float, bias_calibration))
     summary = {
         "feature_columns": dataset.feature_columns,
         "dataset_shapes": {
@@ -70,6 +75,7 @@ def _save_summary(
             "historical_window_slots": config.historical_window_slots,
             "forecast_horizon_slots": config.forecast_horizon_slots,
             "resample_frequency": config.resample_frequency,
+            "measurement_recent_days": config.measurement_recent_days,
             "include_open_meteo": config.include_open_meteo,
             "open_meteo_start_date": config.open_meteo_start_date,
             "open_meteo_end_date": config.open_meteo_end_date,
@@ -90,6 +96,8 @@ def _save_summary(
             "keras_test_mae": quantization.keras_test_mae,
             "tflite_fp32_test_mae": quantization.tflite_fp32_test_mae,
             "tflite_int8_test_mae": quantization.tflite_int8_test_mae,
+            "bias_calibration_mean_abs_c": float(sum(abs(value) for value in bias_vector) / len(bias_vector)),
+            "bias_calibration_max_abs_c": float(max(abs(value) for value in bias_vector)),
         },
         "footprint": {
             "fine_tuned_model_params": training.fine_tuned_model.count_params(),
@@ -112,6 +120,7 @@ def _save_summary(
             "int8_tflite": str(quantization.int8_tflite_path)
             if quantization.int8_tflite_path is not None
             else None,
+            "horizon_bias_calibration": str(bias_calibration_path),
         },
     }
     output_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
@@ -151,6 +160,15 @@ def run_pipeline(config: PipelineConfig) -> PipelineArtifacts:
     keras_model_path = config.output_directory / "best_pruned_model.keras"
     pruning.best_pruned_model.save(keras_model_path)
     scaler_path = _save_scaler(dataset, config.output_directory / "feature_scaler.json")
+    bias_calibration = compute_horizon_bias_calibration(
+        pruning.best_pruned_model,
+        dataset.X_validate,
+        dataset.y_validate,
+    )
+    bias_calibration_path = save_horizon_bias_calibration(
+        config.output_directory / "horizon_bias_calibration.json",
+        bias_calibration,
+    )
 
     if config.skip_quantization:
         quantization = summarize_keras_model_without_tflite(
@@ -171,6 +189,8 @@ def run_pipeline(config: PipelineConfig) -> PipelineArtifacts:
         training=training,
         pruning=pruning,
         quantization=quantization,
+        bias_calibration=bias_calibration,
+        bias_calibration_path=bias_calibration_path,
         output_path=config.output_directory / "training_summary.json",
     )
     return PipelineArtifacts(
@@ -179,6 +199,7 @@ def run_pipeline(config: PipelineConfig) -> PipelineArtifacts:
         pruning=pruning,
         quantization=quantization,
         keras_model_path=keras_model_path,
+        bias_calibration_path=bias_calibration_path,
         scaler_path=scaler_path,
         summary_path=summary_path,
     )
