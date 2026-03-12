@@ -58,7 +58,7 @@ class WeightedForecastHuber(keras.losses.Loss):
 @keras.saving.register_keras_serializable(package="local_cnn")
 class LastTimeStep(layers.Layer):
     def call(self, inputs: tf.Tensor) -> tf.Tensor:
-        return inputs[:, -1, :]
+        return ops.squeeze(ops.take(inputs, indices=[-1], axis=1), axis=1)
 
 
 @keras.saving.register_keras_serializable(package="local_cnn")
@@ -129,7 +129,14 @@ class HybridTemperatureAnchor(layers.Layer):
         self._climatology_weights = tf.constant(climatology_weights.reshape(1, -1), dtype=tf.float32)
 
     def call(self, inputs: tf.Tensor) -> tf.Tensor:
-        last_normalized_temperature = inputs[:, -1, self.temperature_feature_index]
+        temperature_history = ops.squeeze(
+            ops.take(inputs, indices=[self.temperature_feature_index], axis=2),
+            axis=2,
+        )
+        last_normalized_temperature = ops.squeeze(
+            ops.take(temperature_history, indices=[-1], axis=1),
+            axis=1,
+        )
         last_temperature_c = (
             last_normalized_temperature * self.temperature_feature_scale + self.temperature_feature_mean
         )
@@ -139,29 +146,39 @@ class HybridTemperatureAnchor(layers.Layer):
             axis=-1,
         )
 
-        seasonal_anchor = inputs[:, : self.forecast_horizon_slots, self.temperature_feature_index]
+        seasonal_anchor = ops.take(
+            temperature_history,
+            indices=list(range(self.forecast_horizon_slots)),
+            axis=1,
+        )
         seasonal_anchor = (
             seasonal_anchor * self.temperature_feature_scale + self.temperature_feature_mean
         )
 
-        if self.has_climatology_anchor:
-            climatology_feature = inputs[:, -1, self.temp_mean_24h_feature_index]
-            climatology_anchor = (
-                climatology_feature * self.temp_mean_24h_feature_scale + self.temp_mean_24h_feature_mean
-            )
-            climatology_anchor = ops.repeat(
-                ops.expand_dims(climatology_anchor, axis=-1),
-                repeats=self.forecast_horizon_slots,
-                axis=-1,
-            )
-        else:
-            climatology_anchor = ops.zeros_like(persistence_anchor)
-
-        return (
+        blended_anchor = (
             persistence_anchor * self._persistence_weights
             + seasonal_anchor * self._seasonal_weights
-            + climatology_anchor * self._climatology_weights
         )
+        if not self.has_climatology_anchor:
+            return blended_anchor
+
+        climatology_history = ops.squeeze(
+            ops.take(inputs, indices=[self.temp_mean_24h_feature_index], axis=2),
+            axis=2,
+        )
+        climatology_feature = ops.squeeze(
+            ops.take(climatology_history, indices=[-1], axis=1),
+            axis=1,
+        )
+        climatology_anchor = (
+            climatology_feature * self.temp_mean_24h_feature_scale + self.temp_mean_24h_feature_mean
+        )
+        climatology_anchor = ops.repeat(
+            ops.expand_dims(climatology_anchor, axis=-1),
+            repeats=self.forecast_horizon_slots,
+            axis=-1,
+        )
+        return blended_anchor + climatology_anchor * self._climatology_weights
 
     def get_config(self) -> dict[str, object]:
         return {

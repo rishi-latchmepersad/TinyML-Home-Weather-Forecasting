@@ -53,8 +53,8 @@ extern osMutexId_t g_fs_mutex;
 #endif
 // Declare how many 30-minute slots back we look when computing the temperature delta.
 #define FORECAST_TEMP_DELTA_T_LAG_SLOTS     (1u)
-// Declare how many 30-minute slots back we look when computing the pressure delta (12 hours).
-#define FORECAST_TEMP_DELTA_P_LAG_SLOTS     (24u)
+// Declare how many 30-minute slots back we look when computing the pressure delta.
+#define FORECAST_TEMP_DELTA_P_LAG_SLOTS     (1u)
 // Declare how many engineered plus raw features the model expects per time step. Tie this
 // directly to the generated model metadata so the inference task automatically adapts when
 // the notebook changes the input feature count.
@@ -91,14 +91,12 @@ extern osMutexId_t g_fs_mutex;
 #error "Model input tensor must encode exactly 48 30-minute slots to match the live window"
 #endif
 
-#if ((FORECAST_TEMP_FEATURE_COUNT != 4u) && (FORECAST_TEMP_FEATURE_COUNT != 9u))
-#error "Forecast task currently supports only 4-feature ablation or 9-feature engineered models"
+#if (FORECAST_TEMP_FEATURE_COUNT != 6u)
+#error "Forecast task currently supports only the deployed 6-feature model"
 #endif
 
-#if (FORECAST_TEMP_FEATURE_COUNT == 4u)
-#define FORECAST_TEMP_MODEL_VARIANT_NAME    "ablation (4-feature raw)"
-#elif (FORECAST_TEMP_FEATURE_COUNT == 9u)
-#define FORECAST_TEMP_MODEL_VARIANT_NAME    "full (9-feature engineered)"
+#if (FORECAST_TEMP_FEATURE_COUNT == 6u)
+#define FORECAST_TEMP_MODEL_VARIANT_NAME    "selected (6-feature deployable)"
 #else
 #define FORECAST_TEMP_MODEL_VARIANT_NAME    "unsupported"
 #endif
@@ -155,22 +153,27 @@ typedef struct {
 // IMPORTANT: these values must match the StandardScaler in the training notebook
 // for the deployed model and feature order.
 // Current order for 4-feature ablation: [temperature, humidity, pressure, illuminance_lux]
-// Current order for 9-feature model:
-// [temperature, humidity, pressure, illuminance_lux, delta_T, temp_mean_6h,
-//  humidity_mean_6h, sin_hour, cos_hour]
-static const float g_feature_means[FORECAST_TEMP_FEATURE_COUNT] = { 28.884267f,
-		86.161369f, 101063.070000f, 4378.142890f,
-#if (FORECAST_TEMP_FEATURE_COUNT == 9u)
-		0.0f, 28.884267f, 86.161369f, 0.0f, 0.0f,
-#endif
-		};
+// Current order for 6-feature model:
+// [temperature, humidity, pressure, illuminance_lux, delta_T, pressure_delta]
+// Current order:
+// [temperature, humidity, pressure, illuminance_lux, delta_T, pressure_delta]
+static const float g_feature_means[FORECAST_TEMP_FEATURE_COUNT] = {
+		27.595968f,
+		74.650795f,
+		101105.914063f,
+		30520.873047f,
+		0.000096f,
+		-0.001222f,
+};
 // Store the feature standard deviations so we can normalize each component.
-static const float g_feature_stds[FORECAST_TEMP_FEATURE_COUNT] = { 4.121619f,
-		12.275329f, 167.728468f, 6739.249270f,
-#if (FORECAST_TEMP_FEATURE_COUNT == 9u)
-		1.0f, 4.121619f, 12.275329f, 0.707107f, 0.707107f,
-#endif
-		};
+static const float g_feature_stds[FORECAST_TEMP_FEATURE_COUNT] = {
+		2.590937f,
+		13.098757f,
+		194.783981f,
+		38723.996094f,
+		0.442968f,
+		28.661697f,
+};
 
 // Hold the FreeRTOS thread handle so we do not start the task twice.
 static osThreadId_t g_forecast_thread_id = NULL;
@@ -189,10 +192,12 @@ static ai_handle g_forecast_network = AI_HANDLE_NULL;
 // Provide storage for the activations buffer that the runtime will fill.
 AI_ALIGNED(4)
 static ai_u8 g_network_activations[AI_FORECAST_TEMP_ML_MODEL_DATA_ACTIVATIONS_SIZE];
-// Provide storage for the quantized input tensor.
-static int8_t g_network_input_buffer[AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE];
-// Provide storage for the quantized output tensor.
-static int8_t g_network_output_buffer[AI_FORECAST_TEMP_ML_MODEL_OUT_1_SIZE];
+// Provide storage for the network input tensor in the generated model's native format.
+AI_ALIGNED(4)
+static ai_u8 g_network_input_buffer[AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE_BYTES];
+// Provide storage for the network output tensor in the generated model's native format.
+AI_ALIGNED(4)
+static ai_u8 g_network_output_buffer[AI_FORECAST_TEMP_ML_MODEL_OUT_1_SIZE_BYTES];
 // Cache the input buffer descriptor returned by the runtime.
 static ai_buffer *g_network_inputs = NULL;
 // Cache the output buffer descriptor returned by the runtime.
@@ -290,7 +295,7 @@ static size_t g_slot_history_count = 0u;
 
 // Store the normalized feature vectors for each 30-minute step in a ring buffer.
 static float g_feature_window[FORECAST_TEMP_WINDOW_LENGTH][FORECAST_TEMP_FEATURE_COUNT] =
-		{ 0.0f };
+		{ { 0.0f } };
 // Track the index of the oldest feature vector in the sliding window.
 static size_t g_feature_window_head = 0u;
 // Track how many feature vectors are currently valid in the sliding window.
@@ -326,7 +331,7 @@ static void forecast_temp_prepare_features(float temperature_c,
 static void forecast_temp_append_feature_vector(
 		const float normalized_features[FORECAST_TEMP_FEATURE_COUNT]);
 // Forward declare a helper that exports the sliding window into the int8 input tensor.
-static bool forecast_temp_export_window_to_network(int8_t *destination_buffer);
+static bool forecast_temp_export_window_to_network(ai_u8 *destination_buffer);
 // Forward declare a helper that runs the model once the window is full.
 static bool forecast_temp_run_inference(
 		float predictions_out[FORECAST_TEMP_FORECAST_HORIZON_SLOTS],
@@ -1330,54 +1335,13 @@ static void forecast_temp_prepare_features(float temperature_c,
 		float out_features[FORECAST_TEMP_FEATURE_COUNT]) {
 	float raw_features[FORECAST_TEMP_FEATURE_COUNT] = { 0.0f };
 	float delta_t = 0.0f;
-	float temperature_mean_6h = temperature_c;
-	float humidity_mean_6h = humidity_pct;
-	float sin_hour = 0.0f;
-	float cos_hour = 1.0f;
+	float pressure_delta = 0.0f;
 
 	if (g_slot_history_count > 0u) {
 		const size_t latest_index = (g_slot_history_head + g_slot_history_count
 				- 1u) % FORECAST_TEMP_HISTORY_CAPACITY;
 		delta_t = temperature_c - g_slot_temperature_history[latest_index];
-	}
-
-	if (g_slot_history_count > 0u) {
-		const size_t sample_count =
-				(g_slot_history_count < 11u) ? g_slot_history_count : 11u;
-		float temperature_sum = temperature_c;
-		for (size_t i = 0u; i < sample_count; ++i) {
-			const size_t history_index = (g_slot_history_head
-					+ g_slot_history_count - 1u - i)
-					% FORECAST_TEMP_HISTORY_CAPACITY;
-			temperature_sum += g_slot_temperature_history[history_index];
-		}
-		temperature_mean_6h = temperature_sum / (float) (sample_count + 1u);
-	}
-
-	if (g_feature_window_count > 0u) {
-		const size_t sample_count =
-				(g_feature_window_count < 11u) ? g_feature_window_count : 11u;
-		float humidity_sum = humidity_pct;
-		for (size_t i = 0u; i < sample_count; ++i) {
-			const size_t feature_index = (g_feature_window_head
-					+ g_feature_window_count - 1u - i)
-					% FORECAST_TEMP_WINDOW_LENGTH;
-			humidity_sum += g_feature_window[feature_index][1u]
-					* g_feature_stds[1u] + g_feature_means[1u];
-		}
-		humidity_mean_6h = humidity_sum / (float) (sample_count + 1u);
-	}
-
-	char timestamp[24] = { 0 };
-	if (ds3231_read_time_iso8601_utc_i2c1(timestamp, sizeof timestamp)
-			== HAL_OK) {
-		int hour = -1;
-		if (sscanf(timestamp, "%*4d-%*2d-%*2dT%2d", &hour) == 1) {
-			const float hour_angle = (2.0f * FORECAST_TEMP_PI * (float) hour)
-					/ 24.0f;
-			sin_hour = sinf(hour_angle);
-			cos_hour = cosf(hour_angle);
-		}
+		pressure_delta = pressure_pa - g_slot_pressure_history[latest_index];
 	}
 
 	// Populate the raw feature vector in the same order used during training.
@@ -1385,13 +1349,8 @@ static void forecast_temp_prepare_features(float temperature_c,
 	raw_features[1] = humidity_pct;
 	raw_features[2] = pressure_pa;
 	raw_features[3] = illuminance_lux;
-#if (FORECAST_TEMP_FEATURE_COUNT == 9u)
 	raw_features[4] = delta_t;
-	raw_features[5] = temperature_mean_6h;
-	raw_features[6] = humidity_mean_6h;
-	raw_features[7] = sin_hour;
-	raw_features[8] = cos_hour;
-#endif
+	raw_features[5] = pressure_delta;
 	// Normalize each feature using the stored StandardScaler parameters.
 	for (size_t i = 0u; i < FORECAST_TEMP_FEATURE_COUNT; ++i) {
 		out_features[i] = (raw_features[i] - g_feature_means[i])
@@ -1420,8 +1379,8 @@ static void forecast_temp_append_feature_vector(
 	g_feature_window_count += 1u;
 }
 
-// Convert the sliding window into the quantized tensor expected by the network.
-static bool forecast_temp_export_window_to_network(int8_t *destination_buffer) {
+// Convert the sliding window into the tensor format expected by the network.
+static bool forecast_temp_export_window_to_network(ai_u8 *destination_buffer) {
 	// Guard against NULL destination pointers.
 	if (destination_buffer == NULL) {
 		return false;
@@ -1430,7 +1389,9 @@ static bool forecast_temp_export_window_to_network(int8_t *destination_buffer) {
 	if (g_feature_window_count < FORECAST_TEMP_WINDOW_LENGTH) {
 		return false;
 	}
-	// Walk the window in chronological order and quantize each feature.
+	const bool expects_float_input = (AI_BUFFER_FMT_GET_TYPE(
+			AI_FORECAST_TEMP_ML_MODEL_IN_1_FORMAT) == AI_BUFFER_FMT_TYPE_FLOAT);
+	// Walk the window in chronological order and export each feature.
 	size_t out_index = 0u;
 	for (size_t time_index = 0u;
 			time_index < FORECAST_TEMP_NETWORK_WINDOW_SLOTS; ++time_index) {
@@ -1450,15 +1411,21 @@ static bool forecast_temp_export_window_to_network(int8_t *destination_buffer) {
 				feature_index < FORECAST_TEMP_FEATURE_COUNT; ++feature_index) {
 			const float normalized_value =
 					g_feature_window[source_index][feature_index];
-			float scaled_value = normalized_value / g_input_scale;
-			scaled_value += (float) g_input_zero_point;
-			int32_t quantized = (int32_t) lroundf(scaled_value);
-			if (quantized < -128) {
-				quantized = -128;
-			} else if (quantized > 127) {
-				quantized = 127;
+			if (expects_float_input) {
+				float *float_destination = (float*) destination_buffer;
+				float_destination[out_index] = normalized_value;
+			} else {
+				int8_t *int8_destination = (int8_t*) destination_buffer;
+				float scaled_value = normalized_value / g_input_scale;
+				scaled_value += (float) g_input_zero_point;
+				int32_t quantized = (int32_t) lroundf(scaled_value);
+				if (quantized < -128) {
+					quantized = -128;
+				} else if (quantized > 127) {
+					quantized = 127;
+				}
+				int8_destination[out_index] = (int8_t) quantized;
 			}
-			destination_buffer[out_index] = (int8_t) quantized;
 			out_index += 1u;
 		}
 	}
@@ -1520,11 +1487,20 @@ static bool forecast_temp_run_inference(
 		printf(LOG_PREFIX "[forecast] inference runtime %lu ms\r\n",
 				(unsigned long) elapsed_ms);
 	}
-	// Decode the int8 outputs back into floating-point units and report each lead time.
+	const bool outputs_are_float = (AI_BUFFER_FMT_GET_TYPE(
+			AI_FORECAST_TEMP_ML_MODEL_OUT_1_FORMAT) == AI_BUFFER_FMT_TYPE_FLOAT);
+	// Decode the outputs back into floating-point units and report each lead time.
 	for (size_t i = 0u; i < FORECAST_TEMP_FORECAST_HORIZON_SLOTS; ++i) {
-		const float dequantized = ((float) g_network_output_buffer[i]
-				- (float) g_output_zero_point) * g_output_scale;
-		predictions_out[i] = dequantized;
+		float predicted_temperature_c = 0.0f;
+		if (outputs_are_float) {
+			const float *float_output = (const float*) g_network_output_buffer;
+			predicted_temperature_c = float_output[i];
+		} else {
+			const int8_t *int8_output = (const int8_t*) g_network_output_buffer;
+			predicted_temperature_c = ((float) int8_output[i]
+					- (float) g_output_zero_point) * g_output_scale;
+		}
+		predictions_out[i] = predicted_temperature_c;
 		const uint32_t lead_minutes_total = (uint32_t) ((i + 1u)
 				* FORECAST_TEMP_MINUTES_PER_SLOT);
 		const uint32_t lead_hours = lead_minutes_total / 60u;
@@ -1532,7 +1508,7 @@ static bool forecast_temp_run_inference(
 		if (should_log) {
 			printf(LOG_PREFIX "[forecast] horizon+%02lu:%02lu %.2f C\r\n",
 					(unsigned long) lead_hours, (unsigned long) lead_minutes,
-					(double) dequantized);
+					(double) predicted_temperature_c);
 		}
 	}
 	// Signal success to the caller.
