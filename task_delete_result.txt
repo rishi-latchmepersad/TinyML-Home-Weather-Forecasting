@@ -1,1 +1,0 @@
-SUCCESS: The scheduled task "\AutoHibernateAfterIdle" was successfully deleted.

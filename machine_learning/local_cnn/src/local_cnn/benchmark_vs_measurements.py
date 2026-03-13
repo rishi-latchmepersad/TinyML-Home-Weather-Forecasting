@@ -19,7 +19,7 @@ from .evaluate_vs_measurements import (
     _select_split_indices,
 )
 from .features import prepare_dataset
-from .modeling import horizon_60m_mae
+from .modeling import horizon_360m_mae, horizon_60m_mae
 
 
 def build_argument_parser() -> argparse.ArgumentParser:
@@ -227,7 +227,7 @@ def main() -> int:
 
     model = tf.keras.models.load_model(
         args.model_path,
-        custom_objects={"horizon_60m_mae": horizon_60m_mae},
+        custom_objects={"horizon_60m_mae": horizon_60m_mae, "horizon_360m_mae": horizon_360m_mae},
         compile=False,
     )
     predictions = model.predict(dataset.input_sequences[replay_indices], verbose=0)

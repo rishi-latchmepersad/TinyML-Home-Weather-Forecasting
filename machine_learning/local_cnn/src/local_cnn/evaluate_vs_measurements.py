@@ -12,7 +12,7 @@ from .calibration import apply_horizon_bias_calibration, load_horizon_bias_calib
 from .config import DEFAULT_MEASUREMENTS_DIRECTORY, DEFAULT_OUTPUT_DIRECTORY, PipelineConfig
 from .data import _read_measurement_csv, build_weather_dataframe
 from .features import prepare_dataset
-from .modeling import horizon_60m_mae
+from .modeling import horizon_360m_mae, horizon_60m_mae
 
 
 def build_argument_parser() -> argparse.ArgumentParser:
@@ -265,7 +265,7 @@ def main() -> int:
 
     model = tf.keras.models.load_model(
         args.model_path,
-        custom_objects={"horizon_60m_mae": horizon_60m_mae},
+        custom_objects={"horizon_60m_mae": horizon_60m_mae, "horizon_360m_mae": horizon_360m_mae},
         compile=False,
     )
     predictions = model.predict(dataset.input_sequences[replay_indices], verbose=0)

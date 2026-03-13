@@ -136,7 +136,7 @@ def evaluate_keras_mae(keras_model: keras.Model, X: np.ndarray, y: np.ndarray) -
         return float(evaluation["mean_absolute_error"])
 
     for metric_name, metric_value in evaluation.items():
-        if metric_name.endswith("mae") and metric_name != "horizon_60m_mae":
+        if metric_name.endswith("mae") and metric_name not in {"horizon_60m_mae", "horizon_360m_mae"}:
             return float(metric_value)
 
     raise ValueError(f"Could not find a scalar MAE metric in evaluation results: {evaluation}")

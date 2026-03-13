@@ -18,13 +18,16 @@ from .features import PreparedDataset
 
 logger = logging.getLogger(__name__)
 
+PRIMARY_HORIZON_MINUTES = 360
+PRIMARY_HORIZON_INDEX = 11
+
 
 @keras.saving.register_keras_serializable(package="local_cnn")
 class WeightedForecastHuber(keras.losses.Loss):
     def __init__(
         self,
         forecast_horizon_slots: int,
-        primary_horizon_index: int = 1,
+        primary_horizon_index: int = PRIMARY_HORIZON_INDEX,
         delta: float = 1.5,
         name: str = "weighted_forecast_huber",
     ) -> None:
@@ -207,7 +210,15 @@ def horizon_60m_mae(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
     return ops.mean(ops.abs(y_true[:, 1] - y_pred[:, 1]))
 
 
-def build_regression_loss(forecast_horizon_slots: int, primary_horizon_index: int = 1) -> keras.losses.Loss:
+@keras.saving.register_keras_serializable(package="local_cnn")
+def horizon_360m_mae(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
+    return ops.mean(ops.abs(y_true[:, PRIMARY_HORIZON_INDEX] - y_pred[:, PRIMARY_HORIZON_INDEX]))
+
+
+def build_regression_loss(
+    forecast_horizon_slots: int,
+    primary_horizon_index: int = PRIMARY_HORIZON_INDEX,
+) -> keras.losses.Loss:
     return WeightedForecastHuber(
         forecast_horizon_slots=forecast_horizon_slots,
         primary_horizon_index=primary_horizon_index,
@@ -344,7 +355,7 @@ def build_one_dimensional_convolutional_model(
     model.compile(
         optimizer=keras.optimizers.Adam(learning_rate=1e-3),
         loss=build_regression_loss(forecast_horizon_slots=forecast_horizon_slots),
-        metrics=[keras.metrics.MeanAbsoluteError(name="mae"), horizon_60m_mae],
+        metrics=[keras.metrics.MeanAbsoluteError(name="mae"), horizon_360m_mae],
     )
     return model
 
@@ -413,7 +424,7 @@ def build_model_for_tuning(
     model.compile(
         optimizer=keras.optimizers.Adam(learning_rate=learning_rate),
         loss=build_regression_loss(forecast_horizon_slots=forecast_horizon_slots),
-        metrics=[keras.metrics.MeanAbsoluteError(name="mae"), horizon_60m_mae],
+        metrics=[keras.metrics.MeanAbsoluteError(name="mae"), horizon_360m_mae],
     )
     return model
 
@@ -472,7 +483,7 @@ def tune_model(dataset: PreparedDataset, config: PipelineConfig) -> tuple[keras.
             temp_mean_24h_feature_scale=temp_mean_24h_feature_scale,
             temp_mean_24h_feature_index=temp_mean_24h_feature_index,
         ),
-        objective=kt.Objective("val_horizon_60m_mae", direction="min"),
+        objective=kt.Objective("val_horizon_360m_mae", direction="min"),
         max_trials=config.tuner_max_trials,
         executions_per_trial=config.tuner_executions_per_trial,
         overwrite=True,
@@ -480,7 +491,7 @@ def tune_model(dataset: PreparedDataset, config: PipelineConfig) -> tuple[keras.
         project_name=project_name,
     )
     early_stopping = keras.callbacks.EarlyStopping(
-        monitor="val_horizon_60m_mae",
+        monitor="val_horizon_360m_mae",
         mode="min",
         patience=config.tuner_patience,
         restore_best_weights=True,
@@ -501,9 +512,9 @@ def tune_model(dataset: PreparedDataset, config: PipelineConfig) -> tuple[keras.
         return_dict=True,
     )
     validation_mae = float(evaluation["mae"])
-    validation_60m_mae = float(evaluation["horizon_60m_mae"])
+    validation_360m_mae = float(evaluation["horizon_360m_mae"])
     logger.info("Tuned model validation MAE: %.4f", validation_mae)
-    logger.info("Tuned model validation +60m MAE: %.4f", validation_60m_mae)
+    logger.info("Tuned model validation +%dm MAE: %.4f", PRIMARY_HORIZON_MINUTES, validation_360m_mae)
     return best_model, float(validation_mae)
 
 
@@ -515,11 +526,11 @@ def fine_tune_model(
     model.compile(
         optimizer=keras.optimizers.Adam(learning_rate=config.fine_tune_learning_rate),
         loss=model.loss,
-        metrics=[keras.metrics.MeanAbsoluteError(name="mae"), horizon_60m_mae],
+        metrics=[keras.metrics.MeanAbsoluteError(name="mae"), horizon_360m_mae],
     )
     callbacks = [
         keras.callbacks.ReduceLROnPlateau(
-            monitor="val_horizon_60m_mae",
+            monitor="val_horizon_360m_mae",
             mode="min",
             factor=0.5,
             patience=6,
@@ -527,7 +538,7 @@ def fine_tune_model(
             verbose=0,
         ),
         keras.callbacks.EarlyStopping(
-            monitor="val_horizon_60m_mae",
+            monitor="val_horizon_360m_mae",
             mode="min",
             patience=10,
             restore_best_weights=True,
@@ -550,7 +561,7 @@ def fine_tune_model(
         return_dict=True,
     )
     validation_mae = float(evaluation["mae"])
-    validation_60m_mae = float(evaluation["horizon_60m_mae"])
+    validation_360m_mae = float(evaluation["horizon_360m_mae"])
     logger.info("Fine-tuned model validation MAE: %.4f", validation_mae)
-    logger.info("Fine-tuned model validation +60m MAE: %.4f", validation_60m_mae)
+    logger.info("Fine-tuned model validation +%dm MAE: %.4f", PRIMARY_HORIZON_MINUTES, validation_360m_mae)
     return model, float(validation_mae)

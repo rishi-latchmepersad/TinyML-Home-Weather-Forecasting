@@ -9,7 +9,7 @@ from keras import layers
 
 from .config import PipelineConfig
 from .features import PreparedDataset
-from .modeling import estimate_conv1d_macs, estimate_model_size_bytes, horizon_60m_mae
+from .modeling import estimate_conv1d_macs, estimate_model_size_bytes, horizon_360m_mae
 
 logger = logging.getLogger(__name__)
 
@@ -276,7 +276,7 @@ def run_pruning_sweep(
         pruned_candidate_model.compile(
             optimizer=keras.optimizers.Adam(learning_rate=config.pruning_learning_rate),
             loss=model.loss,
-            metrics=[keras.metrics.MeanAbsoluteError(name="mae"), horizon_60m_mae],
+            metrics=[keras.metrics.MeanAbsoluteError(name="mae"), horizon_360m_mae],
         )
         pruned_candidate_model.fit(
             dataset.X_train,
@@ -287,7 +287,7 @@ def run_pruning_sweep(
             verbose=0,
             callbacks=[
                 keras.callbacks.ReduceLROnPlateau(
-                    monitor="val_horizon_60m_mae",
+                    monitor="val_horizon_360m_mae",
                     mode="min",
                     factor=0.5,
                     patience=4,
@@ -295,7 +295,7 @@ def run_pruning_sweep(
                     verbose=0,
                 ),
                 keras.callbacks.EarlyStopping(
-                    monitor="val_horizon_60m_mae",
+                    monitor="val_horizon_360m_mae",
                     mode="min",
                     patience=8,
                     restore_best_weights=True,
