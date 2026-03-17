@@ -69,3 +69,9 @@
 [2026-03-16 19:12:17.385] Application Id=0 Provider=igccservice Level=Information Time=2026-03-16T19:12:14.9022452-04:00 Message=PowerEvent handled successfully by the service.
 [2026-03-16 19:12:19.635] Application Id=0 Provider=igccservice Level=Information Time=2026-03-16T19:12:18.8027815-04:00 Message=PowerEvent handled successfully by the service.
 [2026-03-16 19:12:21.768] System Id=9007 Provider=nhi Level=Information Time=2026-03-16T19:12:20.0518099-04:00 Message=The driver entered RTD3. All the connected devices will be removed from driver's internal state, so it is expected that DeviceDisconnected events will happen.
+[2026-03-16 22:41:40.385] Application Id=0 Provider=igccservice Level=Information Time=2026-03-16T22:41:38.8349960-04:00 Message=PowerEvent handled successfully by the service.
+[2026-03-17 14:36:44.904] Application Id=0 Provider=igccservice Level=Information Time=2026-03-17T14:36:42.2210252-04:00 Message=PowerEvent handled successfully by the service.
+[2026-03-17 14:36:52.069] Application Id=0 Provider=igccservice Level=Information Time=2026-03-17T14:36:46.2593553-04:00 Message=PowerEvent handled successfully by the service.
+[2026-03-17 14:36:52.070] Application Id=0 Provider=igccservice Level=Information Time=2026-03-17T14:36:44.2886263-04:00 Message=PowerEvent handled successfully by the service.
+[2026-03-17 14:36:52.074] Application Id=0 Provider=igccservice Level=Information Time=2026-03-17T14:36:44.0772854-04:00 Message=PowerEvent handled successfully by the service.
+[2026-03-17 14:36:54.320] System Id=9007 Provider=nhi Level=Information Time=2026-03-17T14:36:48.3321896-04:00 Message=The driver entered RTD3. All the connected devices will be removed from driver's internal state, so it is expected that DeviceDisconnected events will happen.
