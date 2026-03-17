@@ -1062,7 +1062,7 @@
         <mxCell id="cnn-blend-new" value="&lt;b&gt;HorizonBlend&lt;/b&gt;&lt;div&gt;blend short and long residuals with a learned horizon ramp&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ead1dc;strokeColor=#a64d79;fontSize=14;" parent="1" vertex="1">
           <mxGeometry x="675.77" y="770" width="230" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="cnn-anchor-new" value="&lt;b&gt;HybridTemperatureAnchor&lt;/b&gt;&lt;div&gt;deployed 6-feature variant uses:&lt;/div&gt;&lt;div&gt;persistence anchor + 24h seasonal anchor&lt;/div&gt;&lt;div&gt;(no temp_mean_24h climatology input)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0e0e3;strokeColor=#45818e;fontSize=14;" parent="1" vertex="1">
+        <mxCell id="cnn-anchor-new" value="&lt;b&gt;HybridTemperatureAnchor&lt;/b&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;persistence anchor + 24h seasonal anchor for stability&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0e0e3;strokeColor=#45818e;fontSize=14;" parent="1" vertex="1">
           <mxGeometry x="280" y="620" width="260" height="110" as="geometry" />
         </mxCell>
         <mxCell id="cnn-add-new" value="&lt;b&gt;Add&lt;/b&gt;&lt;div&gt;final forecast = anchor + blended residual&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c9daf8;strokeColor=#3c78d8;fontSize=14;" parent="1" vertex="1">
@@ -1086,11 +1086,10 @@
         <mxCell id="cnn-edge-e" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;" parent="1" source="cnn-sep2-new" target="cnn-proj-new" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="cnn-edge-f" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;exitX=0;exitY=1;exitDx=0;exitDy=0;" parent="1" source="cnn-proj-new" target="cnn-gap-new" edge="1">
+        <mxCell id="cnn-edge-f" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="cnn-proj-new" target="cnn-gap-new" edge="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="1050" y="280" />
-              <mxPoint x="1050" y="320" />
+              <mxPoint x="1140" y="320" />
               <mxPoint x="752" y="320" />
             </Array>
           </mxGeometry>
@@ -1171,16 +1170,16 @@
         <mxCell id="cnn-edge-u" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="cnn-add-new" target="cnn-output-new" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="2g-Jlzwm730CsJKmbX8U-3" value="" style="shape=curlyBracket;whiteSpace=wrap;html=1;rounded=1;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;rotation=-180;direction=south;" vertex="1" parent="1">
+        <mxCell id="2g-Jlzwm730CsJKmbX8U-3" value="" style="shape=curlyBracket;whiteSpace=wrap;html=1;rounded=1;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;rotation=-180;direction=south;" parent="1" vertex="1">
           <mxGeometry x="280" y="280" width="320" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="2g-Jlzwm730CsJKmbX8U-4" value="Conv Block 1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+        <mxCell id="2g-Jlzwm730CsJKmbX8U-4" value="Conv Block 1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="385" y="290" width="110" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="2g-Jlzwm730CsJKmbX8U-5" value="" style="shape=curlyBracket;whiteSpace=wrap;html=1;rounded=1;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;rotation=-180;direction=south;" vertex="1" parent="1">
+        <mxCell id="2g-Jlzwm730CsJKmbX8U-5" value="" style="shape=curlyBracket;whiteSpace=wrap;html=1;rounded=1;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;rotation=-180;direction=south;" parent="1" vertex="1">
           <mxGeometry x="675.77" y="280" width="320" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="2g-Jlzwm730CsJKmbX8U-6" value="Conv Block 2" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+        <mxCell id="2g-Jlzwm730CsJKmbX8U-6" value="Conv Block 2" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="780.77" y="290" width="110" height="30" as="geometry" />
         </mxCell>
       </root>

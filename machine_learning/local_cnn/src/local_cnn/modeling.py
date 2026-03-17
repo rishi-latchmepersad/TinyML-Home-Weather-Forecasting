@@ -36,9 +36,13 @@ class WeightedForecastHuber(keras.losses.Loss):
         self.primary_horizon_index = int(primary_horizon_index)
         self.delta = float(delta)
 
-        base_weights = np.linspace(1.20, 0.80, self.forecast_horizon_slots, dtype=np.float32)
+        horizon_indices = np.arange(self.forecast_horizon_slots, dtype=np.float32)
+        base_weights = np.linspace(1.05, 0.95, self.forecast_horizon_slots, dtype=np.float32)
         if 0 <= self.primary_horizon_index < self.forecast_horizon_slots:
-            base_weights[self.primary_horizon_index] *= 2.5
+            # Emphasize a band around the primary horizon instead of a single slot.
+            horizon_distance = horizon_indices - float(self.primary_horizon_index)
+            band_boost = 1.0 + 1.75 * np.exp(-0.5 * np.square(horizon_distance / 2.5))
+            base_weights *= band_boost
         self._weights = tf.constant(base_weights / np.mean(base_weights), dtype=tf.float32)
 
     def call(self, y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
@@ -79,6 +83,44 @@ class HorizonBlend(layers.Layer):
     def get_config(self) -> dict[str, object]:
         return {
             "forecast_horizon_slots": self.forecast_horizon_slots,
+            **super().get_config(),
+        }
+
+
+@keras.saving.register_keras_serializable(package="local_cnn")
+class SeasonalNaiveTrajectory(layers.Layer):
+    def __init__(
+        self,
+        forecast_horizon_slots: int,
+        temperature_feature_index: int,
+        temperature_feature_mean: float,
+        temperature_feature_scale: float,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.forecast_horizon_slots = int(forecast_horizon_slots)
+        self.temperature_feature_index = int(temperature_feature_index)
+        self.temperature_feature_mean = float(temperature_feature_mean)
+        self.temperature_feature_scale = float(temperature_feature_scale)
+
+    def call(self, inputs: tf.Tensor) -> tf.Tensor:
+        temperature_history = ops.squeeze(
+            ops.take(inputs, indices=[self.temperature_feature_index], axis=2),
+            axis=2,
+        )
+        seasonal_trajectory = ops.take(
+            temperature_history,
+            indices=list(range(self.forecast_horizon_slots)),
+            axis=1,
+        )
+        return seasonal_trajectory * self.temperature_feature_scale + self.temperature_feature_mean
+
+    def get_config(self) -> dict[str, object]:
+        return {
+            "forecast_horizon_slots": self.forecast_horizon_slots,
+            "temperature_feature_index": self.temperature_feature_index,
+            "temperature_feature_mean": self.temperature_feature_mean,
+            "temperature_feature_scale": self.temperature_feature_scale,
             **super().get_config(),
         }
 
@@ -302,11 +344,21 @@ def build_one_dimensional_convolutional_model(
     temporal_summary = layers.Concatenate(name="temporal_summary_features")(
         [pooled_average_features, pooled_max_features, latest_temporal_features]
     )
+    seasonal_naive_trajectory = SeasonalNaiveTrajectory(
+        forecast_horizon_slots=forecast_horizon_slots,
+        temperature_feature_index=temperature_feature_index,
+        temperature_feature_mean=temperature_feature_mean,
+        temperature_feature_scale=temperature_feature_scale,
+        name="seasonal_naive_temperature_trajectory",
+    )(input_layer)
+    residual_context = layers.Concatenate(name="residual_context_features")(
+        [temporal_summary, seasonal_naive_trajectory]
+    )
     short_dense_projection = layers.Dense(
         units=dense_units,
         activation="relu",
         name="dense_short_projection",
-    )(temporal_summary)
+    )(residual_context)
     regularized_short_features = layers.Dropout(
         rate=dropout_rate,
         name="dropout_regularization",
@@ -317,7 +369,7 @@ def build_one_dimensional_convolutional_model(
         name="predicted_temperature_delta_short_horizon",
     )(regularized_short_features)
     long_term_summary = layers.Concatenate(name="long_term_summary_features")(
-        [pooled_average_features, pooled_max_features]
+        [pooled_average_features, pooled_max_features, latest_temporal_features, seasonal_naive_trajectory]
     )
     long_dense_projection = layers.Dense(
         units=max(dense_units // 2, 32),
@@ -333,18 +385,8 @@ def build_one_dimensional_convolutional_model(
         forecast_horizon_slots=forecast_horizon_slots,
         name="blended_temperature_delta_horizon",
     )([short_delta_temperature_horizon, delta_temperature_long_horizon])
-    temperature_anchor = HybridTemperatureAnchor(
-        forecast_horizon_slots=forecast_horizon_slots,
-        temperature_feature_index=temperature_feature_index,
-        temperature_feature_mean=temperature_feature_mean,
-        temperature_feature_scale=temperature_feature_scale,
-        temp_mean_24h_feature_index=temp_mean_24h_feature_index,
-        temp_mean_24h_feature_mean=temp_mean_24h_feature_mean,
-        temp_mean_24h_feature_scale=temp_mean_24h_feature_scale,
-        name="hybrid_temperature_anchor",
-    )(input_layer)
     output_temperature = layers.Add(name="predicted_temperature_horizon")(
-        [temperature_anchor, blended_delta_horizon]
+        [seasonal_naive_trajectory, blended_delta_horizon]
     )
 
     model = keras.Model(

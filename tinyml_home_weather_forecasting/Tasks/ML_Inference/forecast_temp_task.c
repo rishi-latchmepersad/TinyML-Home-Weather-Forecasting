@@ -71,6 +71,8 @@ extern osMutexId_t g_fs_mutex;
 #define FORECAST_TEMP_SLOT_CACHE_PATH       "0:/logs/forecast_minute_cache.bin"
 // Declare a version tag so we can invalidate stale cache files when the layout changes.
 #define FORECAST_TEMP_SLOT_CACHE_VERSION    (1u)
+// Trinidad and Tobago does not observe daylight saving time, so the local offset stays fixed.
+#define FORECAST_TEMP_LOCAL_UTC_OFFSET_HOURS (-4)
 // Declare pi locally so angle math does not depend on libc extensions.
 #define FORECAST_TEMP_PI                    (3.14159265358979323846f)
 
@@ -91,12 +93,14 @@ extern osMutexId_t g_fs_mutex;
 #error "Model input tensor must encode exactly 48 30-minute slots to match the live window"
 #endif
 
-#if (FORECAST_TEMP_FEATURE_COUNT != 6u)
-#error "Forecast task currently supports only the deployed 6-feature model"
+#if ((FORECAST_TEMP_FEATURE_COUNT != 6u) && (FORECAST_TEMP_FEATURE_COUNT != 9u))
+#error "Forecast task currently supports only the deployed 6-feature or 9-feature models"
 #endif
 
 #if (FORECAST_TEMP_FEATURE_COUNT == 6u)
 #define FORECAST_TEMP_MODEL_VARIANT_NAME    "selected (6-feature deployable)"
+#elif (FORECAST_TEMP_FEATURE_COUNT == 9u)
+#define FORECAST_TEMP_MODEL_VARIANT_NAME    "long-horizon residual (9-feature deployable)"
 #else
 #define FORECAST_TEMP_MODEL_VARIANT_NAME    "unsupported"
 #endif
@@ -152,9 +156,7 @@ typedef struct {
 // Store the feature means calculated during the data-preparation phase.
 // IMPORTANT: these values must match the StandardScaler in the training notebook
 // for the deployed model and feature order.
-// Current order for 4-feature ablation: [temperature, humidity, pressure, illuminance_lux]
-// Current order for 6-feature model:
-// [temperature, humidity, pressure, illuminance_lux, delta_T, pressure_delta]
+#if (FORECAST_TEMP_FEATURE_COUNT == 6u)
 // Current order:
 // [temperature, humidity, pressure, illuminance_lux, delta_T, pressure_delta]
 static const float g_feature_means[FORECAST_TEMP_FEATURE_COUNT] = {
@@ -165,7 +167,6 @@ static const float g_feature_means[FORECAST_TEMP_FEATURE_COUNT] = {
 		0.000096f,
 		-0.001222f,
 };
-// Store the feature standard deviations so we can normalize each component.
 static const float g_feature_stds[FORECAST_TEMP_FEATURE_COUNT] = {
 		2.590937f,
 		13.098757f,
@@ -174,6 +175,33 @@ static const float g_feature_stds[FORECAST_TEMP_FEATURE_COUNT] = {
 		0.442968f,
 		28.661697f,
 };
+#elif (FORECAST_TEMP_FEATURE_COUNT == 9u)
+// Current order:
+// [temperature, humidity, pressure, illuminance_lux, delta_T, pressure_delta,
+//  temp_mean_24h, sin_hour, cos_hour]
+static const float g_feature_means[FORECAST_TEMP_FEATURE_COUNT] = {
+		27.578371f,
+		74.798004f,
+		101106.265625f,
+		30461.671875f,
+		0.000020f,
+		0.001832f,
+		27.579014f,
+		0.000557f,
+		-0.000190f,
+};
+static const float g_feature_stds[FORECAST_TEMP_FEATURE_COUNT] = {
+		2.583175f,
+		13.038000f,
+		195.025436f,
+		38654.007812f,
+		0.442430f,
+		28.670912f,
+		1.060627f,
+		0.707053f,
+		0.707160f,
+};
+#endif
 
 // Hold the FreeRTOS thread handle so we do not start the task twice.
 static osThreadId_t g_forecast_thread_id = NULL;
@@ -315,7 +343,9 @@ static void forecast_temp_accumulate_minute_sample(float temperature_c,
 static bool forecast_temp_finalize_slot_sample(float *temperature_c_out,
 		float *humidity_pct_out, float *pressure_pa_out,
 		float *illuminance_lux_out);
-// Forward declare a helper that updates the raw history ring buffer.
+// Forward declare helpers that compute long-horizon context features from the raw history.
+static float forecast_temp_compute_temp_mean_24h(float current_temperature_c);
+static bool forecast_temp_get_local_hour(uint8_t *hour_out);
 static void forecast_temp_store_slot_history(float temperature_c,
 		float pressure_pa);
 // Forward declare a helper that persists or restores the partial 30-minute slot.
@@ -1309,6 +1339,44 @@ static void forecast_temp_restore_slot_checkpoint(void) {
 			(unsigned long) FORECAST_TEMP_MINUTES_PER_SLOT);
 }
 
+// Estimate the 24-hour rolling mean using the current slot plus up to 47 prior slots.
+static float forecast_temp_compute_temp_mean_24h(float current_temperature_c) {
+	float temperature_sum = current_temperature_c;
+	size_t sample_count = 1u;
+	const size_t max_previous_slots = FORECAST_TEMP_WINDOW_LENGTH - 1u;
+	const size_t previous_slots =
+			(g_slot_history_count < max_previous_slots) ?
+					g_slot_history_count : max_previous_slots;
+
+	for (size_t offset = 0u; offset < previous_slots; ++offset) {
+		const size_t history_index =
+				(g_slot_history_head + g_slot_history_count - 1u - offset)
+						% FORECAST_TEMP_HISTORY_CAPACITY;
+		temperature_sum += g_slot_temperature_history[history_index];
+		sample_count += 1u;
+	}
+
+	return temperature_sum / (float) sample_count;
+}
+
+// Convert the RTC's UTC hour into local Trinidad time so cyclic hour features match training.
+static bool forecast_temp_get_local_hour(uint8_t *hour_out) {
+	if (hour_out == NULL) {
+		return false;
+	}
+	char timestamp[24] = { 0 };
+	if (ds3231_read_time_iso8601_utc_i2c1(timestamp, sizeof(timestamp)) != HAL_OK) {
+		return false;
+	}
+	unsigned int hour_utc = 0u;
+	if (sscanf(timestamp, "%*4u-%*2u-%*2uT%2u:%*2u:%*2uZ", &hour_utc) != 1) {
+		return false;
+	}
+	const int hour_local = ((int) hour_utc + FORECAST_TEMP_LOCAL_UTC_OFFSET_HOURS + 24) % 24;
+	*hour_out = (uint8_t) hour_local;
+	return true;
+}
+
 // Store the latest 30-minute temperature and pressure so deltas stay accurate.
 static void forecast_temp_store_slot_history(float temperature_c,
 		float pressure_pa) {
@@ -1351,6 +1419,19 @@ static void forecast_temp_prepare_features(float temperature_c,
 	raw_features[3] = illuminance_lux;
 	raw_features[4] = delta_t;
 	raw_features[5] = pressure_delta;
+#if (FORECAST_TEMP_FEATURE_COUNT == 9u)
+	raw_features[6] = forecast_temp_compute_temp_mean_24h(temperature_c);
+	uint8_t local_hour = 0u;
+	if (forecast_temp_get_local_hour(&local_hour)) {
+		const float angle = (2.0f * FORECAST_TEMP_PI * (float) local_hour) / 24.0f;
+		raw_features[7] = sinf(angle);
+		raw_features[8] = cosf(angle);
+	} else {
+		// Fall back to midnight when the RTC read fails so the feature vector stays finite.
+		raw_features[7] = 0.0f;
+		raw_features[8] = 1.0f;
+	}
+#endif
 	// Normalize each feature using the stored StandardScaler parameters.
 	for (size_t i = 0u; i < FORECAST_TEMP_FEATURE_COUNT; ++i) {
 		out_features[i] = (raw_features[i] - g_feature_means[i])
