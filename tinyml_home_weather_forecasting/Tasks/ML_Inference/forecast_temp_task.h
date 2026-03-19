@@ -24,8 +24,12 @@
 
 // Expose a helper that spins up the forecasting task during system initialization.
 bool forecast_temp_task_start(void);
-// Expose a helper that reports the latest predicted temperature vector and inference time when available.
-bool forecast_temp_get_latest_prediction(float *temperatures_c_out, size_t temperatures_capacity, uint32_t *inference_time_ms_out);
+// Expose a helper that reports the latest predicted temperature vector and inference metadata when available.
+bool forecast_temp_get_latest_prediction(float *temperatures_c_out,
+        size_t temperatures_capacity, uint32_t *inference_time_ms_out,
+        uint32_t *prediction_sequence_out,
+        char *prediction_timestamp_iso8601_out,
+        size_t prediction_timestamp_capacity);
 
 // Close the header guard.
 #endif  // FORECAST_TEMP_TASK_H_

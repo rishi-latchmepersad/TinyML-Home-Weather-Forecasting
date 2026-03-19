@@ -1,0 +1,16 @@
+[2026-03-18 07:26:35.057] watcher started; pid=21376
+[2026-03-18 14:08:17.575] Application Id=0 Provider=igccservice Level=Information Time=2026-03-18T14:08:17.0061569-04:00 Message=PowerEvent handled successfully by the service.
+[2026-03-18 14:08:21.704] System Id=9008 Provider=nhi Level=Information Time=2026-03-18T14:08:18.8355072-04:00 Message=Driver exit RTD3. All the connected devices will now cause DeviceConnected events.
+[2026-03-18 14:42:03.871] Application Id=0 Provider=igccservice Level=Information Time=2026-03-18T14:42:00.6507866-04:00 Message=PowerEvent handled successfully by the service.
+[2026-03-18 14:42:03.872] Application Id=0 Provider=igccservice Level=Information Time=2026-03-18T14:41:59.4549092-04:00 Message=PowerEvent handled successfully by the service.
+[2026-03-18 14:42:03.965] Application Id=0 Provider=igccservice Level=Information Time=2026-03-18T14:41:57.2945567-04:00 Message=PowerEvent handled successfully by the service.
+[2026-03-18 14:42:06.188] System Id=9007 Provider=nhi Level=Information Time=2026-03-18T14:42:03.8786465-04:00 Message=The driver entered RTD3. All the connected devices will be removed from driver's internal state, so it is expected that DeviceDisconnected events will happen.
+[2026-03-18 14:42:06.338] Application Id=0 Provider=igccservice Level=Information Time=2026-03-18T14:42:01.4711230-04:00 Message=PowerEvent handled successfully by the service.
+[2026-03-18 14:54:57.039] System Id=9008 Provider=nhi Level=Information Time=2026-03-18T14:54:56.0003496-04:00 Message=Driver exit RTD3. All the connected devices will now cause DeviceConnected events.
+[2026-03-18 14:54:57.189] Application Id=0 Provider=igccservice Level=Information Time=2026-03-18T14:54:54.7361488-04:00 Message=PowerEvent handled successfully by the service.
+[2026-03-18 17:01:29.015] Application Id=0 Provider=igccservice Level=Information Time=2026-03-18T17:01:26.7207834-04:00 Message=PowerEvent handled successfully by the service.
+[2026-03-18 17:01:36.096] Application Id=0 Provider=igccservice Level=Information Time=2026-03-18T17:01:29.9253616-04:00 Message=PowerEvent handled successfully by the service.
+[2026-03-18 17:01:36.097] Application Id=0 Provider=igccservice Level=Information Time=2026-03-18T17:01:28.4827834-04:00 Message=PowerEvent handled successfully by the service.
+[2026-03-18 17:01:36.103] Application Id=0 Provider=igccservice Level=Information Time=2026-03-18T17:01:28.2589342-04:00 Message=PowerEvent handled successfully by the service.
+[2026-03-18 17:01:38.934] System Id=9007 Provider=nhi Level=Information Time=2026-03-18T17:01:33.2712946-04:00 Message=The driver entered RTD3. All the connected devices will be removed from driver's internal state, so it is expected that DeviceDisconnected events will happen.
+[2026-03-18 17:02:09.526] Application Id=1022 Provider=.NET Runtime Level=Error Time=2026-03-18T17:02:07.7784297-04:00 Message=.NET Runtime version 4.0.30319.0 - There was a failure initializing profiling API attach infrastructure. This process will not allow a profiler to attach. HRESULT: 0x80004005. Process ID (decimal): 2444. Message ID: [0x2509].

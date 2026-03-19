@@ -59,6 +59,7 @@ static FIL g_active_file; // FatFS file object representing the currently open l
 static bool g_file_open = false; // Track whether the active file is currently open to avoid redundant opens.
 static char g_last_date_yyyy_mm_dd[11] = {0}; // Keep the last date string so we know when to rotate log files.
 static char g_active_path[128] = {0}; // Store the path of the active log file for reopening and flushing operations.
+static uint32_t g_last_logged_prediction_sequence = 0u; // Track the last live forecast sequence written to disk so we only log fresh predictions once.
 #if defined(__GNUC__) // Apply additional alignment attributes when compiling with GCC to meet DMA/cache requirements.
 __attribute__((aligned(32))) // Align the buffer to 32 bytes to keep cache lines consistent for SD card DMA.
 #endif // Close GCC-specific alignment guard.
@@ -157,14 +158,28 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
 // -----------------------------------------------------------------------------
             float predicted_temperatures_c[FORECAST_TEMP_FORECAST_HORIZON_SLOTS] = {0.0f}; // Buffer to hold the latest predicted temperature vector.
             uint32_t inference_time_ms = 0u; // Track the runtime of the most recent inference.
-            if (forecast_temp_get_latest_prediction(predicted_temperatures_c, FORECAST_TEMP_FORECAST_HORIZON_SLOTS, &inference_time_ms)) { // Attempt to retrieve a new prediction from the forecasting module.
+            uint32_t prediction_sequence = 0u; // Track which live forecast generation produced the vector.
+            char prediction_timestamp_iso8601[24] = {0}; // Preserve the actual inference timestamp rather than the logger poll time.
+            if (forecast_temp_get_latest_prediction(predicted_temperatures_c,
+                                                    FORECAST_TEMP_FORECAST_HORIZON_SLOTS,
+                                                    &inference_time_ms,
+                                                    &prediction_sequence,
+                                                    prediction_timestamp_iso8601,
+                                                    sizeof prediction_timestamp_iso8601)) { // Attempt to retrieve a new prediction from the forecasting module.
+                if ((prediction_sequence == 0u)
+                        || (prediction_sequence == g_last_logged_prediction_sequence)) {
+                    break; // Skip stale bootstrap outputs and duplicate logger polls.
+                }
                 const double first_slot = (FORECAST_TEMP_FORECAST_HORIZON_SLOTS > 0u) ? (double)predicted_temperatures_c[0] : 0.0;
                 printf(LOG_PREFIX "We successfully got a %lu-slot prediction vector. First slot: %.2f C\n",
                        (unsigned long)FORECAST_TEMP_FORECAST_HORIZON_SLOTS,
                        first_slot);
+                const char *line_timestamp =
+                        (prediction_timestamp_iso8601[0] != '\0') ?
+                                prediction_timestamp_iso8601 : ts_now;
                 char line[512]; // Buffer to store the formatted CSV line before writing to the main buffer.
                 size_t len = // Variable capturing the number of bytes in the formatted log entry.
-                    inference_logger_format_csv_line(ts_now, predicted_temperatures_c,
+                    inference_logger_format_csv_line(line_timestamp, predicted_temperatures_c,
                                                       FORECAST_TEMP_FORECAST_HORIZON_SLOTS,
                                                       inference_time_ms,
                                                       line, sizeof line); // Provide the destination buffer and its capacity to prevent overflow.
@@ -184,6 +199,7 @@ static void inference_logger_task_entry(void *argument) { // Main FreeRTOS task 
                     }
                     memcpy(&g_write_buffer[g_write_used], line, len); // Copy the formatted line into the write buffer at the current end.
                     g_write_used += len; // Update the number of bytes used to include the new line.
+                    g_last_logged_prediction_sequence = prediction_sequence; // Record that this live forecast generation has been persisted.
                     state = INFERENCE_LOGGER_STATE_FLUSH; // Trigger a flush so the newly added data is persisted promptly.
                     break; // Exit the RUNNING state to allow the flush to occur immediately.
                 } // End formatted line validity check.

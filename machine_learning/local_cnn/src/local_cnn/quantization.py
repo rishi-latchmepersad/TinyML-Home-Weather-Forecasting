@@ -74,8 +74,20 @@ def evaluate_tflite_regression_mae(
     max_samples: int = 1000,
     calibration_pool: np.ndarray | None = None,
 ) -> float:
-    interpreter = tf.lite.Interpreter(model_path=str(tflite_model_path))
-    interpreter.allocate_tensors()
+    try:
+        interpreter = tf.lite.Interpreter(model_path=str(tflite_model_path))
+        interpreter.allocate_tensors()
+    except RuntimeError:
+        logger.warning(
+            "[TFLite] Default delegate allocation failed for %s; retrying without default delegates.",
+            tflite_model_path,
+            exc_info=True,
+        )
+        interpreter = tf.lite.Interpreter(
+            model_path=str(tflite_model_path),
+            experimental_op_resolver_type=tf.lite.experimental.OpResolverType.BUILTIN_WITHOUT_DEFAULT_DELEGATES,
+        )
+        interpreter.allocate_tensors()
     input_details = interpreter.get_input_details()[0]
     output_details = interpreter.get_output_details()[0]
     input_scale = input_details["quantization"][0]

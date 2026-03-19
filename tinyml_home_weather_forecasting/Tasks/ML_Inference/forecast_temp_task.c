@@ -214,6 +214,10 @@ static float g_latest_prediction_c[FORECAST_TEMP_FORECAST_HORIZON_SLOTS] = {
 static bool g_latest_prediction_valid = false;
 // Track the most recent inference runtime in milliseconds.
 static uint32_t g_latest_inference_time_ms = 0u;
+// Track the most recent live prediction sequence so loggers can detect fresh outputs.
+static uint32_t g_latest_prediction_sequence = 0u;
+// Store when the most recent live prediction was actually generated.
+static char g_latest_prediction_timestamp_iso8601[24] = { 0 };
 
 // Keep the neural network handle returned by X-CUBE-AI.
 static ai_handle g_forecast_network = AI_HANDLE_NULL;
@@ -346,6 +350,10 @@ static bool forecast_temp_finalize_slot_sample(float *temperature_c_out,
 // Forward declare helpers that compute long-horizon context features from the raw history.
 static float forecast_temp_compute_temp_mean_24h(float current_temperature_c);
 static bool forecast_temp_get_local_hour(uint8_t *hour_out);
+static bool forecast_temp_get_local_hour_from_slot_key(const char *slot_key,
+		uint8_t *hour_out);
+static bool forecast_temp_compute_bootstrap_slot_key(const char *timestamp_iso8601,
+		char *slot_key_out, size_t slot_key_cap);
 static void forecast_temp_store_slot_history(float temperature_c,
 		float pressure_pa);
 // Forward declare a helper that persists or restores the partial 30-minute slot.
@@ -416,7 +424,10 @@ bool forecast_temp_task_start(void) {
 
 // Allow other modules to fetch the latest predicted temperature vector.
 bool forecast_temp_get_latest_prediction(float *temperatures_c_out,
-		size_t temperatures_capacity, uint32_t *inference_time_ms_out) {
+        size_t temperatures_capacity, uint32_t *inference_time_ms_out,
+        uint32_t *prediction_sequence_out,
+        char *prediction_timestamp_iso8601_out,
+        size_t prediction_timestamp_capacity) {
 	// Guard against NULL pointers or undersized output buffers from the caller.
 	if ((temperatures_c_out == NULL)
 			|| (temperatures_capacity < FORECAST_TEMP_FORECAST_HORIZON_SLOTS)) {
@@ -429,16 +440,40 @@ bool forecast_temp_get_latest_prediction(float *temperatures_c_out,
 		(void) osMutexAcquire(g_prediction_mutex, osWaitForever);
 	}
 	// Copy the prediction vector when we have emitted one already.
-	if (g_latest_prediction_valid) {
-		memcpy(temperatures_c_out, g_latest_prediction_c,
-				sizeof(float) * FORECAST_TEMP_FORECAST_HORIZON_SLOTS);
-		if (inference_time_ms_out != NULL) {
-			*inference_time_ms_out = g_latest_inference_time_ms;
-		}
-		has_prediction = true;
-	} else if (inference_time_ms_out != NULL) {
-		*inference_time_ms_out = 0u;
-	}
+    if (g_latest_prediction_valid) {
+        memcpy(temperatures_c_out, g_latest_prediction_c,
+                sizeof(float) * FORECAST_TEMP_FORECAST_HORIZON_SLOTS);
+        if (inference_time_ms_out != NULL) {
+            *inference_time_ms_out = g_latest_inference_time_ms;
+        }
+        if (prediction_sequence_out != NULL) {
+            *prediction_sequence_out = g_latest_prediction_sequence;
+        }
+        if ((prediction_timestamp_iso8601_out != NULL)
+                && (prediction_timestamp_capacity > 0u)) {
+            if (g_latest_prediction_timestamp_iso8601[0] != '\0') {
+                (void) strncpy(prediction_timestamp_iso8601_out,
+                        g_latest_prediction_timestamp_iso8601,
+                        prediction_timestamp_capacity - 1u);
+                prediction_timestamp_iso8601_out[prediction_timestamp_capacity - 1u] =
+                        '\0';
+            } else {
+                prediction_timestamp_iso8601_out[0] = '\0';
+            }
+        }
+        has_prediction = true;
+    } else {
+        if (inference_time_ms_out != NULL) {
+            *inference_time_ms_out = 0u;
+        }
+        if (prediction_sequence_out != NULL) {
+            *prediction_sequence_out = 0u;
+        }
+        if ((prediction_timestamp_iso8601_out != NULL)
+                && (prediction_timestamp_capacity > 0u)) {
+            prediction_timestamp_iso8601_out[0] = '\0';
+        }
+    }
 	// Release the mutex now that we are done.
 	if (g_prediction_mutex != NULL) {
 		(void) osMutexRelease(g_prediction_mutex);
@@ -500,10 +535,12 @@ static void forecast_temp_bootstrap_accumulate_bundle(
 	}
 	// Allocate a small buffer where we can store the YYYY-MM-DDTHH:MM slot key.
 	char bundle_slot_key[20] = { 0 };
-	// Copy the first 16 characters so we keep the date, hour, and minute portion.
-	(void) strncpy(bundle_slot_key, bundle->timestamp_iso8601, 16u);
-	// Ensure the copied slot key is null-terminated.
-	bundle_slot_key[16] = '\0';
+	// Collapse the minute-level timestamp into its containing 30-minute slot so bootstrap
+	// replay reconstructs the same cadence used during training and live inference.
+	if (!forecast_temp_compute_bootstrap_slot_key(bundle->timestamp_iso8601,
+			bundle_slot_key, sizeof(bundle_slot_key))) {
+		return;
+	}
 	// Detect when the active bucket belongs to a different slot than this bundle.
 	if ((slot_bucket->sample_count > 0u)
 			&& (strncmp(slot_bucket->slot_key, bundle_slot_key,
@@ -557,6 +594,18 @@ static void forecast_temp_bootstrap_finalize_slot(
 	// Populate the normalized features using the same pipeline as the live task.
 	forecast_temp_prepare_features(slot_temperature, slot_humidity,
 			slot_pressure, slot_illuminance, normalized_features);
+#if (FORECAST_TEMP_FEATURE_COUNT == 9u)
+	// Override the cyclic hour features using the historical slot timestamp instead of
+	// the current RTC hour so bootstrapped windows match the training data semantics.
+	uint8_t local_hour = 0u;
+	if (forecast_temp_get_local_hour_from_slot_key(bucket->slot_key, &local_hour)) {
+		const float angle = (2.0f * FORECAST_TEMP_PI * (float) local_hour) / 24.0f;
+		normalized_features[7] = (sinf(angle) - g_feature_means[7])
+				/ g_feature_stds[7];
+		normalized_features[8] = (cosf(angle) - g_feature_means[8])
+				/ g_feature_stds[8];
+	}
+#endif
 	// Push the normalized features into the sliding window ring buffer.
 	forecast_temp_append_feature_vector(normalized_features);
 	// Check whether the window has enough history to satisfy the model.
@@ -1053,18 +1102,34 @@ static void forecast_temp_task_entry(void *argument) {
 				state = FORECAST_TEMP_STATE_PUBLISH_PREDICTION;
 			}
 			break;
-		case FORECAST_TEMP_STATE_PUBLISH_PREDICTION:
-			// Publish the prediction under the mutex so other modules can read it.
-			if (g_prediction_mutex != NULL) {
-				(void) osMutexAcquire(g_prediction_mutex, osWaitForever);
-			}
-			memcpy(g_latest_prediction_c, context.predicted_temperatures_c,
-					sizeof(context.predicted_temperatures_c));
-			g_latest_inference_time_ms = context.inference_time_ms;
-			g_latest_prediction_valid = true;
-			if (g_prediction_mutex != NULL) {
-				(void) osMutexRelease(g_prediction_mutex);
-			}
+        case FORECAST_TEMP_STATE_PUBLISH_PREDICTION:
+            // Publish the prediction under the mutex so other modules can read it.
+            char prediction_timestamp_iso8601[sizeof(g_latest_prediction_timestamp_iso8601)] =
+                    { 0 };
+            if (ds3231_read_time_iso8601_utc_i2c1(prediction_timestamp_iso8601,
+                    sizeof(prediction_timestamp_iso8601)) != HAL_OK) {
+                prediction_timestamp_iso8601[0] = '\0';
+            }
+            if (g_prediction_mutex != NULL) {
+                (void) osMutexAcquire(g_prediction_mutex, osWaitForever);
+            }
+            memcpy(g_latest_prediction_c, context.predicted_temperatures_c,
+                    sizeof(context.predicted_temperatures_c));
+            g_latest_inference_time_ms = context.inference_time_ms;
+            g_latest_prediction_sequence += 1u;
+            if (prediction_timestamp_iso8601[0] != '\0') {
+                (void) strncpy(g_latest_prediction_timestamp_iso8601,
+                        prediction_timestamp_iso8601,
+                        sizeof(g_latest_prediction_timestamp_iso8601) - 1u);
+                g_latest_prediction_timestamp_iso8601[sizeof(g_latest_prediction_timestamp_iso8601)
+                        - 1u] = '\0';
+            } else {
+                g_latest_prediction_timestamp_iso8601[0] = '\0';
+            }
+            g_latest_prediction_valid = true;
+            if (g_prediction_mutex != NULL) {
+                (void) osMutexRelease(g_prediction_mutex);
+            }
 			// Return to the wait state so the cycle repeats on the next minute.
 			state = FORECAST_TEMP_STATE_WAIT_MINUTE;
 			break;
@@ -1374,6 +1439,44 @@ static bool forecast_temp_get_local_hour(uint8_t *hour_out) {
 	}
 	const int hour_local = ((int) hour_utc + FORECAST_TEMP_LOCAL_UTC_OFFSET_HOURS + 24) % 24;
 	*hour_out = (uint8_t) hour_local;
+	return true;
+}
+
+// Parse a bootstrap slot key and convert its UTC hour into local Trinidad time.
+static bool forecast_temp_get_local_hour_from_slot_key(const char *slot_key,
+		uint8_t *hour_out) {
+	if ((slot_key == NULL) || (hour_out == NULL)) {
+		return false;
+	}
+	unsigned int hour_utc = 0u;
+	if (sscanf(slot_key, "%*4u-%*2u-%*2uT%2u:%*2u", &hour_utc) != 1) {
+		return false;
+	}
+	const int hour_local = ((int) hour_utc + FORECAST_TEMP_LOCAL_UTC_OFFSET_HOURS + 24)
+			% 24;
+	*hour_out = (uint8_t) hour_local;
+	return true;
+}
+
+// Collapse a minute-level ISO-8601 timestamp into its containing 30-minute slot key.
+static bool forecast_temp_compute_bootstrap_slot_key(const char *timestamp_iso8601,
+		char *slot_key_out, size_t slot_key_cap) {
+	if ((timestamp_iso8601 == NULL) || (slot_key_out == NULL)
+			|| (slot_key_cap < 17u)) {
+		return false;
+	}
+	unsigned int year = 0u;
+	unsigned int month = 0u;
+	unsigned int day = 0u;
+	unsigned int hour = 0u;
+	unsigned int minute = 0u;
+	if (sscanf(timestamp_iso8601, "%4u-%2u-%2uT%2u:%2u", &year, &month, &day, &hour,
+			&minute) != 5) {
+		return false;
+	}
+	const unsigned int slot_minute = (minute >= 30u) ? 30u : 0u;
+	(void) snprintf(slot_key_out, slot_key_cap, "%04u-%02u-%02uT%02u:%02u", year,
+			month, day, hour, slot_minute);
 	return true;
 }
 
