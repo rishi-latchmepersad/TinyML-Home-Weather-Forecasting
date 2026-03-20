@@ -142,6 +142,7 @@ def create_sliding_windows(
 def prepare_dataset(
     weather_dataframe: pd.DataFrame,
     config: PipelineConfig,
+    existing_scaler: StandardScaler | None = None,
 ) -> PreparedDataset:
     engineered_dataframe, selected_features_dataframe = engineer_features(
         weather_dataframe=weather_dataframe,
@@ -174,10 +175,16 @@ def prepare_dataset(
     if num_train_samples <= 0:
         raise ValueError("Training split is empty; increase the dataset size or train_fraction.")
 
-    # Fit normalization on training-only history rows to avoid leaking future statistics.
-    scaler = StandardScaler()
-    train_feature_stop = num_train_samples + config.historical_window_slots - 1
-    scaler.fit(raw_feature_values[:train_feature_stop])
+    # Fit normalization on training-only history rows to avoid leaking future statistics,
+    # unless an explicit saved scaler is provided for deployment-faithful evaluation.
+    if existing_scaler is None:
+        scaler = StandardScaler()
+        train_feature_stop = num_train_samples + config.historical_window_slots - 1
+        scaler.fit(raw_feature_values[:train_feature_stop])
+    else:
+        scaler = existing_scaler
+        if len(getattr(scaler, "mean_", [])) != raw_feature_values.shape[1]:
+            raise ValueError("Provided scaler feature dimension does not match the selected feature columns.")
     normalized_features = scaler.transform(raw_feature_values)
 
     input_sequences, target_sequences = create_sliding_windows(

@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.1.2 Chrome/138.0.7204.243 Electron/37.4.0 Safari/537.36" version="28.1.2" pages="11">
   <diagram id="vM8fxDD7liS2lbMWXIOC" name="Block Diagram">
-    <mxGraphModel dx="1822" dy="674" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="1">
+    <mxGraphModel dx="2214" dy="889" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="1">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -971,7 +971,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="cnn-model" name="1D CNN Model">
-    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1364" dy="889" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1003,31 +1003,31 @@
           <mxGeometry x="1075.77" y="360" width="170" height="70" as="geometry" />
         </mxCell>
         <mxCell id="cnn-short-summary" value="&lt;b&gt;Temporal Summary&lt;/b&gt;&lt;div&gt;Concatenate [GAP, GMP, LastTimeStep]&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce5cd;strokeColor=#d79b00;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="925.77" y="500" width="240" height="80" as="geometry" />
+          <mxGeometry x="925.77" y="480" width="240" height="80" as="geometry" />
         </mxCell>
         <mxCell id="cnn-short-head" value="&lt;b&gt;Short-Horizon Residual Head&lt;/b&gt;&lt;div&gt;Dense 96, ReLU&lt;/div&gt;&lt;div&gt;Dropout 0.10&lt;/div&gt;&lt;div&gt;Dense 24 residual outputs&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f4cccc;strokeColor=#cc0000;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="940.77" y="610" width="210" height="110" as="geometry" />
+          <mxGeometry x="940.77" y="590" width="210" height="110" as="geometry" />
         </mxCell>
         <mxCell id="cnn-long-summary" value="&lt;b&gt;Long-Term Summary&lt;/b&gt;&lt;div&gt;Concatenate [GAP, GMP, LastTimeStep, SeasonalNaiveTrajectory]&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce5cd;strokeColor=#d79b00;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="634.23" y="500" width="220" height="80" as="geometry" />
+          <mxGeometry x="635" y="480" width="220" height="80" as="geometry" />
         </mxCell>
         <mxCell id="cnn-long-head" value="&lt;b&gt;Long-Horizon Residual Head&lt;/b&gt;&lt;div&gt;Dense 48, ReLU&lt;/div&gt;&lt;div&gt;Dense 24 residual outputs&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f4cccc;strokeColor=#cc0000;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="639.23" y="670" width="210" height="100" as="geometry" />
+          <mxGeometry x="639.23" y="590" width="210" height="100" as="geometry" />
         </mxCell>
         <mxCell id="cnn-blend-new" value="&lt;b&gt;HorizonBlend&lt;/b&gt;&lt;div&gt;blend short and long residuals with a fixed linear horizon ramp&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ead1dc;strokeColor=#a64d79;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="660.77" y="820" width="230" height="80" as="geometry" />
+          <mxGeometry x="630" y="720" width="230" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="y_Bi3zAc03PGpFTs4sGf-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;curved=1;" edge="1" parent="1" source="cnn-anchor-new" target="cnn-short-head">
+        <mxCell id="y_Bi3zAc03PGpFTs4sGf-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;curved=1;" edge="1" parent="1" source="cnn-anchor-new" target="cnn-short-head">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="cnn-anchor-new" value="&lt;b&gt;SeasonalNaiveTrajectory&lt;/b&gt;&lt;div&gt;24-hour seasonal naive trajectory&lt;/div&gt;&lt;div&gt;derived from the temperature history&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0e0e3;strokeColor=#45818e;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="280" y="500" width="260" height="110" as="geometry" />
+          <mxGeometry x="290" y="480" width="260" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="cnn-add-new" value="&lt;b&gt;Add&lt;/b&gt;&lt;div&gt;final forecast = seasonal naive trajectory + blended residual&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c9daf8;strokeColor=#3c78d8;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="610" y="950" width="220" height="80" as="geometry" />
+        <mxCell id="cnn-add-new" value="&lt;b&gt;Add&lt;/b&gt;&lt;div&gt;final forecast = seasonal naive trajectory + trusted regularized residual&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c9daf8;strokeColor=#3c78d8;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="615.77" y="1050" width="260" height="80" as="geometry" />
         </mxCell>
         <mxCell id="cnn-output-new" value="&lt;b&gt;Predicted Temperature Horizon&lt;/b&gt;&lt;div&gt;24 outputs = +30 min to +12 h&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="610" y="1070" width="220" height="80" as="geometry" />
+          <mxGeometry x="635.77" y="1150" width="220" height="80" as="geometry" />
         </mxCell>
         <mxCell id="cnn-edge-a" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;" parent="1" source="cnn-input-new" target="cnn-conv1-new" edge="1">
           <mxGeometry relative="1" as="geometry" />
@@ -1127,12 +1127,24 @@
         <mxCell id="cnn-edge-s" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;entryX=0;entryY=0.5;entryDx=0;entryDy=0;elbow=vertical;curved=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="cnn-anchor-new" target="cnn-add-new" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="cnn-edge-t" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;entryX=0.75;entryY=0;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;curved=1;" parent="1" source="cnn-blend-new" target="cnn-add-new" edge="1">
+        <mxCell id="cnn-edge-t" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;entryX=0.5;entryY=0;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;curved=1;" parent="1" source="cnn-residual-reg-new" target="cnn-add-new" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="610.0015384615385" y="910" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="cnn-edge-u" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;" parent="1" source="cnn-add-new" target="cnn-output-new" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cnn-trust-schedule-new" value="&lt;b&gt;ResidualTrustSchedule&lt;/b&gt;&lt;div&gt;horizon-dependent trust weights&lt;/div&gt;&lt;div&gt;larger corrections early, smaller corrections late&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d9d2e9;strokeColor=#674ea7;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="619.23" y="830" width="250" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="cnn-residual-reg-new" value="&lt;b&gt;ResidualRegularization&lt;/b&gt;&lt;div&gt;soft long-horizon residual penalty&lt;/div&gt;&lt;div&gt;stabilizes corrections vs baseline&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d9d2e9;strokeColor=#674ea7;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="620" y="940" width="250" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="cnn-edge-trust-new" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;" edge="1" parent="1" source="cnn-blend-new" target="cnn-trust-schedule-new">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cnn-edge-reg-new" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;curved=1;" edge="1" parent="1" source="cnn-trust-schedule-new" target="cnn-residual-reg-new">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="2g-Jlzwm730CsJKmbX8U-3" value="" style="shape=curlyBracket;whiteSpace=wrap;html=1;rounded=1;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;rotation=-180;direction=south;" parent="1" vertex="1">

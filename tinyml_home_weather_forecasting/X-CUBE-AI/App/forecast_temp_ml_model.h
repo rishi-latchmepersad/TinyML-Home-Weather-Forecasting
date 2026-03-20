@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    forecast_temp_ml_model.h
   * @author  AST Embedded Analytics Research Platform
-  * @date    2026-03-18T09:07:59-0400
+  * @date    2026-03-20T14:11:28-0400
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * @attention
@@ -68,7 +68,7 @@ AI_DEPRECATED
 #define AI_FORECAST_TEMP_ML_MODEL_OUT_1_SIZE_BYTES  (24)
 
 /******************************************************************************/
-#define AI_FORECAST_TEMP_ML_MODEL_N_NODES (25)
+#define AI_FORECAST_TEMP_ML_MODEL_N_NODES (22)
 
 
 AI_API_DECLARE_BEGIN

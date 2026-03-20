@@ -41,7 +41,7 @@ class WeightedForecastHuber(keras.losses.Loss):
         if 0 <= self.primary_horizon_index < self.forecast_horizon_slots:
             # Emphasize a band around the primary horizon instead of a single slot.
             horizon_distance = horizon_indices - float(self.primary_horizon_index)
-            band_boost = 1.0 + 1.75 * np.exp(-0.5 * np.square(horizon_distance / 2.5))
+            band_boost = 1.0 + 2.25 * np.exp(-0.5 * np.square(horizon_distance / 2.0))
             base_weights *= band_boost
         self._weights = tf.constant(base_weights / np.mean(base_weights), dtype=tf.float32)
 
@@ -83,6 +83,81 @@ class HorizonBlend(layers.Layer):
     def get_config(self) -> dict[str, object]:
         return {
             "forecast_horizon_slots": self.forecast_horizon_slots,
+            **super().get_config(),
+        }
+
+
+@keras.saving.register_keras_serializable(package="local_cnn")
+class ResidualTrustSchedule(layers.Layer):
+    def __init__(
+        self,
+        forecast_horizon_slots: int,
+        short_horizon_trust: float = 0.95,
+        long_horizon_trust: float = 0.25,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.forecast_horizon_slots = int(forecast_horizon_slots)
+        self.short_horizon_trust = float(short_horizon_trust)
+        self.long_horizon_trust = float(long_horizon_trust)
+        trust_schedule = np.linspace(
+            self.short_horizon_trust,
+            self.long_horizon_trust,
+            self.forecast_horizon_slots,
+            dtype=np.float32,
+        )
+        self._trust_schedule = tf.constant(trust_schedule.reshape(1, -1), dtype=tf.float32)
+
+    def call(self, inputs: tf.Tensor) -> tf.Tensor:
+        return inputs * self._trust_schedule
+
+    def get_config(self) -> dict[str, object]:
+        return {
+            "forecast_horizon_slots": self.forecast_horizon_slots,
+            "short_horizon_trust": self.short_horizon_trust,
+            "long_horizon_trust": self.long_horizon_trust,
+            **super().get_config(),
+        }
+
+
+@keras.saving.register_keras_serializable(package="local_cnn")
+class ResidualRegularization(layers.Layer):
+    def __init__(
+        self,
+        forecast_horizon_slots: int,
+        penalty_strength: float = 0.01,
+        short_horizon_penalty: float = 0.4,
+        long_horizon_penalty: float = 2.0,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.forecast_horizon_slots = int(forecast_horizon_slots)
+        self.penalty_strength = float(penalty_strength)
+        self.short_horizon_penalty = float(short_horizon_penalty)
+        self.long_horizon_penalty = float(long_horizon_penalty)
+        penalty_weights = np.linspace(
+            self.short_horizon_penalty,
+            self.long_horizon_penalty,
+            self.forecast_horizon_slots,
+            dtype=np.float32,
+        )
+        self._penalty_weights = tf.constant(penalty_weights.reshape(1, -1), dtype=tf.float32)
+
+    def call(self, inputs: tf.Tensor) -> tf.Tensor:
+        if self.penalty_strength > 0.0:
+            residual_penalty = self.penalty_strength * ops.mean(
+                self._penalty_weights * ops.square(inputs),
+                axis=-1,
+            )
+            self.add_loss(ops.mean(residual_penalty))
+        return inputs
+
+    def get_config(self) -> dict[str, object]:
+        return {
+            "forecast_horizon_slots": self.forecast_horizon_slots,
+            "penalty_strength": self.penalty_strength,
+            "short_horizon_penalty": self.short_horizon_penalty,
+            "long_horizon_penalty": self.long_horizon_penalty,
             **super().get_config(),
         }
 
@@ -292,6 +367,10 @@ def build_one_dimensional_convolutional_model(
     second_block_filters: int = 64,
     projection_filters: int = 12,
     dense_units: int = 96,
+    short_horizon_residual_trust: float = 0.95,
+    long_horizon_residual_trust: float = 0.25,
+    residual_penalty_strength: float = 0.03,
+    compile_model: bool = True,
 ) -> keras.Model:
     input_layer = keras.Input(
         shape=(input_window_length, number_of_input_features),
@@ -381,12 +460,25 @@ def build_one_dimensional_convolutional_model(
         dtype="float32",
         name="predicted_temperature_delta_long_horizon",
     )(long_dense_projection)
-    blended_delta_horizon = HorizonBlend(
+    blended_residual_horizon = HorizonBlend(
         forecast_horizon_slots=forecast_horizon_slots,
-        name="blended_temperature_delta_horizon",
+        name="blended_temperature_residual_horizon",
     )([short_delta_temperature_horizon, delta_temperature_long_horizon])
+    trusted_residual_horizon = ResidualTrustSchedule(
+        forecast_horizon_slots=forecast_horizon_slots,
+        short_horizon_trust=short_horizon_residual_trust,
+        long_horizon_trust=long_horizon_residual_trust,
+        name="trusted_temperature_residual_horizon",
+    )(blended_residual_horizon)
+    regularized_residual_horizon = ResidualRegularization(
+        forecast_horizon_slots=forecast_horizon_slots,
+        penalty_strength=residual_penalty_strength,
+        short_horizon_penalty=0.4,
+        long_horizon_penalty=2.0,
+        name="regularized_temperature_residual_horizon",
+    )(trusted_residual_horizon)
     output_temperature = layers.Add(name="predicted_temperature_horizon")(
-        [seasonal_naive_trajectory, blended_delta_horizon]
+        [seasonal_naive_trajectory, regularized_residual_horizon]
     )
 
     model = keras.Model(
@@ -394,11 +486,12 @@ def build_one_dimensional_convolutional_model(
         outputs=output_temperature,
         name="lightweight_1d_cnn_forecaster",
     )
-    model.compile(
-        optimizer=keras.optimizers.Adam(learning_rate=1e-3),
-        loss=build_regression_loss(forecast_horizon_slots=forecast_horizon_slots),
-        metrics=[keras.metrics.MeanAbsoluteError(name="mae"), horizon_360m_mae],
-    )
+    if compile_model:
+        model.compile(
+            optimizer=keras.optimizers.Adam(learning_rate=1e-3),
+            loss=build_regression_loss(forecast_horizon_slots=forecast_horizon_slots),
+            metrics=[keras.metrics.MeanAbsoluteError(name="mae"), horizon_360m_mae],
+        )
     return model
 
 
@@ -446,6 +539,21 @@ def build_model_for_tuning(
         values=[3e-3, 1e-3, 3e-4],
         default=1e-3,
     )
+    short_horizon_residual_trust = hp.Choice(
+        "short_horizon_residual_trust",
+        values=[0.75, 0.9, 1.0],
+        default=0.9,
+    )
+    long_horizon_residual_trust = hp.Choice(
+        "long_horizon_residual_trust",
+        values=[0.05, 0.10, 0.15, 0.25, 0.40],
+        default=0.15,
+    )
+    residual_penalty_strength = hp.Choice(
+        "residual_penalty_strength",
+        values=[0.01, 0.03, 0.05, 0.08],
+        default=0.03,
+    )
 
     model = build_one_dimensional_convolutional_model(
         input_window_length=input_window_length,
@@ -462,6 +570,9 @@ def build_model_for_tuning(
         second_block_filters=second_block_filters,
         projection_filters=projection_filters,
         dense_units=dense_units,
+        short_horizon_residual_trust=short_horizon_residual_trust,
+        long_horizon_residual_trust=long_horizon_residual_trust,
+        residual_penalty_strength=residual_penalty_strength,
     )
     model.compile(
         optimizer=keras.optimizers.Adam(learning_rate=learning_rate),
