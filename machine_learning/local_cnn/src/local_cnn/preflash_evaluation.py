@@ -216,6 +216,26 @@ def _predict(model_path: Path, inputs: np.ndarray) -> tuple[np.ndarray, str]:
     return model.predict(inputs, verbose=0), "keras"
 
 
+
+
+def _deduplicate_baseline_log(baseline_log: pd.DataFrame) -> pd.DataFrame:
+    forecast_columns = [column for column in baseline_log.columns if column.startswith("forecast_t+")]
+    deduplicated = baseline_log.copy()
+    deduplicated["timestamp_iso8601"] = pd.to_datetime(
+        deduplicated["timestamp_iso8601"],
+        utc=True,
+        errors="coerce",
+    )
+    deduplicated = deduplicated.dropna(subset=["timestamp_iso8601"]).sort_values("timestamp_iso8601")
+    if not forecast_columns:
+        return deduplicated.reset_index(drop=True)
+
+    for column in forecast_columns:
+        deduplicated[column] = pd.to_numeric(deduplicated[column], errors="coerce")
+
+    deduplicated = deduplicated.drop_duplicates(subset=forecast_columns, keep="first")
+    return deduplicated.reset_index(drop=True)
+
 def _build_dataset(
     measurements_dir: Path,
     feature_columns: tuple[str, ...] | None,
@@ -226,8 +246,10 @@ def _build_dataset(
         output_directory=DEFAULT_OUTPUT_DIRECTORY,
         include_open_meteo=False,
     )
-    if feature_columns:
-        config.selected_feature_columns = feature_columns
+    if feature_columns is None:
+        payload = json.loads(scaler_path.read_text(encoding="utf-8"))
+        feature_columns = tuple(payload["feature_columns"])
+    config.selected_feature_columns = feature_columns
     weather_dataframe = build_weather_dataframe(config)
     scaler = _load_saved_scaler(scaler_path, tuple(config.selected_feature_columns))
     dataset = prepare_dataset(weather_dataframe, config, existing_scaler=scaler)
@@ -502,6 +524,126 @@ def _summary_sample_count_by_window(summaries: list[dict[str, object]]) -> dict[
     return sample_count_by_window
 
 
+
+
+def _build_gate(
+    *,
+    recent_df: pd.DataFrame,
+    daily_df: pd.DataFrame,
+    startup_df: pd.DataFrame,
+    daily_summaries: list[dict[str, object]],
+    full_day_sample_count: int,
+    guard_horizons_minutes: list[int],
+    short_horizon_guard_margin_c: float,
+) -> dict[str, object]:
+    gate = {
+        "target_horizon_minutes": 360,
+        "full_day_sample_count": full_day_sample_count,
+        "blind_recent_window_pass": None,
+        "blind_recent_window_delta_c": None,
+        "blind_daily_mean_pass": None,
+        "blind_daily_mean_delta_c": None,
+        "blind_daily_all_pass": None,
+        "blind_daily_worst_delta_c": None,
+        "blind_daily_blind_day_count": 0,
+        "blind_daily_partial_day_count": 0,
+        "blind_daily_excluded_partial_windows": [],
+        "blind_startup_mean_pass": None,
+        "blind_startup_mean_delta_c": None,
+        "blind_startup_all_pass": None,
+        "blind_startup_worst_delta_c": None,
+        "blind_startup_blind_day_count": 0,
+        "short_horizon_guards": {},
+        "overall_pass": False,
+    }
+
+    blind_recent_360 = recent_df[
+        (recent_df["window"] == "blind_recent_excluding_local_adaptation")
+        & (recent_df["horizon_minutes"] == 360)
+    ]
+    if not blind_recent_360.empty:
+        blind_delta = float(blind_recent_360.iloc[0]["delta_cnn_minus_baseline_c"])
+        gate["blind_recent_window_delta_c"] = blind_delta
+        gate["blind_recent_window_pass"] = blind_delta < 0.0
+
+    daily_sample_count_by_window = _summary_sample_count_by_window(daily_summaries)
+    blind_daily_candidate = daily_df[
+        (daily_df["overlaps_recent_local_adaptation"] == False)
+        & (daily_df["horizon_minutes"] == 360)
+    ]
+    blind_daily_full_history_window_names = [
+        window_name
+        for window_name, sample_count in daily_sample_count_by_window.items()
+        if sample_count >= full_day_sample_count
+    ]
+    blind_daily = blind_daily_candidate[
+        blind_daily_candidate["window"].isin(blind_daily_full_history_window_names)
+    ]
+    excluded_partial_windows = sorted(
+        {
+            str(window_name)
+            for window_name, sample_count in daily_sample_count_by_window.items()
+            if sample_count < full_day_sample_count
+            and window_name in set(blind_daily_candidate["window"].astype(str))
+        }
+    )
+    all_pass, mean_delta, worst_delta, count = _summarize_horizon_passes(blind_daily, 360)
+    gate["blind_daily_all_pass"] = all_pass
+    gate["blind_daily_mean_delta_c"] = mean_delta
+    gate["blind_daily_mean_pass"] = None if mean_delta is None else mean_delta < 0.0
+    gate["blind_daily_worst_delta_c"] = worst_delta
+    gate["blind_daily_blind_day_count"] = count
+    gate["blind_daily_partial_day_count"] = len(excluded_partial_windows)
+    gate["blind_daily_excluded_partial_windows"] = excluded_partial_windows
+
+    blind_startup = startup_df[
+        (startup_df["overlaps_recent_local_adaptation"] == False)
+        & (startup_df["horizon_minutes"] == 360)
+    ]
+    startup_all_pass, startup_mean_delta, startup_worst_delta, startup_count = _summarize_horizon_passes(
+        blind_startup, 360
+    )
+    gate["blind_startup_all_pass"] = startup_all_pass
+    gate["blind_startup_mean_delta_c"] = startup_mean_delta
+    gate["blind_startup_mean_pass"] = None if startup_mean_delta is None else startup_mean_delta < 0.0
+    gate["blind_startup_worst_delta_c"] = startup_worst_delta
+    gate["blind_startup_blind_day_count"] = startup_count
+
+    required_checks: list[bool] = []
+    for horizon_minutes in guard_horizons_minutes:
+        guard_df = recent_df[
+            (recent_df["window"] == "blind_recent_excluding_local_adaptation")
+            & (recent_df["horizon_minutes"] == horizon_minutes)
+        ]
+        if guard_df.empty:
+            gate["short_horizon_guards"][str(horizon_minutes)] = {
+                "pass": None,
+                "delta_c": None,
+                "margin_c": short_horizon_guard_margin_c,
+            }
+            continue
+        delta = float(guard_df.iloc[0]["delta_cnn_minus_baseline_c"])
+        guard_pass = delta <= short_horizon_guard_margin_c
+        gate["short_horizon_guards"][str(horizon_minutes)] = {
+            "pass": guard_pass,
+            "delta_c": delta,
+            "margin_c": short_horizon_guard_margin_c,
+        }
+        required_checks.append(guard_pass)
+
+    for check_name in (
+        "blind_recent_window_pass",
+        "blind_daily_mean_pass",
+        "blind_daily_all_pass",
+        "blind_startup_mean_pass",
+        "blind_startup_all_pass",
+    ):
+        value = gate[check_name]
+        required_checks.append(bool(value))
+
+    gate["overall_pass"] = bool(required_checks) and all(required_checks)
+    return gate
+
 def main() -> int:
     args = build_argument_parser().parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -510,6 +652,7 @@ def main() -> int:
     adaptation_days = _adaptation_window_days(args.training_summary_path)
     recent_start = latest_date - pd.Timedelta(days=args.recent_days - 1)
     blind_end = latest_date - pd.Timedelta(days=adaptation_days)
+    effective_daily_days = max(args.daily_days, adaptation_days + 7)
 
     feature_columns = tuple(args.feature_columns) if args.feature_columns else None
     resolved_scaler_path = _resolve_scaler_path(args.training_summary_path, args.scaler_path)
@@ -522,8 +665,9 @@ def main() -> int:
         parse_dates=["timestamp_iso8601"],
         on_bad_lines="skip",
     )
+    board_like_baseline_log = _deduplicate_baseline_log(baseline_log)
 
-    evaluation_start = min(recent_start, latest_date - pd.Timedelta(days=args.daily_days - 1))
+    evaluation_start = min(recent_start, latest_date - pd.Timedelta(days=effective_daily_days - 1))
     relevant_mask = (
         (sample_timestamps_local.normalize() >= evaluation_start)
         & (sample_timestamps_local.normalize() <= latest_date)
@@ -582,8 +726,29 @@ def main() -> int:
         recent_rows.extend(rows)
         recent_window_summaries.append(summary)
 
+    board_like_recent_rows: list[dict[str, object]] = []
+    board_like_recent_window_summaries: list[dict[str, object]] = []
+    for window in recent_windows:
+        rows, summary = _score_window(
+            name=window.name,
+            start_date=window.start_date,
+            end_date=window.end_date,
+            overlaps_recent_local_adaptation=window.overlaps_recent_local_adaptation,
+            horizons_minutes=args.horizons_minutes,
+            sample_timestamps_local=sample_timestamps_local,
+            sample_timestamps_utc=sample_timestamps_utc,
+            predictions=predictions,
+            baseline_log=board_like_baseline_log,
+            measurements_dir=args.measurements_dir,
+            merge_tolerance_minutes=args.merge_tolerance_minutes,
+            sensor=args.sensor,
+            quantity=args.quantity,
+        )
+        board_like_recent_rows.extend(rows)
+        board_like_recent_window_summaries.append(summary)
+
     daily_rows, daily_summaries = _daily_walkforward_rows(
-        recent_days=args.daily_days,
+        recent_days=effective_daily_days,
         adaptation_days=adaptation_days,
         latest_date=latest_date,
         horizons_minutes=args.horizons_minutes,
@@ -596,8 +761,22 @@ def main() -> int:
         sensor=args.sensor,
         quantity=args.quantity,
     )
+    board_like_daily_rows, board_like_daily_summaries = _daily_walkforward_rows(
+        recent_days=effective_daily_days,
+        adaptation_days=adaptation_days,
+        latest_date=latest_date,
+        horizons_minutes=args.horizons_minutes,
+        sample_timestamps_local=sample_timestamps_local,
+        sample_timestamps_utc=sample_timestamps_utc,
+        predictions=predictions,
+        baseline_log=board_like_baseline_log,
+        measurements_dir=args.measurements_dir,
+        merge_tolerance_minutes=args.merge_tolerance_minutes,
+        sensor=args.sensor,
+        quantity=args.quantity,
+    )
     startup_rows, startup_summaries = _startup_slice_rows(
-        recent_days=args.daily_days,
+        recent_days=effective_daily_days,
         adaptation_days=adaptation_days,
         latest_date=latest_date,
         startup_hours=args.startup_hours,
@@ -612,9 +791,28 @@ def main() -> int:
         quantity=args.quantity,
     )
 
+    board_like_startup_rows, board_like_startup_summaries = _startup_slice_rows(
+        recent_days=effective_daily_days,
+        adaptation_days=adaptation_days,
+        latest_date=latest_date,
+        startup_hours=args.startup_hours,
+        horizons_minutes=args.horizons_minutes,
+        sample_timestamps_local=sample_timestamps_local,
+        sample_timestamps_utc=sample_timestamps_utc,
+        predictions=predictions,
+        baseline_log=board_like_baseline_log,
+        measurements_dir=args.measurements_dir,
+        merge_tolerance_minutes=args.merge_tolerance_minutes,
+        sensor=args.sensor,
+        quantity=args.quantity,
+    )
+
     recent_df = pd.DataFrame(recent_rows)
     daily_df = pd.DataFrame(daily_rows)
     startup_df = pd.DataFrame(startup_rows)
+    board_like_recent_df = pd.DataFrame(board_like_recent_rows)
+    board_like_daily_df = pd.DataFrame(board_like_daily_rows)
+    board_like_startup_df = pd.DataFrame(board_like_startup_rows)
 
     recent_csv = args.output_dir / "preflash_recent_windows.csv"
     daily_csv = args.output_dir / "preflash_daily_walkforward.csv"
@@ -733,20 +931,51 @@ def main() -> int:
 
     gate["overall_pass"] = bool(required_checks) and all(required_checks)
 
+    board_like_recent_csv = args.output_dir / "preflash_board_like_recent_windows.csv"
+    board_like_daily_csv = args.output_dir / "preflash_board_like_daily_walkforward.csv"
+    board_like_startup_csv = args.output_dir / "preflash_board_like_startup_slices.csv"
+    if not board_like_recent_df.empty:
+        board_like_recent_df.to_csv(board_like_recent_csv, index=False)
+    if not board_like_daily_df.empty:
+        board_like_daily_df.to_csv(board_like_daily_csv, index=False)
+    if not board_like_startup_df.empty:
+        board_like_startup_df.to_csv(board_like_startup_csv, index=False)
+
+    board_like_gate = _build_gate(
+        recent_df=board_like_recent_df,
+        daily_df=board_like_daily_df,
+        startup_df=board_like_startup_df,
+        daily_summaries=board_like_daily_summaries,
+        full_day_sample_count=full_day_sample_count,
+        guard_horizons_minutes=args.guard_horizons_minutes,
+        short_horizon_guard_margin_c=args.short_horizon_guard_margin_c,
+    )
+    combined_overall_pass = bool(gate["overall_pass"]) and bool(board_like_gate["overall_pass"])
+
     summary = {
         "latest_measurement_date": str(latest_date.date()),
         "recent_start_date": str(recent_start.date()),
         "recent_local_adaptation_days": adaptation_days,
         "startup_hours": args.startup_hours,
+        "effective_daily_days": effective_daily_days,
         "recent_windows": recent_window_summaries,
         "daily_walkforward": daily_summaries,
         "startup_slices": startup_summaries,
+        "board_like_recent_windows": board_like_recent_window_summaries,
+        "board_like_daily_walkforward": board_like_daily_summaries,
+        "board_like_startup_slices": board_like_startup_summaries,
         "gate": gate,
+        "board_like_gate": board_like_gate,
+        "combined_overall_pass": combined_overall_pass,
         "artifacts": {
             "recent_windows_csv": str(recent_csv),
             "daily_walkforward_csv": str(daily_csv),
             "startup_slices_csv": str(startup_csv),
+            "board_like_recent_windows_csv": str(board_like_recent_csv),
+            "board_like_daily_walkforward_csv": str(board_like_daily_csv),
+            "board_like_startup_slices_csv": str(board_like_startup_csv),
             "runtime_model_path": str(runtime_model_path),
+            "board_like_baseline_rows": int(len(board_like_baseline_log)),
             "runtime_model_kind": runtime_kind,
             "scaler_path": str(resolved_scaler_path),
         },
@@ -757,6 +986,7 @@ def main() -> int:
     print(f"Latest measurement date: {latest_date.date()}")
     print(f"Recent start date: {recent_start.date()}")
     print(f"Recent local adaptation days: {adaptation_days}")
+    print(f"Effective daily days: {effective_daily_days}")
     if not recent_df.empty:
         print("Recent windows:")
         print(recent_df.to_string(index=False))
@@ -766,8 +996,20 @@ def main() -> int:
     if not startup_df.empty:
         print("Startup slices:")
         print(startup_df.to_string(index=False))
+    if not board_like_recent_df.empty:
+        print("Board-like recent windows:")
+        print(board_like_recent_df.to_string(index=False))
+    if not board_like_daily_df.empty:
+        print("Board-like daily walk-forward:")
+        print(board_like_daily_df.to_string(index=False))
+    if not board_like_startup_df.empty:
+        print("Board-like startup slices:")
+        print(board_like_startup_df.to_string(index=False))
     print("Gate summary:")
     print(json.dumps(gate, indent=2))
+    print("Board-like gate summary:")
+    print(json.dumps(board_like_gate, indent=2))
+    print(f"Combined overall pass: {combined_overall_pass}")
     print(f"Summary JSON: {summary_path}")
     return 0
 

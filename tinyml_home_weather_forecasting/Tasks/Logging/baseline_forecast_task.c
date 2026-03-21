@@ -51,7 +51,12 @@ typedef struct {
 } baseline_slot_accumulator_t;
 
 static osThreadId_t g_baseline_task_id = NULL;
+static osMutexId_t g_baseline_prediction_mutex = NULL;
 static char g_last_logged_timestamp[24] = {0};
+static float g_latest_baseline_prediction_c[BASELINE_FORECAST_HORIZON_SLOTS] = { 0.0f };
+static bool g_latest_baseline_prediction_valid = false;
+static uint32_t g_latest_baseline_prediction_sequence = 0u;
+static char g_latest_baseline_prediction_timestamp_iso8601[24] = { 0 };
 
 static void baseline_forecast_task_entry(void *argument);
 static bool baseline_collect_recent_temperature_slots(float *slots_out, size_t slots_capacity, size_t *slots_count_out);
@@ -69,6 +74,14 @@ bool baseline_forecast_task_start(void) {
         return true;
     }
 
+    if (g_baseline_prediction_mutex == NULL) {
+        const osMutexAttr_t prediction_mutex_attributes = {
+            .name = "baseline_forecast_prediction_mutex",
+            .attr_bits = osMutexRecursive,
+        };
+        g_baseline_prediction_mutex = osMutexNew(&prediction_mutex_attributes);
+    }
+
     const osThreadAttr_t task_attributes = {
         .name = "baselineForecast",
         .priority = BASELINE_TASK_PRIORITY,
@@ -77,6 +90,54 @@ bool baseline_forecast_task_start(void) {
 
     g_baseline_task_id = osThreadNew(baseline_forecast_task_entry, NULL, &task_attributes);
     return (g_baseline_task_id != NULL);
+}
+
+bool baseline_forecast_get_latest_prediction(float *temperatures_c_out,
+        size_t temperatures_capacity, uint32_t *prediction_sequence_out,
+        char *prediction_timestamp_iso8601_out,
+        size_t prediction_timestamp_capacity) {
+    if ((temperatures_c_out == NULL)
+            || (temperatures_capacity < BASELINE_FORECAST_HORIZON_SLOTS)) {
+        return false;
+    }
+
+    bool has_prediction = false;
+    if (g_baseline_prediction_mutex != NULL) {
+        (void) osMutexAcquire(g_baseline_prediction_mutex, osWaitForever);
+    }
+
+    if (g_latest_baseline_prediction_valid) {
+        memcpy(temperatures_c_out, g_latest_baseline_prediction_c,
+                sizeof(g_latest_baseline_prediction_c));
+        if (prediction_sequence_out != NULL) {
+            *prediction_sequence_out = g_latest_baseline_prediction_sequence;
+        }
+        if ((prediction_timestamp_iso8601_out != NULL)
+                && (prediction_timestamp_capacity > 0u)) {
+            if (g_latest_baseline_prediction_timestamp_iso8601[0] != '\0') {
+                (void) strncpy(prediction_timestamp_iso8601_out,
+                        g_latest_baseline_prediction_timestamp_iso8601,
+                        prediction_timestamp_capacity - 1u);
+                prediction_timestamp_iso8601_out[prediction_timestamp_capacity - 1u] = '\0';
+            } else {
+                prediction_timestamp_iso8601_out[0] = '\0';
+            }
+        }
+        has_prediction = true;
+    } else {
+        if (prediction_sequence_out != NULL) {
+            *prediction_sequence_out = 0u;
+        }
+        if ((prediction_timestamp_iso8601_out != NULL)
+                && (prediction_timestamp_capacity > 0u)) {
+            prediction_timestamp_iso8601_out[0] = '\0';
+        }
+    }
+
+    if (g_baseline_prediction_mutex != NULL) {
+        (void) osMutexRelease(g_baseline_prediction_mutex);
+    }
+    return has_prediction;
 }
 
 static int baseline_compare_file_desc(const void *a, const void *b) {
@@ -163,6 +224,19 @@ static void baseline_forecast_task_entry(void *argument) {
         }
         const TickType_t inference_end_tick = xTaskGetTickCount();
         const uint32_t inference_time_ms = (uint32_t)((inference_end_tick - inference_start_tick) * portTICK_PERIOD_MS);
+
+        if (g_baseline_prediction_mutex != NULL) {
+            (void) osMutexAcquire(g_baseline_prediction_mutex, osWaitForever);
+        }
+        memcpy(g_latest_baseline_prediction_c, forecast_slots, sizeof(g_latest_baseline_prediction_c));
+        g_latest_baseline_prediction_valid = true;
+        g_latest_baseline_prediction_sequence += 1u;
+        (void) strncpy(g_latest_baseline_prediction_timestamp_iso8601, timestamp,
+                sizeof(g_latest_baseline_prediction_timestamp_iso8601) - 1u);
+        g_latest_baseline_prediction_timestamp_iso8601[sizeof(g_latest_baseline_prediction_timestamp_iso8601) - 1u] = '\0';
+        if (g_baseline_prediction_mutex != NULL) {
+            (void) osMutexRelease(g_baseline_prediction_mutex);
+        }
 
 #if BASELINE_DEBUG_LOGS
         printf(LOG_PREFIX "Forecast source idx=[%lu..%lu] yhat+30m=%.3f yhat+12h=%.3f\r\n",

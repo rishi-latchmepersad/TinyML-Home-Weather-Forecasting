@@ -29,6 +29,7 @@
 // Pull in stdlib so we can convert CSV strings into floats.
 #include <stdlib.h>
 #include <math.h>
+#include "../Logging/baseline_forecast_task.h"
 
 #define LOG_PREFIX "[FORECAST_TASK] "
 
@@ -75,6 +76,10 @@ extern osMutexId_t g_fs_mutex;
 #define FORECAST_TEMP_LOCAL_UTC_OFFSET_HOURS (-4)
 // Declare pi locally so angle math does not depend on libc extensions.
 #define FORECAST_TEMP_PI                    (3.14159265358979323846f)
+#define FORECAST_TEMP_BASELINE_BLEND_ALPHA_SHORT  (0.03f)
+#define FORECAST_TEMP_BASELINE_BLEND_ALPHA_LONG   (0.00f)
+#define FORECAST_TEMP_BASELINE_BLEND_BIAS_SHORT_C (0.00f)
+#define FORECAST_TEMP_BASELINE_BLEND_BIAS_LONG_C  (0.00f)
 
 // Sanity-check that our feature count divides cleanly into the network input
 // tensor so we can stride through the flattened buffer without overruns.
@@ -374,6 +379,10 @@ static bool forecast_temp_export_window_to_network(ai_u8 *destination_buffer);
 static bool forecast_temp_run_inference(
 		float predictions_out[FORECAST_TEMP_FORECAST_HORIZON_SLOTS],
 		uint32_t *elapsed_time_ms_out);
+static float forecast_temp_schedule_value(size_t horizon_index, float start_value,
+		float end_value);
+static void forecast_temp_apply_baseline_blend(
+		float predictions_in_out[FORECAST_TEMP_FORECAST_HORIZON_SLOTS]);
 // Forward declare a helper that replays persisted CSV data into the sliding window.
 static void forecast_temp_bootstrap_from_sd_card(void);
 // Forward declare a helper that resets a measurement bundle back to an empty state.
@@ -1110,6 +1119,8 @@ static void forecast_temp_task_entry(void *argument) {
                     sizeof(prediction_timestamp_iso8601)) != HAL_OK) {
                 prediction_timestamp_iso8601[0] = '\0';
             }
+            forecast_temp_apply_baseline_blend(
+                    context.predicted_temperatures_c);
             if (g_prediction_mutex != NULL) {
                 (void) osMutexAcquire(g_prediction_mutex, osWaitForever);
             }
@@ -1138,6 +1149,36 @@ static void forecast_temp_task_entry(void *argument) {
 			state = FORECAST_TEMP_STATE_WAIT_MINUTE;
 			break;
 		}
+	}
+}
+
+static float forecast_temp_schedule_value(size_t horizon_index, float start_value,
+		float end_value) {
+	const float max_index = (FORECAST_TEMP_FORECAST_HORIZON_SLOTS > 1u) ?
+			(float) (FORECAST_TEMP_FORECAST_HORIZON_SLOTS - 1u) : 1.0f;
+	const float fraction = (float) horizon_index / max_index;
+	return start_value + fraction * (end_value - start_value);
+}
+
+static void forecast_temp_apply_baseline_blend(
+		float predictions_in_out[FORECAST_TEMP_FORECAST_HORIZON_SLOTS]) {
+	float baseline_predictions_c[FORECAST_TEMP_FORECAST_HORIZON_SLOTS] = { 0.0f };
+	if (!baseline_forecast_get_latest_prediction(baseline_predictions_c,
+			FORECAST_TEMP_FORECAST_HORIZON_SLOTS, NULL, NULL, 0u)) {
+		return;
+	}
+
+	for (size_t horizon_index = 0u; horizon_index < FORECAST_TEMP_FORECAST_HORIZON_SLOTS;
+			++horizon_index) {
+		const float alpha = forecast_temp_schedule_value(horizon_index,
+				FORECAST_TEMP_BASELINE_BLEND_ALPHA_SHORT,
+				FORECAST_TEMP_BASELINE_BLEND_ALPHA_LONG);
+		const float bias_c = forecast_temp_schedule_value(horizon_index,
+				FORECAST_TEMP_BASELINE_BLEND_BIAS_SHORT_C,
+				FORECAST_TEMP_BASELINE_BLEND_BIAS_LONG_C);
+		predictions_in_out[horizon_index] = baseline_predictions_c[horizon_index]
+				+ alpha * (predictions_in_out[horizon_index]
+						- baseline_predictions_c[horizon_index]) - bias_c;
 	}
 }
 
