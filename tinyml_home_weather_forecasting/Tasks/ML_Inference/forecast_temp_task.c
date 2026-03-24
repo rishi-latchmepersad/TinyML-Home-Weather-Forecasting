@@ -76,8 +76,14 @@ extern osMutexId_t g_fs_mutex;
 #define FORECAST_TEMP_LOCAL_UTC_OFFSET_HOURS (-4)
 // Declare pi locally so angle math does not depend on libc extensions.
 #define FORECAST_TEMP_PI                    (3.14159265358979323846f)
+#if (FORECAST_TEMP_FEATURE_COUNT == 4u)
+// The 4-feature ablation should be evaluated as a pure CNN output.
+#define FORECAST_TEMP_BASELINE_BLEND_ALPHA_SHORT  (1.00f)
+#define FORECAST_TEMP_BASELINE_BLEND_ALPHA_LONG   (1.00f)
+#else
 #define FORECAST_TEMP_BASELINE_BLEND_ALPHA_SHORT  (0.03f)
 #define FORECAST_TEMP_BASELINE_BLEND_ALPHA_LONG   (0.00f)
+#endif
 #define FORECAST_TEMP_BASELINE_BLEND_BIAS_SHORT_C (0.00f)
 #define FORECAST_TEMP_BASELINE_BLEND_BIAS_LONG_C  (0.00f)
 
@@ -98,11 +104,13 @@ extern osMutexId_t g_fs_mutex;
 #error "Model input tensor must encode exactly 48 30-minute slots to match the live window"
 #endif
 
-#if ((FORECAST_TEMP_FEATURE_COUNT != 6u) && (FORECAST_TEMP_FEATURE_COUNT != 9u))
-#error "Forecast task currently supports only the deployed 6-feature or 9-feature models"
+#if ((FORECAST_TEMP_FEATURE_COUNT != 4u) && (FORECAST_TEMP_FEATURE_COUNT != 6u) && (FORECAST_TEMP_FEATURE_COUNT != 9u))
+#error "Forecast task currently supports only the deployed 4-feature, 6-feature, or 9-feature models"
 #endif
 
-#if (FORECAST_TEMP_FEATURE_COUNT == 6u)
+#if (FORECAST_TEMP_FEATURE_COUNT == 4u)
+#define FORECAST_TEMP_MODEL_VARIANT_NAME    "ablation (4-feature deployable)"
+#elif (FORECAST_TEMP_FEATURE_COUNT == 6u)
 #define FORECAST_TEMP_MODEL_VARIANT_NAME    "selected (6-feature deployable)"
 #elif (FORECAST_TEMP_FEATURE_COUNT == 9u)
 #define FORECAST_TEMP_MODEL_VARIANT_NAME    "long-horizon residual (9-feature deployable)"
@@ -161,7 +169,22 @@ typedef struct {
 // Store the feature means calculated during the data-preparation phase.
 // IMPORTANT: these values must match the StandardScaler in the training notebook
 // for the deployed model and feature order.
-#if (FORECAST_TEMP_FEATURE_COUNT == 6u)
+#if (FORECAST_TEMP_FEATURE_COUNT == 4u)
+// Current order:
+// [temperature, humidity, pressure, illuminance_lux]
+static const float g_feature_means[FORECAST_TEMP_FEATURE_COUNT] = {
+		27.554609f,
+		75.039032f,
+		101106.906250f,
+		30414.580078f,
+};
+static const float g_feature_stds[FORECAST_TEMP_FEATURE_COUNT] = {
+		2.572574f,
+		12.963685f,
+		195.151001f,
+		38587.718750f,
+};
+#elif (FORECAST_TEMP_FEATURE_COUNT == 6u)
 // Current order:
 // [temperature, humidity, pressure, illuminance_lux, delta_T, pressure_delta]
 static const float g_feature_means[FORECAST_TEMP_FEATURE_COUNT] = {
@@ -1546,6 +1569,7 @@ static void forecast_temp_prepare_features(float temperature_c,
 		float humidity_pct, float pressure_pa, float illuminance_lux,
 		float out_features[FORECAST_TEMP_FEATURE_COUNT]) {
 	float raw_features[FORECAST_TEMP_FEATURE_COUNT] = { 0.0f };
+#if (FORECAST_TEMP_FEATURE_COUNT >= 6u)
 	float delta_t = 0.0f;
 	float pressure_delta = 0.0f;
 
@@ -1555,14 +1579,17 @@ static void forecast_temp_prepare_features(float temperature_c,
 		delta_t = temperature_c - g_slot_temperature_history[latest_index];
 		pressure_delta = pressure_pa - g_slot_pressure_history[latest_index];
 	}
+#endif
 
 	// Populate the raw feature vector in the same order used during training.
 	raw_features[0] = temperature_c;
 	raw_features[1] = humidity_pct;
 	raw_features[2] = pressure_pa;
 	raw_features[3] = illuminance_lux;
+#if (FORECAST_TEMP_FEATURE_COUNT >= 6u)
 	raw_features[4] = delta_t;
 	raw_features[5] = pressure_delta;
+#endif
 #if (FORECAST_TEMP_FEATURE_COUNT == 9u)
 	raw_features[6] = forecast_temp_compute_temp_mean_24h(temperature_c);
 	uint8_t local_hour = 0u;
