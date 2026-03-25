@@ -1,0 +1,16 @@
+Codex session steps
+Date: 2026-03-25
+
+1. Created and checked out git branch `codex-rnn`.
+2. Verified Python 3.10 availability with `python3.10 --version`.
+3. Created virtual environment with `python3.10 -m venv .venv`.
+4. Verified the virtual environment interpreter with `.venv/bin/python --version`.
+5. Updated `machine_learning/rnn/model_training_int8.ipynb` import-data cell to load CSV files from the repo `measurements/` directory instead of the old `/content/measurements/` Colab path.
+6. Updated the same import-data cell to skip empty CSV files after identifying `measurements/inference_2025-11-20.csv` as a zero-byte file causing `EmptyDataError`.
+7. Tightened the import-data cell so it reads only from the repo-root `measurements/` directory and only loads CSV files matching `*measurements*.csv`.
+8. Updated the import-data cell to explicitly skip `measurements/measurements_2000-01-01.csv`.
+9. Created `machine_learning/rnn/model_training_residual_int8.ipynb`, a new notebook that loads root `measurements/` CSVs, engineers stronger time-series features, trains a compact residual RNN against the 24-hour-prior baseline, evaluates against that baseline, and exports a fully quantized int8 TFLite model.
+10. Verified the new notebook file is valid JSON. Local shell execution is currently blocked because this environment does not yet have `tensorflow`, `numpy`, `pandas`, `scikit-learn`, or `keras_tuner` installed.
+11. Fixed the train/validation/test mask cell in `model_training_residual_int8.ipynb` by converting `sample_timestamps` to timezone-aware pandas datetimes before comparing them to the split timestamps.
+12. Updated the same mask cell to safely handle both timezone-aware and timezone-naive split timestamps using `tz_localize('UTC')` or `tz_convert('UTC')` as appropriate.
+13. Updated `model_training_residual_int8.ipynb` so the quantization cell writes the int8 model both to `machine_learning/rnn/artifacts/residual_rnn_int8.tflite` and to the repo-tracked path `machine_learning/rnn/residual_rnn_int8.tflite`.
