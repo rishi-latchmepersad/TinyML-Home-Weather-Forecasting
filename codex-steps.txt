@@ -14,3 +14,4 @@ Date: 2026-03-25
 11. Fixed the train/validation/test mask cell in `model_training_residual_int8.ipynb` by converting `sample_timestamps` to timezone-aware pandas datetimes before comparing them to the split timestamps.
 12. Updated the same mask cell to safely handle both timezone-aware and timezone-naive split timestamps using `tz_localize('UTC')` or `tz_convert('UTC')` as appropriate.
 13. Updated `model_training_residual_int8.ipynb` so the quantization cell writes the int8 model both to `machine_learning/rnn/artifacts/residual_rnn_int8.tflite` and to the repo-tracked path `machine_learning/rnn/residual_rnn_int8.tflite`.
+14. Updated `model_training_residual_int8.ipynb` to use the reduced feature set `temperature`, `humidity`, `pressure`, `lux`, `temp_delta_24h`, `pressure_delta_24h`, `temp_mean_24h`, `sin_hour`, and `cos_hour`, with `temperature` kept as the first unscaled feature so the residual day-ago baseline logic still works.
