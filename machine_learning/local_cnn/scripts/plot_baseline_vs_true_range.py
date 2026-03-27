@@ -41,6 +41,12 @@ def parse_args() -> argparse.Namespace:
         help="Directory containing baseline_forecast.log and measurements_YYYY-MM-DD.csv files.",
     )
     parser.add_argument(
+        "--baseline-log",
+        type=Path,
+        default=None,
+        help="Optional explicit baseline log path. Defaults to measurements-dir/baseline_forecast.log.",
+    )
+    parser.add_argument(
         "--timezone",
         default=DEFAULT_TIMEZONE,
         help="IANA timezone for plotting.",
@@ -75,8 +81,8 @@ def daterange(start_day: date, end_day: date) -> list[date]:
     return [start_day + timedelta(days=offset) for offset in range(total_days + 1)]
 
 
-def load_baseline(measurements_dir: Path) -> pd.DataFrame:
-    path = measurements_dir / "baseline_forecast.log"
+def load_baseline(measurements_dir: Path, baseline_log: Path | None = None) -> pd.DataFrame:
+    path = baseline_log or (measurements_dir / "baseline_forecast.log")
     baseline = pd.read_csv(path, parse_dates=["timestamp_iso8601"], on_bad_lines="skip")
     if baseline.empty:
         raise ValueError(f"Baseline log {path} is empty.")
@@ -188,19 +194,12 @@ def plot_range(
         linewidth=1.5,
     )
     temp_axis.set_ylabel("Temperature (C)")
-    temp_axis.set_title(
-        f"Baseline vs True Measurements | +{horizon_minutes} min"
-    )
     temp_axis.grid(True, alpha=0.25)
     temp_axis.legend(loc="upper right", frameon=False)
-    temp_axis.set_xlabel(f"Forecasted timestamp ({plot_timezone.key})")
+    temp_axis.set_xlabel("Forecasted timestamp")
     temp_axis.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d %H:%M", tz=plot_timezone))
     temp_axis.tick_params(axis="x", rotation=20)
-    fig.suptitle(
-        "Baseline Forecast vs True Measurements",
-        fontsize=14,
-    )
-    fig.tight_layout(rect=(0.02, 0.02, 1.0, 0.93))
+    fig.tight_layout(rect=(0.02, 0.02, 1.0, 0.98))
     fig.savefig(temp_output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
@@ -224,8 +223,7 @@ def plot_range(
         label=f"Mean AE ({plot_frame['baseline_abs_error'].mean():.3f} C)",
     )
     error_axis.set_ylabel("Absolute error (C)")
-    error_axis.set_xlabel(f"Forecasted timestamp ({plot_timezone.key})")
-    error_axis.set_title("Baseline Prediction Error Over Time")
+    error_axis.set_xlabel("Forecasted timestamp")
     error_axis.grid(True, alpha=0.25)
     error_axis.legend(loc="upper right", frameon=False)
 
@@ -236,11 +234,7 @@ def plot_range(
 
     error_axis.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d %H:%M", tz=plot_timezone))
     error_axis.tick_params(axis="x", rotation=20)
-    fig.suptitle(
-        "Baseline Forecast Prediction Error",
-        fontsize=14,
-    )
-    fig.tight_layout(rect=(0.02, 0.02, 1.0, 0.93))
+    fig.tight_layout(rect=(0.02, 0.02, 1.0, 0.98))
     fig.savefig(error_output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
     return temp_output_path, error_output_path
@@ -263,7 +257,7 @@ def main() -> int:
     if args.end_local is not None:
         end_local = datetime.fromisoformat(args.end_local).replace(tzinfo=plot_timezone)
 
-    baseline = load_baseline(args.measurements_dir)
+    baseline = load_baseline(args.measurements_dir, args.baseline_log)
     measurements = load_measurements(args.measurements_dir, days)
     aligned = build_aligned_frame(
         baseline=baseline,
