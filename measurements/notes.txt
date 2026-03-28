@@ -8,4 +8,5 @@ V4 CNN 11th-13th
 RNN V3 13th-
 Ablation CNN - 01/03/2026 - 05/03/2026
 Full CNN: 06/03/2026 - 24/03/2026
-Ablation CNN: 24/03/2026 - 
+Ablation CNN: 24/03/2026 - 28/03/2026
+Full RNN: 28/03/2026

@@ -26032,44 +26032,44 @@
   ],
   "environment": {
     "generated_model": {
-      "generated_time": "2026-03-26T19:31:32-0400",
+      "generated_time": "2026-03-28T16:06:24-0400",
       "model_files": [
         {
           "name": "forecast_temp_ml_model_data_params.h",
-          "signature": "0x3659411c6b916ed3a084bdd2cf67669a"
+          "signature": "0x0a82b0d0461408bf747d79d92a86ed21"
         },
         {
           "name": "forecast_temp_ml_model_data_params.c",
-          "signature": "0x58a2b4705cfe7ab7c416e694d7cc1c46"
+          "signature": "0xc913e907bc1ef2e87c8bdbc2fc1eeb28"
         },
         {
           "name": "forecast_temp_ml_model_data.h",
-          "signature": "0xec12f71ae23458d59bedd7d87908bf70"
+          "signature": "0x5ff217a72fad588c792630c3370f2dd8"
         },
         {
           "name": "forecast_temp_ml_model_data.c",
-          "signature": "0xb6bb6ed18dae2d6310cd5fc8ce332e74"
+          "signature": "0x14bdf1172d2fed04756e89fd205b7dca"
         },
         {
           "name": "forecast_temp_ml_model_config.h",
-          "signature": "0x2e82f8518ea9f07faa990d7de9306a92"
+          "signature": "0x6e2170abb2a0b69abe0b839f386a7a63"
         },
         {
           "name": "forecast_temp_ml_model.h",
-          "signature": "0x1f0e41d6e05684db240fb0a82db4679a"
+          "signature": "0x6ebc423c9136e2059942fd11279c396f"
         },
         {
           "name": "forecast_temp_ml_model.c",
-          "signature": "0xbd04a50d4645f65b53f396892d5b5db0"
+          "signature": "0x4964c52cea572717bd1e23ae6c6a9410"
         }
       ],
       "name": "forecast_temp_ml_model"
     },
-    "network_signature": "0x281b5283826fc079",
+    "network_signature": "0x2abcdd36ab61f525",
     "test_name": "",
     "tools": [
       {
-        "arguments": "analyze --target stm32f7 --name forecast_temp_ml_model -m C:/Users/rishi_latchmepersad/Downloads/residual_rnn_int8 (1).tflite --compression none --verbosity 1 --workspace C:/Users/RISHI_~1/AppData/Local/Temp/mxAI_workspace1205673209615000287622152696598112 --output C:/Users/rishi_latchmepersad/.stm32cubemx/forecast_temp_ml_model_output",
+        "arguments": "generate --target stm32f7 --name forecast_temp_ml_model -m C:/Users/rishi_latchmepersad/Downloads/residual_rnn_int8 (1).tflite --compression none --verbosity 1 --workspace C:/Users/RISHI_~1/AppData/Local/Temp/mxAI_workspace13662283735213009676005260849307093 --output C:/Users/rishi_latchmepersad/.stm32cubemx/forecast_temp_ml_model_output",
         "environment": [
           "STATS_TYPE=X-CUBE-AI"
         ],
