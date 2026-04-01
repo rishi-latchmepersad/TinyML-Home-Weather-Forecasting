@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    forecast_temp_ml_model.h
   * @author  AST Embedded Analytics Research Platform
-  * @date    2026-03-28T16:06:24-0400
+  * @date    2026-04-01T13:00:12-0400
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * @attention
@@ -23,7 +23,7 @@
 
 /******************************************************************************/
 #define AI_FORECAST_TEMP_ML_MODEL_MODEL_NAME          "forecast_temp_ml_model"
-#define AI_FORECAST_TEMP_ML_MODEL_ORIGIN_MODEL_NAME   "residual_rnn_int8_1"
+#define AI_FORECAST_TEMP_ML_MODEL_ORIGIN_MODEL_NAME   "ablation_rnn_int8"
 
 /******************************************************************************/
 #define AI_FORECAST_TEMP_ML_MODEL_ACTIVATIONS_ALIGNMENT   (4)
@@ -45,9 +45,9 @@ AI_DEPRECATED
 }
 #define AI_FORECAST_TEMP_ML_MODEL_IN_1_FORMAT      (AI_BUFFER_FORMAT_S8)
 #define AI_FORECAST_TEMP_ML_MODEL_IN_1_HEIGHT      (48)
-#define AI_FORECAST_TEMP_ML_MODEL_IN_1_CHANNEL     (9)
-#define AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE        (432)
-#define AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE_BYTES  (432)
+#define AI_FORECAST_TEMP_ML_MODEL_IN_1_CHANNEL     (5)
+#define AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE        (240)
+#define AI_FORECAST_TEMP_ML_MODEL_IN_1_SIZE_BYTES  (240)
 
 /******************************************************************************/
 #define AI_FORECAST_TEMP_ML_MODEL_OUT_NUM       (1)

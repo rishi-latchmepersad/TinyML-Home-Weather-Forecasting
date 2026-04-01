@@ -14,6 +14,8 @@
 #include "../Sensors/bme280_task.h"
 // Pull in our VEML7700 interface to grab illuminance readings.
 #include "../Sensors/veml7700_task.h"
+// Pull in the rain sensor API so the 5-feature RNN can consume is_raining.
+#include "../../Drivers/LM393/Inc/rain_sensor_digital.h"
 // Pull in the DS3231 driver so we can ask the RTC for the current time.
 #include "../../Drivers/DS3231/Inc/ds3231.h"
 // Pull in the FatFs declarations so we can read persisted CSV logs.
@@ -71,13 +73,17 @@ extern osMutexId_t g_fs_mutex;
 // Declare where we checkpoint the in-progress 30-minute accumulator for crash recovery.
 #define FORECAST_TEMP_SLOT_CACHE_PATH       "0:/logs/forecast_minute_cache.bin"
 // Declare a version tag so we can invalidate stale cache files when the layout changes.
-#define FORECAST_TEMP_SLOT_CACHE_VERSION    (1u)
+#define FORECAST_TEMP_SLOT_CACHE_VERSION    (2u)
 // Trinidad and Tobago does not observe daylight saving time, so the local offset stays fixed.
 #define FORECAST_TEMP_LOCAL_UTC_OFFSET_HOURS (-4)
 // Declare pi locally so angle math does not depend on libc extensions.
 #define FORECAST_TEMP_PI                    (3.14159265358979323846f)
 #if (FORECAST_TEMP_FEATURE_COUNT == 4u)
 // The 4-feature ablation should be evaluated as a pure CNN output.
+#define FORECAST_TEMP_BASELINE_BLEND_ALPHA_SHORT  (1.00f)
+#define FORECAST_TEMP_BASELINE_BLEND_ALPHA_LONG   (1.00f)
+#elif (FORECAST_TEMP_FEATURE_COUNT == 5u)
+// The 5-feature RNN ablation should also be evaluated as a pure model output.
 #define FORECAST_TEMP_BASELINE_BLEND_ALPHA_SHORT  (1.00f)
 #define FORECAST_TEMP_BASELINE_BLEND_ALPHA_LONG   (1.00f)
 #else
@@ -105,12 +111,14 @@ extern osMutexId_t g_fs_mutex;
 #error "Model input tensor must encode exactly 48 30-minute slots to match the live window"
 #endif
 
-#if ((FORECAST_TEMP_FEATURE_COUNT != 4u) && (FORECAST_TEMP_FEATURE_COUNT != 6u) && (FORECAST_TEMP_FEATURE_COUNT != 9u))
-#error "Forecast task currently supports only the deployed 4-feature, 6-feature, or 9-feature models"
+#if ((FORECAST_TEMP_FEATURE_COUNT != 4u) && (FORECAST_TEMP_FEATURE_COUNT != 5u) && (FORECAST_TEMP_FEATURE_COUNT != 6u) && (FORECAST_TEMP_FEATURE_COUNT != 9u))
+#error "Forecast task currently supports only the deployed 4-feature, 5-feature, 6-feature, or 9-feature models"
 #endif
 
 #if (FORECAST_TEMP_FEATURE_COUNT == 4u)
 #define FORECAST_TEMP_MODEL_VARIANT_NAME    "ablation (4-feature deployable)"
+#elif (FORECAST_TEMP_FEATURE_COUNT == 5u)
+#define FORECAST_TEMP_MODEL_VARIANT_NAME    "rnn ablation (5-feature deployable)"
 #elif (FORECAST_TEMP_FEATURE_COUNT == 6u)
 #define FORECAST_TEMP_MODEL_VARIANT_NAME    "selected (6-feature deployable)"
 #elif (FORECAST_TEMP_FEATURE_COUNT == 9u)
@@ -141,6 +149,8 @@ typedef struct {
 	bool has_pressure;
 	// Track whether we captured an illuminance value for this timestamp.
 	bool has_illuminance;
+	// Track whether we captured a rain-state value for this timestamp.
+	bool has_raining;
 	// Hold the temperature reading associated with this timestamp.
 	float temperature_c;
 	// Hold the humidity reading associated with this timestamp.
@@ -149,6 +159,8 @@ typedef struct {
 	float pressure_pa;
 	// Hold the illuminance reading associated with this timestamp.
 	float illuminance_lux;
+	// Hold the rain-state reading associated with this timestamp.
+	float is_raining;
 } forecast_temp_measurement_bundle_t;
 
 // Define a struct that aggregates completed bundles into 30-minute averages.
@@ -163,6 +175,8 @@ typedef struct {
 	float pressure_sum;
 	// Track the running sum of illuminance readings inside this slot.
 	float illuminance_sum;
+	// Track the running sum of rain-state readings inside this slot.
+	float raining_sum;
 	// Track how many minute samples contribute to the running sums.
 	uint32_t sample_count;
 } forecast_temp_slot_bucket_t;
@@ -203,6 +217,23 @@ static const float g_feature_stds[FORECAST_TEMP_FEATURE_COUNT] = {
 		38723.996094f,
 		0.442968f,
 		28.661697f,
+};
+#elif (FORECAST_TEMP_FEATURE_COUNT == 5u)
+// Current order:
+// [humidity_pct, is_raining, lux_lx, pressure_pa, temperature_c]
+static const float g_feature_means[FORECAST_TEMP_FEATURE_COUNT] = {
+		82.889644f,
+		0.007160f,
+		1804.762085f,
+		101058.968750f,
+		27.851763f,
+};
+static const float g_feature_stds[FORECAST_TEMP_FEATURE_COUNT] = {
+		13.385205f,
+		0.073354f,
+		4803.652344f,
+		147.541321f,
+		3.329262f,
 };
 #elif (FORECAST_TEMP_FEATURE_COUNT == 9u)
 // Current order:
@@ -282,6 +313,8 @@ typedef struct {
 	float pressure_sum;
 	// Track the running sum of illuminance readings.
 	float illuminance_sum;
+	// Track the running sum of rain-state readings.
+	float raining_sum;
 	// Track how many minute samples we have folded into this bucket.
 	uint32_t sample_count;
 } forecast_temp_slot_accumulator_t;
@@ -328,6 +361,8 @@ typedef struct {
 	float pressure_pa;
 	// Cache the most recent minute-level VEML7700 illuminance reading.
 	float illuminance_lux;
+	// Cache the most recent minute-level rain-state reading.
+	float is_raining;
 	// Cache the averaged 30-minute temperature during the CHECK_SLOT step.
 	float slot_temperature_c;
 	// Cache the averaged 30-minute humidity during the CHECK_SLOT step.
@@ -336,6 +371,8 @@ typedef struct {
 	float slot_pressure_pa;
 	// Cache the averaged 30-minute illuminance during the CHECK_SLOT step.
 	float slot_illuminance_lux;
+	// Cache the averaged 30-minute rain-state during the CHECK_SLOT step.
+	float slot_is_raining;
 	// Hold the normalized features generated for the current slot.
 	float normalized_features[FORECAST_TEMP_FEATURE_COUNT];
 	// Hold the most recent neural-network prediction vector prior to publication.
@@ -371,11 +408,12 @@ static void forecast_temp_extract_quantization(const ai_buffer *buffer,
 		float *scale_out, int32_t *zero_point_out);
 // Forward declare a helper that drops minute samples into the 30-minute accumulator.
 static void forecast_temp_accumulate_minute_sample(float temperature_c,
-		float humidity_pct, float pressure_pa, float illuminance_lux);
+		float humidity_pct, float pressure_pa, float illuminance_lux,
+		float is_raining);
 // Forward declare a helper that reports when the accumulator has a full 30-minute slot ready.
 static bool forecast_temp_finalize_slot_sample(float *temperature_c_out,
 		float *humidity_pct_out, float *pressure_pa_out,
-		float *illuminance_lux_out);
+		float *illuminance_lux_out, float *is_raining_out);
 // Forward declare helpers that compute long-horizon context features from the raw history.
 static float forecast_temp_compute_temp_mean_24h(float current_temperature_c);
 static bool forecast_temp_get_local_hour(uint8_t *hour_out);
@@ -393,7 +431,7 @@ static void forecast_temp_persist_slot_checkpoint(void);
 // Forward declare a helper that builds the normalized feature vector for the completed slot.
 static void forecast_temp_prepare_features(float temperature_c,
 		float humidity_pct, float pressure_pa, float illuminance_lux,
-		float out_features[FORECAST_TEMP_FEATURE_COUNT]);
+		float is_raining, float out_features[FORECAST_TEMP_FEATURE_COUNT]);
 // Forward declare a helper that pushes a normalized feature vector into the sliding window.
 static void forecast_temp_append_feature_vector(
 		const float normalized_features[FORECAST_TEMP_FEATURE_COUNT]);
@@ -534,6 +572,8 @@ static void forecast_temp_bootstrap_reset_bundle(
 	bundle->has_pressure = false;
 	// Mark that we have not yet captured an illuminance reading.
 	bundle->has_illuminance = false;
+	// Mark that we have not yet captured a rain reading.
+	bundle->has_raining = false;
 	// Reset the cached temperature value.
 	bundle->temperature_c = 0.0f;
 	// Reset the cached humidity value.
@@ -542,6 +582,8 @@ static void forecast_temp_bootstrap_reset_bundle(
 	bundle->pressure_pa = 0.0f;
 	// Reset the cached illuminance value.
 	bundle->illuminance_lux = 0.0f;
+	// Reset the cached rain-state value.
+	bundle->is_raining = 0.0f;
 }
 
 // Accumulate a completed measurement bundle into the active 30-minute bucket.
@@ -558,6 +600,12 @@ static void forecast_temp_bootstrap_accumulate_bundle(
 			&& bundle->has_pressure && bundle->has_illuminance)) {
 		return;
 	}
+#if (FORECAST_TEMP_FEATURE_COUNT == 5u)
+	// The 5-feature RNN also expects the rain-state channel.
+	if (!bundle->has_raining) {
+		return;
+	}
+#endif
 	// Ignore bundles that do not carry a timestamp yet.
 	if (!bundle->in_use) {
 		return;
@@ -597,6 +645,8 @@ static void forecast_temp_bootstrap_accumulate_bundle(
 	slot_bucket->pressure_sum += bundle->pressure_pa;
 	// Add the bundle illuminance into the running slot sum.
 	slot_bucket->illuminance_sum += bundle->illuminance_lux;
+	// Add the bundle rain-state into the running slot sum.
+	slot_bucket->raining_sum += bundle->is_raining;
 	// Count how many bundles contribute to the current slot.
 	slot_bucket->sample_count += 1u;
 	// Increment the optional minute counter when the caller provided one.
@@ -622,11 +672,13 @@ static void forecast_temp_bootstrap_finalize_slot(
 	const float slot_pressure = bucket->pressure_sum * reciprocal;
 	// Derive the average illuminance across the slot.
 	const float slot_illuminance = bucket->illuminance_sum * reciprocal;
+	// Derive the average rain-state across the slot.
+	const float slot_raining = bucket->raining_sum * reciprocal;
 	// Allocate storage for the normalized feature vector.
 	float normalized_features[FORECAST_TEMP_FEATURE_COUNT] = { 0.0f };
 	// Populate the normalized features using the same pipeline as the live task.
 	forecast_temp_prepare_features(slot_temperature, slot_humidity,
-			slot_pressure, slot_illuminance, normalized_features);
+			slot_pressure, slot_illuminance, slot_raining, normalized_features);
 #if (FORECAST_TEMP_FEATURE_COUNT == 9u)
 	// Override the cyclic hour features using the historical slot timestamp instead of
 	// the current RTC hour so bootstrapped windows match the training data semantics.
@@ -681,6 +733,8 @@ static void forecast_temp_bootstrap_finalize_slot(
 	bucket->pressure_sum = 0.0f;
 	// Reset the illuminance sum back to zero.
 	bucket->illuminance_sum = 0.0f;
+	// Reset the rain-state sum back to zero.
+	bucket->raining_sum = 0.0f;
 	// Reset the sample counter back to zero.
 	bucket->sample_count = 0u;
 }
@@ -836,6 +890,14 @@ static void forecast_temp_bootstrap_process_file(const char *file_path,
 			bundle.illuminance_lux = value;
 			// Record that the bundle now has an illuminance measurement.
 			bundle.has_illuminance = true;
+#if (FORECAST_TEMP_FEATURE_COUNT == 5u)
+		} else if ((strcmp(sensor, "lm393") == 0)
+				&& (strcmp(quantity, "is_raining") == 0)) {
+			// Cache the LM393 rain-state reading.
+			bundle.is_raining = value;
+			// Record that the bundle now has a rain-state measurement.
+			bundle.has_raining = true;
+#endif
 		} else {
 			// Ignore other sensor quantities that the forecasting model does not consume.
 			continue;
@@ -1058,11 +1120,21 @@ static void forecast_temp_task_entry(void *argument) {
 			// Pull the latest VEML7700 sample so we have illuminance.
 			const bool have_veml = veml7700_get_latest_lux(
 					&context.illuminance_lux);
-			// Skip this minute if either sensor has not produced a valid sample yet.
-			if (!(have_bme && have_veml)) {
+#if (FORECAST_TEMP_FEATURE_COUNT == 5u)
+			// Pull the latest rain state so the RNN sees the same raw sensor tuple used in training.
+			const rain_digital_state_t rain_state = RainDigital_Service_GetState();
+			const bool have_rain = true;
+#else
+			const bool have_rain = true;
+#endif
+			// Skip this minute if any required sensor has not produced a valid sample yet.
+			if (!(have_bme && have_veml && have_rain)) {
 				state = FORECAST_TEMP_STATE_WAIT_MINUTE;
 				break;
 			}
+#if (FORECAST_TEMP_FEATURE_COUNT == 5u)
+			context.is_raining = (rain_state == RAIN_DIGITAL_STATE_WET) ? 1.0f : 0.0f;
+#endif
 			// Fold the valid minute into the running slot sums.
 			state = FORECAST_TEMP_STATE_ACCUMULATE_MINUTE;
 			break;
@@ -1071,7 +1143,7 @@ static void forecast_temp_task_entry(void *argument) {
 			// Fold this minute into the running slot sums.
 			forecast_temp_accumulate_minute_sample(context.temperature_c,
 					context.humidity_pct, context.pressure_pa,
-					context.illuminance_lux);
+					context.illuminance_lux, context.is_raining);
 			// Check whether a full 30-minute slot boundary has been reached yet.
 			state = FORECAST_TEMP_STATE_CHECK_SLOT;
 			break;
@@ -1079,7 +1151,8 @@ static void forecast_temp_task_entry(void *argument) {
 			// Determine if the accumulator has enough data to emit a 30-minute average.
 			const bool have_full_slot = forecast_temp_finalize_slot_sample(
 					&context.slot_temperature_c, &context.slot_humidity_pct,
-					&context.slot_pressure_pa, &context.slot_illuminance_lux);
+					&context.slot_pressure_pa, &context.slot_illuminance_lux,
+					&context.slot_is_raining);
 			if (!have_full_slot) {
 				// Wait for additional minute samples when a slot has not elapsed.
 				printf(
@@ -1097,7 +1170,8 @@ static void forecast_temp_task_entry(void *argument) {
 			// Build the normalized feature vector for this completed slot.
 			forecast_temp_prepare_features(context.slot_temperature_c,
 					context.slot_humidity_pct, context.slot_pressure_pa,
-					context.slot_illuminance_lux, context.normalized_features);
+					context.slot_illuminance_lux, context.slot_is_raining,
+					context.normalized_features);
 			// Queue the normalized vector for insertion into the sliding window.
 			state = FORECAST_TEMP_STATE_APPEND_FEATURES;
 			break;
@@ -1289,7 +1363,8 @@ static void forecast_temp_extract_quantization(const ai_buffer *buffer,
 
 // Add a minute-level reading into the 30-minute accumulator.
 static void forecast_temp_accumulate_minute_sample(float temperature_c,
-		float humidity_pct, float pressure_pa, float illuminance_lux) {
+		float humidity_pct, float pressure_pa, float illuminance_lux,
+		float is_raining) {
 	// Capture the slot key the first time we add a minute to a new accumulator.
 	if (g_slot_accumulator.sample_count == 0u) {
 		if (!forecast_temp_compute_slot_key(g_slot_accumulator_slot_key,
@@ -1305,6 +1380,8 @@ static void forecast_temp_accumulate_minute_sample(float temperature_c,
 	g_slot_accumulator.pressure_sum += pressure_pa;
 	// Add the new illuminance sample into the running sum.
 	g_slot_accumulator.illuminance_sum += illuminance_lux;
+	// Add the new rain-state sample into the running sum.
+	g_slot_accumulator.raining_sum += is_raining;
 	// Increment the sample counter so we know how many minutes have accumulated toward the 30-minute slot.
 	g_slot_accumulator.sample_count += 1u;
 	// Persist the partial slot so a reboot can resume accumulation.
@@ -1314,12 +1391,19 @@ static void forecast_temp_accumulate_minute_sample(float temperature_c,
 // Convert the minute accumulator into a 30-minute average when enough data exists.
 static bool forecast_temp_finalize_slot_sample(float *temperature_c_out,
 		float *humidity_pct_out, float *pressure_pa_out,
-		float *illuminance_lux_out) {
+		float *illuminance_lux_out, float *is_raining_out) {
 	// Ensure all output pointers are valid.
 	if ((temperature_c_out == NULL) || (humidity_pct_out == NULL)
 			|| (pressure_pa_out == NULL) || (illuminance_lux_out == NULL)) {
 		return false;
 	}
+#if (FORECAST_TEMP_FEATURE_COUNT == 5u)
+	if (is_raining_out == NULL) {
+		return false;
+	}
+#else
+	(void) is_raining_out;
+#endif
 	// Only compute an average once enough minute samples are available for the 30-minute slot.
 	if (g_slot_accumulator.sample_count < FORECAST_TEMP_MINUTES_PER_SLOT) {
 		return false;
@@ -1334,6 +1418,10 @@ static bool forecast_temp_finalize_slot_sample(float *temperature_c_out,
 	*pressure_pa_out = g_slot_accumulator.pressure_sum * reciprocal;
 	// Calculate the 30-minute average illuminance.
 	*illuminance_lux_out = g_slot_accumulator.illuminance_sum * reciprocal;
+#if (FORECAST_TEMP_FEATURE_COUNT == 5u)
+	// Calculate the 30-minute average rain state.
+	*is_raining_out = g_slot_accumulator.raining_sum * reciprocal;
+#endif
 	// Reset the accumulator so the next slot starts fresh.
 	memset(&g_slot_accumulator, 0, sizeof(g_slot_accumulator));
 	// Clear the slot key alongside the sums.
@@ -1353,6 +1441,7 @@ typedef struct {
 	float humidity_sum;
 	float pressure_sum;
 	float illuminance_sum;
+	float raining_sum;
 } forecast_temp_slot_checkpoint_t;
 
 // Derive the YYYY-MM-DDTHH:MM slot key from the RTC so checkpoints can be validated.
@@ -1383,7 +1472,8 @@ static void forecast_temp_persist_slot_checkpoint(void) {
 			g_slot_accumulator.temperature_sum, .humidity_sum =
 			g_slot_accumulator.humidity_sum, .pressure_sum =
 			g_slot_accumulator.pressure_sum, .illuminance_sum =
-			g_slot_accumulator.illuminance_sum, };
+			g_slot_accumulator.illuminance_sum, .raining_sum =
+			g_slot_accumulator.raining_sum, };
 	(void) strncpy(checkpoint.slot_key, g_slot_accumulator_slot_key,
 			sizeof(checkpoint.slot_key) - 1u);
 	checkpoint.slot_key[sizeof(checkpoint.slot_key) - 1u] = '\0';
@@ -1459,6 +1549,7 @@ static void forecast_temp_restore_slot_checkpoint(void) {
 	g_slot_accumulator.humidity_sum = checkpoint.humidity_sum;
 	g_slot_accumulator.pressure_sum = checkpoint.pressure_sum;
 	g_slot_accumulator.illuminance_sum = checkpoint.illuminance_sum;
+	g_slot_accumulator.raining_sum = checkpoint.raining_sum;
 	(void) strncpy(g_slot_accumulator_slot_key, checkpoint.slot_key,
 			sizeof(g_slot_accumulator_slot_key) - 1u);
 	g_slot_accumulator_slot_key[sizeof(g_slot_accumulator_slot_key) - 1u] =
@@ -1568,7 +1659,7 @@ static void forecast_temp_store_slot_history(float temperature_c,
 // Build the normalized feature vector for the latest 30-minute slot of data.
 static void forecast_temp_prepare_features(float temperature_c,
 		float humidity_pct, float pressure_pa, float illuminance_lux,
-		float out_features[FORECAST_TEMP_FEATURE_COUNT]) {
+		float is_raining, float out_features[FORECAST_TEMP_FEATURE_COUNT]) {
 	float raw_features[FORECAST_TEMP_FEATURE_COUNT] = { 0.0f };
 #if (FORECAST_TEMP_FEATURE_COUNT >= 6u)
 	float delta_t = 0.0f;
@@ -1583,6 +1674,15 @@ static void forecast_temp_prepare_features(float temperature_c,
 #endif
 
 	// Populate the raw feature vector in the same order used during training.
+#if (FORECAST_TEMP_FEATURE_COUNT == 5u)
+	// The 5-feature ablation is a raw-sensor model:
+	// [humidity_pct, is_raining, lux_lx, pressure_pa, temperature_c]
+	raw_features[0] = humidity_pct;
+	raw_features[1] = is_raining;
+	raw_features[2] = illuminance_lux;
+	raw_features[3] = pressure_pa;
+	raw_features[4] = temperature_c;
+#else
 	raw_features[0] = temperature_c;
 	raw_features[1] = humidity_pct;
 	raw_features[2] = pressure_pa;
@@ -1603,6 +1703,7 @@ static void forecast_temp_prepare_features(float temperature_c,
 		raw_features[7] = 0.0f;
 		raw_features[8] = 1.0f;
 	}
+#endif
 #endif
 	// Normalize each feature using the stored StandardScaler parameters.
 	for (size_t i = 0u; i < FORECAST_TEMP_FEATURE_COUNT; ++i) {
